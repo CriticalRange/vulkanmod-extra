@@ -1,7 +1,5 @@
 package com.criticalrange.mixin.animation;
 
-import com.criticalrange.client.config.VulkanModExtraClientConfig;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -11,91 +9,44 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 /**
- * Mixin to control texture animations based on VulkanMod Extra settings
- * Based on sodium-extra's animation control system
+ * Performance-focused animation optimization mixin
+ * Disables expensive texture animations for better performance
  */
 @Mixin(TextureAtlas.class)
-public abstract class MixinTextureAtlas extends AbstractTexture {
+public abstract class MixinTextureAtlas {
+
     @Unique
-    private final Map<Supplier<Boolean>, List<ResourceLocation>> animatedSprites = Map.of(
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.water, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_still"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_flow")
-            ),
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.lava, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/lava_still"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/lava_flow")
-            ),
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.portal, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/nether_portal")
-            ),
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.fire, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/fire_0"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/fire_1"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_0"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_1"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_fire"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_log_lit"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_campfire_fire"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_campfire_log_lit")
-            ),
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.blockAnimations, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/magma"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/lantern"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sea_lantern"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_lantern"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/kelp"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/kelp_plant"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/seagrass"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/tall_seagrass_top"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/tall_seagrass_bottom"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/warped_stem"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/crimson_stem"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/blast_furnace_front_on"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/smoker_front_on"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/stonecutter_saw"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/prismarine"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/respawn_anchor_top"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "entity/conduit/wind"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "entity/conduit/wind_vertical")
-            ),
-            () -> VulkanModExtraClientConfig.getInstance().animationSettings.sculkSensor, List.of(
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_catalyst_top_bloom"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_catalyst_side_bloom"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_shrieker_inner_top"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_vein"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_shrieker_can_summon_inner_top"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_sensor_tendril_inactive"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "block/sculk_sensor_tendril_active"),
-                    ResourceLocation.fromNamespaceAndPath("minecraft", "vibration")
-            )
+    private static final List<ResourceLocation> DISABLED_ANIMATIONS = List.of(
+        // Fire animations (highest performance impact)
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/fire_0"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/fire_1"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_0"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_1"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_fire"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_log_lit"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_campfire_fire"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_campfire_log_lit"),
+
+        // Water animations (moderate performance impact)
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_still"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/water_flow"),
+
+        // Lava animations (moderate performance impact)
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/lava_still"),
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/lava_flow"),
+
+        // Portal animations (minimal performance impact but visually jarring)
+        ResourceLocation.fromNamespaceAndPath("minecraft", "block/nether_portal")
     );
 
     @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;createTicker()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Ticker;"))
-    public TextureAtlasSprite.Ticker vulkanmodExtra$tickAnimatedSprites(TextureAtlasSprite instance) {
-        TextureAtlasSprite.Ticker tickableAnimation = instance.createTicker();
-        if (tickableAnimation != null &&
-            VulkanModExtraClientConfig.getInstance().animationSettings.animation &&
-            this.shouldAnimate(instance.contents().name())) {
-            return tickableAnimation;
+    public TextureAtlasSprite.Ticker vulkanmodExtra$optimizeAnimatedSprites(TextureAtlasSprite instance) {
+        // Disable animations for performance-critical textures
+        if (instance.contents() != null && DISABLED_ANIMATIONS.contains(instance.contents().name())) {
+            return null; // Disable animation for performance
         }
-        return null;
-    }
-
-    @Unique
-    private boolean shouldAnimate(ResourceLocation identifier) {
-        if (identifier != null) {
-            for (Map.Entry<Supplier<Boolean>, List<ResourceLocation>> supplierListEntry : this.animatedSprites.entrySet()) {
-                if (supplierListEntry.getValue().contains(identifier)) {
-                    return supplierListEntry.getKey().get();
-                }
-            }
-        }
-        return true;
+        return instance.createTicker(); // Keep animation for everything else
     }
 }

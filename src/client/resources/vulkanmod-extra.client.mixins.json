@@ -7,6 +7,9 @@
 		"particle.MixinParticleEngine",
 		"biome.MixinBiomeColors",
 		"fog.MixinFogRenderer",
+		"light_updates.MixinLevelLightEngine",
+		"instant_sneak.MixinCamera",
+		"cloud.MixinDimensionType",
 		"client.gui.MixinVOptionScreen"
 	],
 	"injectors": {
