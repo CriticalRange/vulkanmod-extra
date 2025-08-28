@@ -414,11 +414,93 @@ public class VulkanModExtraIntegration {
         return options;
     }
 
+
+
+
+
+
+
+
+
+    // Track if pages have already been injected to prevent multiple injections
+    private static boolean pagesInjected = false;
+
+    /**
+     * Custom List implementation that dynamically handles VulkanMod Extra pages
+     * This prevents IndexOutOfBoundsException by providing safe access to all pages
+     */
+    private static class CustomPageList extends ArrayList<Object> {
+        private final List<Object> originalPages;
+        private final List<Object> extraPages;
+
+        public CustomPageList(List<Object> originalPages, List<Object> extraPages) {
+            super();
+            this.originalPages = originalPages;
+            this.extraPages = extraPages;
+
+            // Add all pages to this list
+            addAll(originalPages);
+            addAll(extraPages);
+
+            System.out.println("[VulkanMod Extra] CustomPageList created with " +
+                originalPages.size() + " original + " + extraPages.size() + " extra = " + size() + " total pages");
+        }
+
+        @Override
+        public Object get(int index) {
+            try {
+                // First try to get from original pages
+                if (index < originalPages.size()) {
+                    return originalPages.get(index);
+                }
+                // Then try to get from extra pages
+                else if (index < originalPages.size() + extraPages.size()) {
+                    return extraPages.get(index - originalPages.size());
+                }
+                // If index is out of bounds, return null instead of crashing
+                else {
+                    System.out.println("[VulkanMod Extra] Index " + index + " out of bounds, returning null");
+                    return null;
+                }
+            } catch (Exception e) {
+                System.out.println("[VulkanMod Extra] Error accessing page at index " + index + ": " + e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        public int size() {
+            return originalPages.size() + extraPages.size();
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return originalPages.contains(o) || extraPages.contains(o);
+        }
+
+        @Override
+        public int indexOf(Object o) {
+            int index = originalPages.indexOf(o);
+            if (index >= 0) return index;
+
+            index = extraPages.indexOf(o);
+            if (index >= 0) return originalPages.size() + index;
+
+            return -1;
+        }
+    }
+
     /**
      * Alternative integration method using mixin injection
      * This would be called by the MixinVOptionScreen
      */
     public static void injectPagesIntoVulkanMod(Object vOptionScreenInstance) {
+        // Prevent multiple injections of the same pages
+        if (pagesInjected) {
+            System.out.println("[VulkanMod Extra] Pages already injected, skipping...");
+            return;
+        }
+
         System.out.println("[VulkanMod Extra] Starting page injection...");
         try {
             // Get the VulkanMod Extra pages
@@ -434,12 +516,15 @@ public class VulkanModExtraIntegration {
 
             // Cast to the correct type
             @SuppressWarnings("unchecked")
-            List<Object> optionPages = (List<Object>) optionPagesField.get(vOptionScreenInstance);
+            List<Object> originalOptionPages = (List<Object>) optionPagesField.get(vOptionScreenInstance);
 
-            System.out.println("[VulkanMod Extra] Found " + optionPages.size() + " existing pages");
+            System.out.println("[VulkanMod Extra] Found " + originalOptionPages.size() + " existing pages");
 
-                               // Add our pages to VulkanMod's page list
-                   optionPages.addAll(extraPages);
+            // Create a custom page list that wraps the original and adds our pages
+            CustomPageList customPageList = new CustomPageList(originalOptionPages, extraPages);
+
+            // Replace the original page list with our custom one
+            optionPagesField.set(vOptionScreenInstance, customPageList);
 
                    // Initialize the VOptionList for each new page
                    try {
@@ -449,7 +534,7 @@ public class VulkanModExtraIntegration {
                        int itemHeight = 20;
                        int leftMargin = 100;
                        int listWidth = 277;
-                       int listHeight = 220;
+                       int listHeight = 160;
 
                        // Initialize each new page
                        for (Object page : extraPages) {
@@ -460,24 +545,8 @@ public class VulkanModExtraIntegration {
                                // Get the VOptionList and modify its input handling
                                java.lang.reflect.Method getOptionListMethod = page.getClass().getMethod("getOptionList");
                                Object optionList = getOptionListMethod.invoke(page);
-                               if (optionList != null) {
-                                   try {
-                                       // Modify the VOptionList to not consume input in empty areas
-                                       java.lang.reflect.Field listHeightField = optionList.getClass().getSuperclass().getDeclaredField("height");
-                                       listHeightField.setAccessible(true);
-                                       int currentHeight = (Integer) listHeightField.get(optionList);
-
-                                       // Reduce the height to only cover our actual options (not empty space)
-                                       int optionCount = 2; // We have max 2 options per page
-                                       int actualHeight = optionCount * (20 + 3) + 10; // options + margins + padding (using VulkanMod's itemHeight of 20)
-                                       if (actualHeight < currentHeight) {
-                                           listHeightField.set(optionList, actualHeight);
-                                           System.out.println("[VulkanMod Extra] Reduced VOptionList height to prevent empty input consumption");
-                                       }
-                                   } catch (Exception e) {
-                                       System.out.println("[VulkanMod Extra] Could not modify VOptionList height: " + e.getMessage());
-                                   }
-                               }
+                               // Keep VulkanMod's standard fixed height for consistency
+                               System.out.println("[VulkanMod Extra] Using fixed height (160) for all pages");
 
                                System.out.println("[VulkanMod Extra] Initialized VOptionList for page: " + page.getClass().getSimpleName());
                            } catch (Exception e) {
@@ -488,21 +557,21 @@ public class VulkanModExtraIntegration {
                        System.out.println("[VulkanMod Extra] Failed to initialize page lists: " + e.getMessage());
                    }
 
-                   // Refresh the UI to include our new pages and ensure Done button works
+                   // Refresh the UI to include our new pages
                    try {
                        java.lang.reflect.Method buildPageMethod = vOptionScreenInstance.getClass().getDeclaredMethod("buildPage");
                        buildPageMethod.setAccessible(true);
                        buildPageMethod.invoke(vOptionScreenInstance);
                        System.out.println("[VulkanMod Extra] Refreshed UI to include new pages");
-
-                       // UI refresh completed - Done button should work now
-                       System.out.println("[VulkanMod Extra] UI refreshed successfully");
                    } catch (Exception e) {
                        System.out.println("[VulkanMod Extra] Failed to refresh UI: " + e.getMessage());
                    }
 
-                   System.out.println("[VulkanMod Extra] Successfully injected pages! Total pages now: " + optionPages.size());
+                   System.out.println("[VulkanMod Extra] Successfully injected pages! Total pages now: " + customPageList.size());
                    VulkanModExtra.LOGGER.info("Successfully injected {} VulkanMod Extra pages into GUI", extraPages.size());
+
+                   // Mark as injected to prevent multiple injections
+                   pagesInjected = true;
 
         } catch (Exception e) {
             System.out.println("[VulkanMod Extra] Failed to inject pages: " + e.getMessage());
