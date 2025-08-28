@@ -9,6 +9,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Runtime integration with VulkanMod's GUI system
@@ -18,6 +20,9 @@ public class VulkanModExtraIntegration {
 
     private static boolean integrationAttempted = false;
     private static boolean integrationSuccessful = false;
+
+    // Track which screen instances have already been injected to prevent multiple injections
+    private static final Map<Object, Boolean> injectedInstances = new WeakHashMap<>();
 
     /**
      * Attempt to integrate with VulkanMod's GUI system at runtime
@@ -422,9 +427,6 @@ public class VulkanModExtraIntegration {
 
 
 
-    // Track if pages have already been injected to prevent multiple injections
-    private static boolean pagesInjected = false;
-
     /**
      * Custom List implementation that dynamically handles VulkanMod Extra pages
      * This prevents IndexOutOfBoundsException by providing safe access to all pages
@@ -495,14 +497,15 @@ public class VulkanModExtraIntegration {
      * This would be called by the MixinVOptionScreen
      */
     public static void injectPagesIntoVulkanMod(Object vOptionScreenInstance) {
-        // Prevent multiple injections of the same pages
-        if (pagesInjected) {
-            System.out.println("[VulkanMod Extra] Pages already injected, skipping...");
-            return;
-        }
-
         System.out.println("[VulkanMod Extra] Starting page injection...");
+
         try {
+            // Check if this screen instance has already been injected
+            if (injectedInstances.containsKey(vOptionScreenInstance)) {
+                System.out.println("[VulkanMod Extra] This screen instance already has pages injected, skipping...");
+                return;
+            }
+
             // Get the VulkanMod Extra pages
             List<Object> extraPages = createVulkanModExtraPages();
             System.out.println("[VulkanMod Extra] Created " + extraPages.size() + " extra pages");
@@ -570,8 +573,8 @@ public class VulkanModExtraIntegration {
                    System.out.println("[VulkanMod Extra] Successfully injected pages! Total pages now: " + customPageList.size());
                    VulkanModExtra.LOGGER.info("Successfully injected {} VulkanMod Extra pages into GUI", extraPages.size());
 
-                   // Mark as injected to prevent multiple injections
-                   pagesInjected = true;
+                   // Mark this screen instance as injected to prevent multiple injections for this instance
+                   injectedInstances.put(vOptionScreenInstance, true);
 
         } catch (Exception e) {
             System.out.println("[VulkanMod Extra] Failed to inject pages: " + e.getMessage());
