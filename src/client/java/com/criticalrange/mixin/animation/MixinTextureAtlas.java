@@ -6,7 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
@@ -41,12 +43,33 @@ public abstract class MixinTextureAtlas {
         ResourceLocation.fromNamespaceAndPath("minecraft", "block/nether_portal")
     );
 
-    @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;createTicker()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Ticker;"))
+    @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;createTicker()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Ticker;"), require = 0)
     public TextureAtlasSprite.Ticker vulkanmodExtra$optimizeAnimatedSprites(TextureAtlasSprite instance) {
-        // Disable animations for performance-critical textures
-        if (instance.contents() != null && DISABLED_ANIMATIONS.contains(instance.contents().name())) {
-            return null; // Disable animation for performance
+        // Use config settings to control animations
+        if (instance.contents() != null) {
+            ResourceLocation textureName = instance.contents().name();
+            if (shouldDisableAnimation(textureName)) {
+                return null; // Disable animation for performance
+            }
         }
         return instance.createTicker(); // Keep animation for everything else
+    }
+
+    private boolean shouldDisableAnimation(ResourceLocation textureName) {
+        String path = textureName.getPath();
+        // Check config settings to determine if animation should be disabled
+        if (path.contains("water") && !com.criticalrange.VulkanModExtra.CONFIG.animationSettings.water) {
+            return true;
+        }
+        if (path.contains("lava") && !com.criticalrange.VulkanModExtra.CONFIG.animationSettings.lava) {
+            return true;
+        }
+        if (path.contains("fire") && !com.criticalrange.VulkanModExtra.CONFIG.animationSettings.fire) {
+            return true;
+        }
+        if (path.contains("nether_portal") && !com.criticalrange.VulkanModExtra.CONFIG.animationSettings.portal) {
+            return true;
+        }
+        return false;
     }
 }

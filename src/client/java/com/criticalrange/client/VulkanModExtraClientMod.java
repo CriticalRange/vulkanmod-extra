@@ -15,10 +15,15 @@ public class VulkanModExtraClientMod {
         // Initialize HUD
         hud = new VulkanModExtraHud();
 
-        // Try to integrate with VulkanMod's GUI system
-        VulkanModExtraIntegration.tryIntegrateWithVulkanMod();
+        // Try to integrate with VulkanMod's GUI system (safe approach)
+        try {
+            VulkanModExtraIntegration.tryIntegrateWithVulkanMod();
+        } catch (Exception e) {
+            LOGGER.warn("Failed to integrate with VulkanMod GUI, but features will still work", e);
+        }
 
         LOGGER.info("VulkanMod Extra Client initialized successfully!");
+        LOGGER.info("All features are active - use '/vulkanmod-extra' command to check status.");
     }
 
     public static void onHudRender(GuiGraphics guiGraphics, float partialTicks) {

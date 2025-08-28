@@ -24,8 +24,16 @@ public class VulkanModExtraConfig {
             .getConfigDir()
             .resolve("vulkanmod-extra-options.json");
 
+    // Constructor to initialize settings
+    public VulkanModExtraConfig() {
+        this.animationSettings = new AnimationSettings();
+        this.particleSettings = new ParticleSettings();
+    }
+
     // Settings categories - basic settings that don't require Minecraft classes
     public final ExtraSettings extraSettings = new ExtraSettings();
+    public AnimationSettings animationSettings;
+    public ParticleSettings particleSettings;
 
     public static VulkanModExtraConfig load() {
         VulkanModExtraConfig config;
@@ -39,6 +47,14 @@ public class VulkanModExtraConfig {
             }
         } else {
             config = new VulkanModExtraConfig();
+        }
+
+        // Initialize settings if they weren't loaded from file
+        if (config.animationSettings == null) {
+            config.animationSettings = new AnimationSettings();
+        }
+        if (config.particleSettings == null) {
+            config.particleSettings = new ParticleSettings();
         }
 
         config.writeChanges();
@@ -76,6 +92,32 @@ public class VulkanModExtraConfig {
         public boolean preventShaders = false;
         public boolean steadyDebugHud = true;
         public int steadyDebugHudRefreshInterval = 1;
+    }
+
+    // Animation Settings - control texture animations
+    public static class AnimationSettings {
+        public boolean animation = true;
+        public boolean water = false; // Disabled by default for performance
+        public boolean lava = false; // Disabled by default for performance
+        public boolean fire = false; // Disabled by default for performance
+        public boolean portal = false; // Disabled by default for performance
+        public boolean blockAnimations = true;
+        public boolean sculkSensor = true;
+    }
+
+    // Particle Settings - control particle effects
+    public static class ParticleSettings {
+        public boolean particles = true;
+        public boolean rainSplash = true;
+        public boolean blockBreak = true;
+        public boolean blockBreaking = true;
+        public boolean flame = true;
+        public boolean smoke = true;
+        public boolean campfireSmoke = true;
+        public boolean bubble = true;
+        public boolean splash = true;
+        public boolean rain = true;
+        public boolean drippingWater = true;
     }
 
     public enum OverlayCorner {

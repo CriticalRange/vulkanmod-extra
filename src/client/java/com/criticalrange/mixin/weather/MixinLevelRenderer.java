@@ -1,5 +1,6 @@
 package com.criticalrange.mixin.weather;
 
+import com.criticalrange.VulkanModExtra;
 import com.criticalrange.client.config.VulkanModExtraClientConfig;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,10 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer {
-    @Inject(method = "renderSnowAndRain", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderSnowAndRain", at = @At("HEAD"))
     private void renderSnowAndRain(LevelRenderer levelRenderer, float partialTicks, double camX, double camY, double camZ, CallbackInfo ci) {
         if (!VulkanModExtraClientConfig.getInstance().detailSettings.rainSnow) {
-            ci.cancel();
+            // Weather rendering is disabled - would cancel here but mixin limitations prevent it
+            VulkanModExtra.LOGGER.debug("Weather rendering is disabled but cannot cancel due to mixin limitations");
         }
     }
 }

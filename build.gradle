@@ -51,6 +51,9 @@ dependencies {
 	// VulkanMod dependency - required for integration
 	modImplementation "maven.modrinth:vulkanmod:${project.vulkanmod_version}"
 
+	// Note: VulkanMod requires Vulkan drivers and may not work in dev environment
+	// For testing without graphics, consider using production builds
+
 }
 
 processResources {

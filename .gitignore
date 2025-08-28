@@ -40,4 +40,4 @@ replay_*.log
 *.jfr
 
 # projects
-sodium-extra/
+sodium-extra/VulkanMod/
