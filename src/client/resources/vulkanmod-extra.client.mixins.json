@@ -1,11 +1,18 @@
 {
 	"required": true,
-	"package": "com.criticalrange.mixin.client",
+	"package": "com.criticalrange.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+		"animation.MixinTextureAtlas",
+		"particle.MixinParticleEngine",
+		"biome.MixinBiomeColors",
+		"fog.MixinFogRenderer",
+		"client.gui.MixinVOptionScreen"
 	],
 	"injectors": {
 		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
 	}
 }

@@ -3,15 +3,15 @@
 	"id": "vulkanmod-extra",
 	"version": "${version}",
 	"name": "VulkanMod Extra",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Extra features and optimizations for VulkanMod, providing enhanced control over animations, particles, rendering, and more.",
 	"authors": [
-		"Me!"
+		"CriticalRange"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/CriticalRange/vulkanmod-extra",
+		"sources": "https://github.com/CriticalRange/vulkanmod-extra"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/vulkanmod-extra/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -19,11 +19,10 @@
 			"com.criticalrange.VulkanModExtra"
 		],
 		"client": [
-			"com.criticalrange.VulkanModExtraClient"
+			"com.criticalrange.client.VulkanModExtraClient"
 		]
 	},
 	"mixins": [
-		"vulkanmod-extra.mixins.json",
 		{
 			"config": "vulkanmod-extra.client.mixins.json",
 			"environment": "client"
@@ -33,9 +32,10 @@
 		"fabricloader": ">=0.17.2",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"vulkanmod": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"modmenu": "*"
 	}
 }
