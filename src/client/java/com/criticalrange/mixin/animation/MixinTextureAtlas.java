@@ -49,7 +49,7 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
     @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;createTicker()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Ticker;"))
     public TextureAtlasSprite.Ticker vulkanmodExtra$tickAnimatedSprites(TextureAtlasSprite instance) {
         TextureAtlasSprite.Ticker tickableAnimation = instance.createTicker();
-        if (tickableAnimation != null && VulkanModExtra.CONFIG.animationSettings.animation && this.shouldAnimate(instance.contents().name()))
+        if (tickableAnimation != null && VulkanModExtra.CONFIG.animationSettings.animations && this.shouldAnimate(instance.contents().name()))
             return tickableAnimation;
         return null;
     }

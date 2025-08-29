@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinLevelRenderer {
     @Inject(method = "renderSnowAndRain", at = @At(value = "HEAD"), cancellable = true)
     private void vulkanmodExtra$renderSnowAndRain(LightTexture lightTexture, float f, double d, double e, double g, CallbackInfo ci) {
-        if (!VulkanModExtra.CONFIG.detailSettings.rainSnow) {
+        if (!VulkanModExtra.CONFIG.environmentSettings.rainSnow) {
             ci.cancel();
         }
     }

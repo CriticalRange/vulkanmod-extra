@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ArmorStandRenderer.class)
 public class MixinArmorStandRenderer {
 
-    @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "render(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At("HEAD"), cancellable = true, remap = false)
     private void vulkanmodExtra$onRender(CallbackInfo ci) {
         if (!VulkanModExtra.CONFIG.renderSettings.armorStand) {
             ci.cancel();

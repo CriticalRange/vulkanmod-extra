@@ -52,16 +52,16 @@ public class VulkanModExtraHud {
             lastUpdateTime = currentTime;
             
             // Debug log to see if HUD is being called and what the config values are (only once per second)
-            var config = VulkanModExtra.CONFIG.extraSettings;
+            var config = VulkanModExtra.CONFIG.hudSettings;
             var fpsMode = config.fpsDisplayMode;
-            System.out.println("[VulkanMod Extra DEBUG] FPS updated - showFps: " + config.showFps + ", fpsDisplayMode: " + fpsMode + ", FPS: " + fps);
+            VulkanModExtra.LOGGER.debug("FPS updated - showFps: {}, fpsDisplayMode: {}, FPS: {}", config.showFps, fpsMode, fps);
         }
 
         renderOverlay(guiGraphics);
     }
 
     private void renderOverlay(GuiGraphics guiGraphics) {
-        var config = VulkanModExtra.CONFIG.extraSettings;
+        var config = VulkanModExtra.CONFIG.hudSettings;
         var clientConfig = VulkanModExtraClientConfig.getInstance();
 
         int screenWidth = minecraft.getWindow().getGuiScaledWidth();
@@ -122,8 +122,8 @@ public class VulkanModExtraHud {
         guiGraphics.drawString(minecraft.font, text, x, y, color, false);
     }
     
-    private int renderFpsDisplay(GuiGraphics guiGraphics, int x, int y, int lineHeight, 
-                                com.criticalrange.config.VulkanModExtraConfig.ExtraSettings config) {
+    private int renderFpsDisplay(GuiGraphics guiGraphics, int x, int y, int lineHeight,
+                                com.criticalrange.config.VulkanModExtraConfig.HudSettings config) {
         int linesRendered = 0;
         var fpsMode = config.fpsDisplayMode;
         var textContrast = config.textContrast;

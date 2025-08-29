@@ -1,10 +1,28 @@
 # VulkanMod Extra
 
-A comprehensive performance and quality-of-life enhancement mod for VulkanMod.
+A comprehensive performance and quality-of-life enhancement mod for VulkanMod with a modern, modular architecture.
 
 ## ✅ Current Status
 
+**🆕 Recently Refactored**: Complete architectural overhaul with modular design, improved maintainability, and enhanced performance. All features are working with the new system while maintaining full compatibility.
+
 **Fully Functional**: All features are working including safe GUI integration with VulkanMod's settings menu! You can control settings through the in-game menu, commands, or config files.
+
+## 🏗️ Architecture
+
+### New Modular Design
+- **Feature-Based Architecture**: Each feature is now a self-contained module
+- **Clean Separation of Concerns**: Configuration, features, and integration are properly separated
+- **Registry Pattern**: Centralized feature management with the FeatureManager
+- **Configuration Manager**: Robust configuration system with automatic backups
+- **Event-Driven**: Clean event system for feature coordination
+
+### Key Components
+- `FeatureManager`: Central registry for all features
+- `ConfigurationManager`: Handles all configuration operations
+- `BaseFeature`: Abstract base class for implementing features
+- `FeatureCategory`: Organized feature categorization
+- Individual feature modules in `src/client/java/com/criticalrange/features/`
 
 ## ✨ Features
 
@@ -50,56 +68,62 @@ Reloads the configuration file (requires OP level 2).
 
 ## ⚙️ Configuration
 
-All settings can be controlled via the config file:
+### New Configuration System
+The refactored version uses a hierarchical, modular configuration system:
+
 ```
-.minecraft/config/vulkanmod-extra-options.json
+.minecraft/config/vulkanmod-extra/config.json
 ```
 
-### Example Configuration
+### Configuration Structure
 ```json
 {
-  "extra_settings": {
-    "overlay_corner": "TOP_LEFT",
-    "text_contrast": "NONE",
-    "show_fps": false,
-    "show_f_p_s_extended": true,
-    "show_coords": false,
-    "reduce_resolution_on_mac": false,
-    "use_adaptive_sync": false,
-    "toasts": true,
-    "advancement_toast": true,
-    "recipe_toast": true,
-    "system_toast": true,
-    "tutorial_toast": true,
-    "instant_sneak": false,
-    "prevent_shaders": false,
-    "steady_debug_hud": true,
-    "steady_debug_hud_refresh_interval": 1
+  "coreSettings": {
+    "enableMod": true,
+    "enableGuiIntegration": true,
+    "enableDebugLogging": false,
+    "autoSaveConfig": true
   },
-  "animation_settings": {
-    "animation": false,
-    "water": false,
-    "lava": false,
-    "fire": false,
-    "portal": false,
-    "block_animations": false,
-    "sculk_sensor": false
+  "hudSettings": {
+    "showFps": false,
+    "fpsDisplayMode": "BASIC",
+    "overlayCorner": "TOP_LEFT",
+    "textContrast": "NONE",
+    "showCoords": false,
+    "toasts": true
   },
-  "particle_settings": {
-    "particles": false,
-    "rain_splash": false,
-    "block_break": false,
-    "block_breaking": false,
-    "flame": false,
-    "smoke": false,
-    "campfire_smoke": false,
-    "bubble": false,
-    "splash": false,
-    "rain": false,
-    "dripping_water": false
+  "performanceSettings": {
+    "instantSneak": false,
+    "useAdaptiveSync": false,
+    "steadyDebugHud": true,
+    "preventShaders": false
+  },
+  "animationSettings": {
+    "animations": true,
+    "water": true,
+    "lava": true,
+    "fire": true,
+    "portal": true,
+    "blockAnimations": true
+  },
+  "particleSettings": {
+    "particles": true,
+    "rainSplash": true,
+    "flame": true,
+    "smoke": true
+  },
+  "environmentSettings": {
+    "sky": true,
+    "sun": true,
+    "moon": true,
+    "stars": true,
+    "rainSnow": true
   }
 }
 ```
+
+### Legacy Compatibility
+The new system maintains full compatibility with existing configurations. Old config files will be automatically migrated with backups created.
 
 ## 🚀 Installation
 

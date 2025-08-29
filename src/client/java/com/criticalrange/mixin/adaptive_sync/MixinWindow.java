@@ -17,12 +17,12 @@ public class MixinWindow {
 
     @Redirect(method = "updateVsync", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapInterval(I)V", remap = false))
     private void vulkanmodExtra$setSwapInterval(int interval) {
-        if (VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync) {
+        if (VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync) {
             if (GLFW.glfwExtensionSupported("GLX_EXT_swap_control_tear") || GLFW.glfwExtensionSupported("WGL_EXT_swap_control_tear")) {
                 GLFW.glfwSwapInterval(-1);
             } else {
                 VulkanModExtra.LOGGER.warn("Adaptive vsync not supported, falling back to vanilla vsync state!");
-                VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync = false;
+                VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync = false;
                 VulkanModExtra.CONFIG.writeChanges();
                 GLFW.glfwSwapInterval(interval);
             }

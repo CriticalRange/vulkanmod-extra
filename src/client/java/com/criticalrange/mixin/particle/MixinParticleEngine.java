@@ -21,29 +21,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine {
-    
+
+
     @Inject(method = "destroy", at = @At(value = "HEAD"), cancellable = true)
-    public void vulkanmodExtra$addBlockBreakParticles(BlockPos pos, BlockState state, CallbackInfo ci) {
+    public void vulkanmodExtra$controlBlockBreakParticles(BlockPos pos, BlockState state, CallbackInfo ci) {
+        // Only cancel if both global particles and block break particles are disabled
         if (!VulkanModExtra.CONFIG.particleSettings.particles || !VulkanModExtra.CONFIG.particleSettings.blockBreak) {
             ci.cancel();
         }
     }
 
     @Inject(method = "crack", at = @At(value = "HEAD"), cancellable = true)
-    public void vulkanmodExtra$addBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
+    public void vulkanmodExtra$controlBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
+        // Only cancel if both global particles and block breaking particles are disabled
         if (!VulkanModExtra.CONFIG.particleSettings.particles || !VulkanModExtra.CONFIG.particleSettings.blockBreaking) {
             ci.cancel();
         }
     }
 
     @Inject(method = "createParticle", at = @At(value = "HEAD"), cancellable = true)
-    public void vulkanmodExtra$addParticle(ParticleOptions particleOptions, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
-        if (VulkanModExtra.CONFIG.particleSettings.particles) {
-            ResourceLocation particleTypeId = BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType());
-            if (!VulkanModExtra.CONFIG.particleSettings.otherMap.computeIfAbsent(particleTypeId, k -> true)) {
-                cir.setReturnValue(null);
-            }
-        } else {
+    public void vulkanmodExtra$controlParticleCreation(ParticleOptions particleOptions, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
+        // Early exit if particles are globally disabled
+        if (!VulkanModExtra.CONFIG.particleSettings.particles) {
+            cir.setReturnValue(null);
+            return;
+        }
+
+        // Check specific particle type
+        ResourceLocation particleTypeId = BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType());
+        if (!VulkanModExtra.CONFIG.particleSettings.otherParticles.computeIfAbsent(particleTypeId.getPath(), k -> true)) {
             cir.setReturnValue(null);
         }
     }

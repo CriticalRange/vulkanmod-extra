@@ -17,7 +17,7 @@ public class MixinDimensionType {
     @Inject(method = "hasSkyLight", at = @At("HEAD"), cancellable = true)
     private void vulkanmodExtra$optimizeCloudRendering(CallbackInfoReturnable<Boolean> cir) {
         // Disable sky light (and thus clouds) in certain performance scenarios
-        if (VulkanModExtra.CONFIG.extraSettings.cloudDistance <= 32) {
+        if (VulkanModExtra.CONFIG.environmentSettings.cloudDistance <= 32) {
             // Very low cloud distance - disable sky light processing for better performance
             cir.setReturnValue(false);
             return;

@@ -35,11 +35,11 @@ public abstract class MixinDebugScreenOverlay {
 
     @Inject(method = "render", at = @At(value = "HEAD"))
     public void vulkanmodExtra$preRender(GuiGraphics guiGraphics, CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG.extraSettings.steadyDebugHud) {
+        if (VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud) {
             final long currentTime = Util.getMillis();
             if (currentTime > this.nextTime) {
                 this.rebuild = true;
-                this.nextTime = currentTime + (VulkanModExtra.CONFIG.extraSettings.steadyDebugHudRefreshInterval * 50L);
+                this.nextTime = currentTime + (VulkanModExtra.CONFIG.performanceSettings.steadyDebugHudRefreshInterval * 50L);
             } else {
                 this.rebuild = false;
             }

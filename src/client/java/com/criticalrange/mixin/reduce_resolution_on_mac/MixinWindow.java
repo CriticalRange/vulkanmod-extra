@@ -23,7 +23,7 @@ public class MixinWindow {
     @Inject(method = "setGuiScale", at = @At("HEAD"))
     private void vulkanmodExtra$optimizeMacResolution(CallbackInfo ci) {
         // Check if macOS resolution reduction is enabled
-        if (VulkanModExtra.CONFIG.extraSettings.reduceResolutionOnMac) {
+        if (VulkanModExtra.CONFIG.performanceSettings.reduceResolutionOnMac) {
             // Check if we're running on macOS
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("mac")) {

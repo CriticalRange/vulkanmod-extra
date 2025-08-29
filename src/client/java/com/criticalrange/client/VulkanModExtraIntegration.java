@@ -66,7 +66,7 @@ public class VulkanModExtraIntegration {
      */
     public static void injectPagesIntoCurrentScreen() {
         // Check if GUI integration is disabled
-        if (!VulkanModExtra.CONFIG.extraSettings.enableVulkanModGuiIntegration) {
+        if (!VulkanModExtra.CONFIG.coreSettings.enableGuiIntegration) {
             return;
         }
         
@@ -401,11 +401,21 @@ public class VulkanModExtraIntegration {
         };
 
         // Animation master toggle
-        options.add(createOption.apply("animation", value -> {
-            VulkanModExtra.CONFIG.animationSettings.animation = value;
+        Object animationMasterOption = createOption.apply("animation", value -> {
+            VulkanModExtra.CONFIG.animationSettings.animations = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
-        }));
+        });
+        if (animationMasterOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(animationMasterOption, Component.translatable("vulkanmod-extra.option.animation.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(animationMasterOption);
+        }
 
         // Individual animation options
         String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
@@ -421,7 +431,16 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + type + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -447,17 +466,27 @@ public class VulkanModExtraIntegration {
         };
 
         // Particles master toggle
-        options.add(createOption.apply("particles", value -> {
+        Object particlesMasterOption = createOption.apply("particles", value -> {
             VulkanModExtra.CONFIG.particleSettings.particles = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
-        }));
+        });
+        if (particlesMasterOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(particlesMasterOption, Component.translatable("vulkanmod-extra.option.particles.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(particlesMasterOption);
+        }
 
         // Core particle types (most commonly used)
         String[] coreParticles = {
-            "rainSplash", "blockBreak", "blockBreaking", "flame", "smoke", 
-            "bubble", "splash", "rain", "drippingWater", "explosion", "heart", 
-            "crit", "enchant", "note", "portal", "lava", "firework", "happyVillager", 
+            "rainSplash", "blockBreak", "blockBreaking", "flame", "smoke",
+            "bubble", "splash", "rain", "drippingWater", "explosion", "heart",
+            "crit", "enchant", "note", "portal", "lava", "firework", "happyVillager",
             "angryVillager", "ash", "campfireCosySmoke", "effect", "dust", "poof"
         };
 
@@ -473,12 +502,21 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + particle + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         // Environmental particles
         String[] environmentalParticles = {
-            "cherryLeaves", "crimsonSpore", "warpedSpore", "whiteAsh", "sporeBlossomAir", 
+            "cherryLeaves", "crimsonSpore", "warpedSpore", "whiteAsh", "sporeBlossomAir",
             "mycelium", "cloud", "composter", "drippingHoney", "fallingHoney", "landingHoney"
         };
 
@@ -494,7 +532,16 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + particle + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -511,9 +558,9 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
-                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(key);
+                                var field = VulkanModExtra.CONFIG.environmentSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
-                                return field.getBoolean(VulkanModExtra.CONFIG.detailSettings);
+                                return field.getBoolean(VulkanModExtra.CONFIG.environmentSettings);
                             } catch (Exception e) { return true; }
                         });
             } catch (Exception e) { return null; }
@@ -524,16 +571,25 @@ public class VulkanModExtraIntegration {
         for (String type : detailTypes) {
             Object option = createOption.apply(type, value -> {
                 try {
-                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(type);
+                    var field = VulkanModExtra.CONFIG.environmentSettings.getClass().getDeclaredField(type);
                     field.setAccessible(true);
-                    field.setBoolean(VulkanModExtra.CONFIG.detailSettings, value);
+                    field.setBoolean(VulkanModExtra.CONFIG.environmentSettings, value);
                     VulkanModExtra.CONFIG.writeChanges();
                 } catch (Exception e) {
                     VulkanModExtra.LOGGER.error("Failed to set detail option: " + type, e);
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + type + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -578,7 +634,7 @@ public class VulkanModExtraIntegration {
         
         // Add prevent shaders from extra settings
         Object preventShadersOption = createOption.apply("preventShaders", value -> {
-            VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
+            VulkanModExtra.CONFIG.performanceSettings.preventShaders = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
@@ -595,10 +651,17 @@ public class VulkanModExtraIntegration {
         Object fpsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(fpsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.showFps = value;
+                        VulkanModExtra.CONFIG.hudSettings.showFps = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.showFps);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(fpsOption, Component.translatable("vulkanmod-extra.option.show_fps.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(fpsOption);
 
         // FPS Display Mode using CyclingOption pattern
@@ -612,18 +675,26 @@ public class VulkanModExtraIntegration {
                     .newInstance(fpsModeComponent,
                         fpsDisplayModeValues, // All enum values as options
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) () -> 
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode);
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode);
             
             // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
-            setTranslatorMethod.invoke(fpsModeOption, 
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value -> 
+            setTranslatorMethod.invoke(fpsModeOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value ->
                     Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
-            
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(fpsModeOption, Component.translatable("vulkanmod-extra.option.fps_display_mode.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+
             options.add(fpsModeOption);
         } catch (Exception e) {
             // Fallback to switch option if CyclingOption is not available
@@ -632,16 +703,16 @@ public class VulkanModExtraIntegration {
                     .newInstance(fpsModeComponent,
                         (java.util.function.Consumer<Boolean>) value -> {
                             // Cycle through FPS modes: BASIC -> EXTENDED -> DETAILED -> BASIC
-                            var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
+                            var currentMode = VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode;
                             var nextMode = switch (currentMode) {
                                 case BASIC -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.EXTENDED;
                                 case EXTENDED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.DETAILED;
                                 case DETAILED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC;
                             };
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = nextMode;
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode = nextMode;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
-                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
+                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
             options.add(fpsModeOption);
         }
 
@@ -654,18 +725,26 @@ public class VulkanModExtraIntegration {
                     .newInstance(overlayCornerComponent,
                         overlayCornerValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
+                            VulkanModExtra.CONFIG.hudSettings.overlayCorner = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) () -> 
-                            VulkanModExtra.CONFIG.extraSettings.overlayCorner);
+                            VulkanModExtra.CONFIG.hudSettings.overlayCorner);
                             
             // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
-            setTranslatorMethod.invoke(overlayCornerOption, 
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value -> 
+            setTranslatorMethod.invoke(overlayCornerOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value ->
                     Component.translatable("vulkanmod-extra.option.overlay_corner." + value.toString().toLowerCase()));
-                    
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(overlayCornerOption, Component.translatable("vulkanmod-extra.option.overlay_corner.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+
             options.add(overlayCornerOption);
         } catch (Exception e) {
             VulkanModExtra.LOGGER.warn("Failed to create Overlay Corner cycling option", e);
@@ -680,18 +759,26 @@ public class VulkanModExtraIntegration {
                     .newInstance(textContrastComponent,
                         textContrastValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.textContrast = value;
+                            VulkanModExtra.CONFIG.hudSettings.textContrast = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) () -> 
-                            VulkanModExtra.CONFIG.extraSettings.textContrast);
+                            VulkanModExtra.CONFIG.hudSettings.textContrast);
                             
             // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
-            setTranslatorMethod2.invoke(textContrastOption, 
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value -> 
+            setTranslatorMethod2.invoke(textContrastOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value ->
                     Component.translatable("vulkanmod-extra.option.text_contrast." + value.toString().toLowerCase()));
-                    
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(textContrastOption, Component.translatable("vulkanmod-extra.option.text_contrast.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+
             options.add(textContrastOption);
         } catch (Exception e) {
             VulkanModExtra.LOGGER.warn("Failed to create Text Contrast cycling option", e);
@@ -702,10 +789,17 @@ public class VulkanModExtraIntegration {
         Object coordsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(coordsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.showCoords = value;
+                        VulkanModExtra.CONFIG.hudSettings.showCoords = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showCoords);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.showCoords);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(coordsOption, Component.translatable("vulkanmod-extra.option.show_coords.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(coordsOption);
 
         // Toasts
@@ -713,10 +807,17 @@ public class VulkanModExtraIntegration {
         Object toastsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(toastsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.toasts = value;
+                        VulkanModExtra.CONFIG.hudSettings.toasts = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.toasts);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.toasts);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(toastsOption, Component.translatable("vulkanmod-extra.option.toasts.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(toastsOption);
 
         // Advancement toasts
@@ -724,10 +825,17 @@ public class VulkanModExtraIntegration {
         Object advancementToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(advancementToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.advancementToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.advancementToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.advancementToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(advancementToastOption, Component.translatable("vulkanmod-extra.option.advancement_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(advancementToastOption);
 
         // Recipe toasts
@@ -735,10 +843,17 @@ public class VulkanModExtraIntegration {
         Object recipeToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(recipeToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.recipeToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.recipeToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.recipeToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(recipeToastOption, Component.translatable("vulkanmod-extra.option.recipe_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(recipeToastOption);
 
         // System toasts
@@ -746,10 +861,17 @@ public class VulkanModExtraIntegration {
         Object systemToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(systemToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.systemToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.systemToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.systemToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.systemToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(systemToastOption, Component.translatable("vulkanmod-extra.option.system_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(systemToastOption);
 
         // Tutorial toasts
@@ -757,10 +879,17 @@ public class VulkanModExtraIntegration {
         Object tutorialToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(tutorialToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.tutorialToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.tutorialToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(tutorialToastOption, Component.translatable("vulkanmod-extra.option.tutorial_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(tutorialToastOption);
 
         // Instant sneak
@@ -768,10 +897,17 @@ public class VulkanModExtraIntegration {
         Object instantSneakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(instantSneakComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
+                        VulkanModExtra.CONFIG.performanceSettings.instantSneak = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.instantSneak);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.instantSneak);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(instantSneakOption, Component.translatable("vulkanmod-extra.option.instant_sneak.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(instantSneakOption);
 
         // Adaptive sync
@@ -779,10 +915,17 @@ public class VulkanModExtraIntegration {
         Object adaptiveSyncOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(adaptiveSyncComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync = value;
+                        VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(adaptiveSyncOption, Component.translatable("vulkanmod-extra.option.use_adaptive_sync.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(adaptiveSyncOption);
 
         // Steady debug HUD
@@ -790,10 +933,17 @@ public class VulkanModExtraIntegration {
         Object steadyDebugHudOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(steadyDebugHudComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
+                        VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(steadyDebugHudOption, Component.translatable("vulkanmod-extra.option.steady_debug_hud.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(steadyDebugHudOption);
 
         return options;
@@ -812,8 +962,10 @@ public class VulkanModExtraIntegration {
      * This prevents IndexOutOfBoundsException by providing safe access to all pages
      */
     private static class CustomPageList extends ArrayList<Object> {
-        private final List<Object> originalPages;
-        private final List<Object> extraPages;
+        private static final long serialVersionUID = 1L;
+
+        private transient final List<Object> originalPages;
+        private transient final List<Object> extraPages;
 
         public CustomPageList(List<Object> originalPages, List<Object> extraPages) {
             super();
@@ -1000,11 +1152,21 @@ public class VulkanModExtraIntegration {
         };
 
         // Animation master toggle
-        options.add(createOption.apply("animation", value -> {
-            VulkanModExtra.CONFIG.animationSettings.animation = value;
+        Object animationMasterOption = createOption.apply("animation", value -> {
+            VulkanModExtra.CONFIG.animationSettings.animations = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
-        }));
+        });
+        if (animationMasterOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(animationMasterOption, Component.translatable("vulkanmod-extra.option.animation.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(animationMasterOption);
+        }
 
         // Individual animation options
         String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
@@ -1020,7 +1182,16 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + type + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -1046,11 +1217,21 @@ public class VulkanModExtraIntegration {
         };
 
         // Particles master toggle
-        options.add(createOption.apply("particles", value -> {
+        Object particlesMasterOption = createOption.apply("particles", value -> {
             VulkanModExtra.CONFIG.particleSettings.particles = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
-        }));
+        });
+        if (particlesMasterOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(particlesMasterOption, Component.translatable("vulkanmod-extra.option.particles.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(particlesMasterOption);
+        }
 
         // Core particle types (comprehensive list)
         String[] coreParticles = {
@@ -1091,7 +1272,16 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + particle + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -1108,9 +1298,9 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
-                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(key);
+                                var field = VulkanModExtra.CONFIG.environmentSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
-                                return field.getBoolean(VulkanModExtra.CONFIG.detailSettings);
+                                return field.getBoolean(VulkanModExtra.CONFIG.environmentSettings);
                             } catch (Exception e) { return true; }
                         });
             } catch (Exception e) { return null; }
@@ -1121,16 +1311,25 @@ public class VulkanModExtraIntegration {
         for (String type : detailTypes) {
             Object option = createOption.apply(type, value -> {
                 try {
-                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(type);
+                    var field = VulkanModExtra.CONFIG.environmentSettings.getClass().getDeclaredField(type);
                     field.setAccessible(true);
-                    field.setBoolean(VulkanModExtra.CONFIG.detailSettings, value);
+                    field.setBoolean(VulkanModExtra.CONFIG.environmentSettings, value);
                     VulkanModExtra.CONFIG.writeChanges();
                 } catch (Exception e) {
                     VulkanModExtra.LOGGER.error("Failed to set detail option: " + type, e);
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + type + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         return options;
@@ -1155,7 +1354,7 @@ public class VulkanModExtraIntegration {
             } catch (Exception e) { return null; }
         };
 
-        // Basic render options
+                // Basic render options
         String[] renderTypes = {"lightUpdates", "itemFrame", "armorStand", "painting", "piston",
                                "beaconBeam", "limitBeaconBeamHeight", "enchantingTableBook", "itemFrameNameTag", "playerNameTag"};
         for (String type : renderTypes) {
@@ -1170,7 +1369,16 @@ public class VulkanModExtraIntegration {
                 }
                 return null;
             });
-            if (option != null) options.add(option);
+            if (option != null) {
+                try {
+                    // Set tooltip using reflection
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option." + type + ".tooltip"));
+                } catch (Exception e) {
+                    // Tooltip setting failed, continue without tooltip
+                }
+                options.add(option);
+            }
         }
 
         // Add fog options
@@ -1179,22 +1387,49 @@ public class VulkanModExtraIntegration {
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
-        if (fogOption != null) options.add(fogOption);
+        if (fogOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(fogOption, Component.translatable("vulkanmod-extra.option.global_fog.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(fogOption);
+        }
 
         Object multiDimFogOption = createOption.apply("multi_dimension_fog", value -> {
             VulkanModExtra.CONFIG.renderSettings.multiDimensionFog = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
-        if (multiDimFogOption != null) options.add(multiDimFogOption);
+        if (multiDimFogOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(multiDimFogOption, Component.translatable("vulkanmod-extra.option.multi_dimension_fog.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(multiDimFogOption);
+        }
 
         // Add prevent shaders from extra settings
         Object preventShadersOption = createOption.apply("preventShaders", value -> {
-            VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
+            VulkanModExtra.CONFIG.performanceSettings.preventShaders = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
-        if (preventShadersOption != null) options.add(preventShadersOption);
+        if (preventShadersOption != null) {
+            try {
+                // Set tooltip using reflection
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(preventShadersOption, Component.translatable("vulkanmod-extra.option.preventShaders.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
+            options.add(preventShadersOption);
+        }
 
         return options;
     }
@@ -1207,10 +1442,17 @@ public class VulkanModExtraIntegration {
         Object fpsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(fpsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.showFps = value;
+                        VulkanModExtra.CONFIG.hudSettings.showFps = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.showFps);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(fpsOption, Component.translatable("vulkanmod-extra.option.show_fps.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(fpsOption);
 
         // FPS Display Mode using CyclingOption pattern
@@ -1224,17 +1466,25 @@ public class VulkanModExtraIntegration {
                     .newInstance(fpsModeComponent,
                         fpsDisplayModeValues, // All enum values as options
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) () ->
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode);
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode);
 
             // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(fpsModeOption,
                 (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value ->
                     Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(fpsModeOption, Component.translatable("vulkanmod-extra.option.fps_display_mode.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
 
             options.add(fpsModeOption);
         } catch (Exception e) {
@@ -1244,16 +1494,16 @@ public class VulkanModExtraIntegration {
                     .newInstance(fpsModeComponent,
                         (java.util.function.Consumer<Boolean>) value -> {
                             // Cycle through FPS modes: BASIC -> EXTENDED -> DETAILED -> BASIC
-                            var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
+                            var currentMode = VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode;
                             var nextMode = switch (currentMode) {
                                 case BASIC -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.EXTENDED;
                                 case EXTENDED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.DETAILED;
                                 case DETAILED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC;
                             };
-                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = nextMode;
+                            VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode = nextMode;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
-                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
+                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
             options.add(fpsModeOption);
         }
 
@@ -1266,17 +1516,25 @@ public class VulkanModExtraIntegration {
                     .newInstance(overlayCornerComponent,
                         overlayCornerValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
+                            VulkanModExtra.CONFIG.hudSettings.overlayCorner = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) () ->
-                            VulkanModExtra.CONFIG.extraSettings.overlayCorner);
+                            VulkanModExtra.CONFIG.hudSettings.overlayCorner);
 
-            // Set translator for display names
+                        // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(overlayCornerOption,
                 (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value ->
                     Component.translatable("vulkanmod-extra.option.overlay_corner." + value.toString().toLowerCase()));
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(overlayCornerOption, Component.translatable("vulkanmod-extra.option.overlay_corner.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
 
             options.add(overlayCornerOption);
         } catch (Exception e) {
@@ -1292,17 +1550,25 @@ public class VulkanModExtraIntegration {
                     .newInstance(textContrastComponent,
                         textContrastValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
-                            VulkanModExtra.CONFIG.extraSettings.textContrast = value;
+                            VulkanModExtra.CONFIG.hudSettings.textContrast = value;
                             VulkanModExtra.CONFIG.writeChanges();
                         },
                         (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) () ->
-                            VulkanModExtra.CONFIG.extraSettings.textContrast);
+                            VulkanModExtra.CONFIG.hudSettings.textContrast);
 
-            // Set translator for display names
+                        // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod2.invoke(textContrastOption,
                 (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value ->
                     Component.translatable("vulkanmod-extra.option.text_contrast." + value.toString().toLowerCase()));
+
+            // Set tooltip using reflection
+            try {
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
+                setTooltipMethod.invoke(textContrastOption, Component.translatable("vulkanmod-extra.option.text_contrast.tooltip"));
+            } catch (Exception e) {
+                // Tooltip setting failed, continue without tooltip
+            }
 
             options.add(textContrastOption);
         } catch (Exception e) {
@@ -1314,10 +1580,17 @@ public class VulkanModExtraIntegration {
         Object coordsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(coordsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.showCoords = value;
+                        VulkanModExtra.CONFIG.hudSettings.showCoords = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showCoords);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.showCoords);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(coordsOption, Component.translatable("vulkanmod-extra.option.show_coords.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(coordsOption);
 
         // Toasts
@@ -1325,10 +1598,17 @@ public class VulkanModExtraIntegration {
         Object toastsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(toastsComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.toasts = value;
+                        VulkanModExtra.CONFIG.hudSettings.toasts = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.toasts);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.toasts);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(toastsOption, Component.translatable("vulkanmod-extra.option.toasts.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(toastsOption);
 
         // Advancement toasts
@@ -1336,10 +1616,17 @@ public class VulkanModExtraIntegration {
         Object advancementToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(advancementToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.advancementToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.advancementToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.advancementToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(advancementToastOption, Component.translatable("vulkanmod-extra.option.advancement_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(advancementToastOption);
 
         // Recipe toasts
@@ -1347,10 +1634,17 @@ public class VulkanModExtraIntegration {
         Object recipeToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(recipeToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.recipeToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.recipeToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.recipeToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(recipeToastOption, Component.translatable("vulkanmod-extra.option.recipe_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(recipeToastOption);
 
         // System toasts
@@ -1358,10 +1652,17 @@ public class VulkanModExtraIntegration {
         Object systemToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(systemToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.systemToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.systemToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.systemToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.systemToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(systemToastOption, Component.translatable("vulkanmod-extra.option.system_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(systemToastOption);
 
         // Tutorial toasts
@@ -1369,10 +1670,17 @@ public class VulkanModExtraIntegration {
         Object tutorialToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(tutorialToastComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
+                        VulkanModExtra.CONFIG.hudSettings.tutorialToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.hudSettings.tutorialToast);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(tutorialToastOption, Component.translatable("vulkanmod-extra.option.tutorial_toast.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(tutorialToastOption);
 
         // Instant sneak
@@ -1380,10 +1688,17 @@ public class VulkanModExtraIntegration {
         Object instantSneakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(instantSneakComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
+                        VulkanModExtra.CONFIG.performanceSettings.instantSneak = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.instantSneak);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.instantSneak);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(instantSneakOption, Component.translatable("vulkanmod-extra.option.instant_sneak.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(instantSneakOption);
 
         // Adaptive sync
@@ -1391,10 +1706,17 @@ public class VulkanModExtraIntegration {
         Object adaptiveSyncOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(adaptiveSyncComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync = value;
+                        VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(adaptiveSyncOption, Component.translatable("vulkanmod-extra.option.use_adaptive_sync.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(adaptiveSyncOption);
 
         // Steady debug HUD
@@ -1402,12 +1724,30 @@ public class VulkanModExtraIntegration {
         Object steadyDebugHudOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(steadyDebugHudComponent,
                     (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
+                        VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud = value;
                         VulkanModExtra.CONFIG.writeChanges();
                     },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud);
+        try {
+            // Set tooltip using reflection
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
+            setTooltipMethod.invoke(steadyDebugHudOption, Component.translatable("vulkanmod-extra.option.steady_debug_hud.tooltip"));
+        } catch (Exception e) {
+            // Tooltip setting failed, continue without tooltip
+        }
         options.add(steadyDebugHudOption);
 
         return options;
     }
 }
+
+
+
+
+
+
+
+
+
+
+

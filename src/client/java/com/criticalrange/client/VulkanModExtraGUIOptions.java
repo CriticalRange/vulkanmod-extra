@@ -710,8 +710,8 @@ public class VulkanModExtraGUIOptions {
             Object overlayCornerOption = createCyclingOption(
                 "vulkanmod-extra.option.overlay_corner",
                 overlayCorners,
-                () -> VulkanModExtra.CONFIG.extraSettings.overlayCorner,
-                value -> VulkanModExtra.CONFIG.extraSettings.overlayCorner = (com.criticalrange.config.VulkanModExtraConfig.OverlayCorner) value,
+                () -> VulkanModExtra.CONFIG.hudSettings.overlayCorner,
+                value -> VulkanModExtra.CONFIG.hudSettings.overlayCorner = (com.criticalrange.config.VulkanModExtraConfig.OverlayCorner) value,
                 corner -> corner.toString().toLowerCase().replace("_", " "),
                 "vulkanmod-extra.option.overlay_corner.tooltip"
             );
@@ -722,8 +722,8 @@ public class VulkanModExtraGUIOptions {
             Object textContrastOption = createCyclingOption(
                 "vulkanmod-extra.option.text_contrast",
                 textContrasts,
-                () -> VulkanModExtra.CONFIG.extraSettings.textContrast,
-                value -> VulkanModExtra.CONFIG.extraSettings.textContrast = (com.criticalrange.config.VulkanModExtraConfig.TextContrast) value,
+                () -> VulkanModExtra.CONFIG.hudSettings.textContrast,
+                value -> VulkanModExtra.CONFIG.hudSettings.textContrast = (com.criticalrange.config.VulkanModExtraConfig.TextContrast) value,
                 contrast -> contrast.toString().toLowerCase(),
                 "vulkanmod-extra.option.text_contrast.tooltip"
             );
@@ -731,24 +731,24 @@ public class VulkanModExtraGUIOptions {
 
             Object fpsOption = createSwitchOption(
                 "vulkanmod-extra.option.show_fps",
-                () -> VulkanModExtra.CONFIG.extraSettings.showFps,
-                value -> VulkanModExtra.CONFIG.extraSettings.showFps = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.showFps,
+                value -> VulkanModExtra.CONFIG.hudSettings.showFps = value,
                 "vulkanmod-extra.option.show_fps.tooltip"
             );
             hudOptions.add(fpsOption);
 
             Object fpsExtendedOption = createSwitchOption(
                 "vulkanmod-extra.option.show_fps_extended",
-                () -> VulkanModExtra.CONFIG.extraSettings.showFPSExtended,
-                value -> VulkanModExtra.CONFIG.extraSettings.showFPSExtended = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.showFPSExtended,
+                value -> VulkanModExtra.CONFIG.hudSettings.showFPSExtended = value,
                 "vulkanmod-extra.option.show_fps_extended.tooltip"
             );
             hudOptions.add(fpsExtendedOption);
 
             Object coordsOption = createSwitchOption(
                 "vulkanmod-extra.option.show_coords",
-                () -> VulkanModExtra.CONFIG.extraSettings.showCoords,
-                value -> VulkanModExtra.CONFIG.extraSettings.showCoords = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.showCoords,
+                value -> VulkanModExtra.CONFIG.hudSettings.showCoords = value,
                 "vulkanmod-extra.option.show_coords.tooltip"
             );
             hudOptions.add(coordsOption);
@@ -756,40 +756,40 @@ public class VulkanModExtraGUIOptions {
             // Performance and advanced options
             Object reduceResolutionOption = createSwitchOption(
                 "vulkanmod-extra.option.reduce_resolution_on_mac",
-                () -> VulkanModExtra.CONFIG.extraSettings.reduceResolutionOnMac,
-                value -> VulkanModExtra.CONFIG.extraSettings.reduceResolutionOnMac = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.reduceResolutionOnMac,
+                value -> VulkanModExtra.CONFIG.performanceSettings.reduceResolutionOnMac = value,
                 "vulkanmod-extra.option.reduce_resolution_on_mac.tooltip"
             );
             hudOptions.add(reduceResolutionOption);
 
             Object adaptiveSyncOption = createSwitchOption(
                 "vulkanmod-extra.option.use_adaptive_sync",
-                () -> VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync,
-                value -> VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync,
+                value -> VulkanModExtra.CONFIG.performanceSettings.useAdaptiveSync = value,
                 "vulkanmod-extra.option.use_adaptive_sync.tooltip"
             );
             hudOptions.add(adaptiveSyncOption);
 
             Object instantSneakOption = createSwitchOption(
                 "vulkanmod-extra.option.instant_sneak",
-                () -> VulkanModExtra.CONFIG.extraSettings.instantSneak,
-                value -> VulkanModExtra.CONFIG.extraSettings.instantSneak = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.instantSneak,
+                value -> VulkanModExtra.CONFIG.performanceSettings.instantSneak = value,
                 "vulkanmod-extra.option.instant_sneak.tooltip"
             );
             hudOptions.add(instantSneakOption);
 
             Object preventShadersOption = createSwitchOption(
                 "vulkanmod-extra.option.prevent_shaders",
-                () -> VulkanModExtra.CONFIG.extraSettings.preventShaders,
-                value -> VulkanModExtra.CONFIG.extraSettings.preventShaders = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.preventShaders,
+                value -> VulkanModExtra.CONFIG.performanceSettings.preventShaders = value,
                 "vulkanmod-extra.option.prevent_shaders.tooltip"
             );
             hudOptions.add(preventShadersOption);
 
             Object steadyDebugHudOption = createSwitchOption(
                 "vulkanmod-extra.option.steady_debug_hud",
-                () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud,
-                value -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud,
+                value -> VulkanModExtra.CONFIG.performanceSettings.steadyDebugHud = value,
                 "vulkanmod-extra.option.steady_debug_hud.tooltip"
             );
             hudOptions.add(steadyDebugHudOption);
@@ -802,24 +802,24 @@ public class VulkanModExtraGUIOptions {
 
             Object advancedItemTooltipsOption = createSwitchOption(
                 "vulkanmod-extra.option.advanced_item_tooltips",
-                () -> VulkanModExtra.CONFIG.extraSettings.advancedItemTooltips,
-                value -> VulkanModExtra.CONFIG.extraSettings.advancedItemTooltips = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.advancedItemTooltips,
+                value -> VulkanModExtra.CONFIG.performanceSettings.advancedItemTooltips = value,
                 "vulkanmod-extra.option.advanced_item_tooltips.tooltip"
             );
             advancedOptions.add(advancedItemTooltipsOption);
 
             Object fastRandomOption = createSwitchOption(
                 "vulkanmod-extra.option.use_fast_random",
-                () -> VulkanModExtra.CONFIG.extraSettings.useFastRandom,
-                value -> VulkanModExtra.CONFIG.extraSettings.useFastRandom = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.useFastRandom,
+                value -> VulkanModExtra.CONFIG.performanceSettings.useFastRandom = value,
                 "vulkanmod-extra.option.use_fast_random.tooltip"
             );
             advancedOptions.add(fastRandomOption);
 
             Object linearColorBlenderOption = createSwitchOption(
                 "vulkanmod-extra.option.linear_flat_color_blender",
-                () -> VulkanModExtra.CONFIG.extraSettings.linearFlatColorBlender,
-                value -> VulkanModExtra.CONFIG.extraSettings.linearFlatColorBlender = value,
+                () -> VulkanModExtra.CONFIG.performanceSettings.linearFlatColorBlender,
+                value -> VulkanModExtra.CONFIG.performanceSettings.linearFlatColorBlender = value,
                 "vulkanmod-extra.option.linear_flat_color_blender.tooltip"
             );
             advancedOptions.add(linearColorBlenderOption);
@@ -828,16 +828,16 @@ public class VulkanModExtraGUIOptions {
             // Note: These would need range options for sliders, but using switch for now
             Object cloudHeightOption = createSwitchOption(
                 "vulkanmod-extra.option.cloud_height",
-                () -> VulkanModExtra.CONFIG.extraSettings.cloudHeight > 0,
-                value -> VulkanModExtra.CONFIG.extraSettings.cloudHeight = value ? 192 : 0,
+                () -> VulkanModExtra.CONFIG.environmentSettings.cloudHeight > 0,
+                value -> VulkanModExtra.CONFIG.environmentSettings.cloudHeight = value ? 192 : 0,
                 "vulkanmod-extra.option.cloud_height.tooltip"
             );
             advancedOptions.add(cloudHeightOption);
 
             Object cloudDistanceOption = createSwitchOption(
                 "vulkanmod-extra.option.cloud_distance",
-                () -> VulkanModExtra.CONFIG.extraSettings.cloudDistance > 0,
-                value -> VulkanModExtra.CONFIG.extraSettings.cloudDistance = value ? 100 : 0,
+                () -> VulkanModExtra.CONFIG.environmentSettings.cloudDistance > 0,
+                value -> VulkanModExtra.CONFIG.environmentSettings.cloudDistance = value ? 100 : 0,
                 "vulkanmod-extra.option.cloud_distance.tooltip"
             );
             advancedOptions.add(cloudDistanceOption);
@@ -849,40 +849,40 @@ public class VulkanModExtraGUIOptions {
 
             Object toastsOption = createSwitchOption(
                 "vulkanmod-extra.option.toasts",
-                () -> VulkanModExtra.CONFIG.extraSettings.toasts,
-                value -> VulkanModExtra.CONFIG.extraSettings.toasts = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.toasts,
+                value -> VulkanModExtra.CONFIG.hudSettings.toasts = value,
                 "vulkanmod-extra.option.toasts.tooltip"
             );
             toastOptions.add(toastsOption);
 
             Object advancementToastOption = createSwitchOption(
                 "vulkanmod-extra.option.advancement_toast",
-                () -> VulkanModExtra.CONFIG.extraSettings.advancementToast,
-                value -> VulkanModExtra.CONFIG.extraSettings.advancementToast = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.advancementToast,
+                value -> VulkanModExtra.CONFIG.hudSettings.advancementToast = value,
                 "vulkanmod-extra.option.advancement_toast.tooltip"
             );
             toastOptions.add(advancementToastOption);
 
             Object recipeToastOption = createSwitchOption(
                 "vulkanmod-extra.option.recipe_toast",
-                () -> VulkanModExtra.CONFIG.extraSettings.recipeToast,
-                value -> VulkanModExtra.CONFIG.extraSettings.recipeToast = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.recipeToast,
+                value -> VulkanModExtra.CONFIG.hudSettings.recipeToast = value,
                 "vulkanmod-extra.option.recipe_toast.tooltip"
             );
             toastOptions.add(recipeToastOption);
 
             Object systemToastOption = createSwitchOption(
                 "vulkanmod-extra.option.system_toast",
-                () -> VulkanModExtra.CONFIG.extraSettings.systemToast,
-                value -> VulkanModExtra.CONFIG.extraSettings.systemToast = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.systemToast,
+                value -> VulkanModExtra.CONFIG.hudSettings.systemToast = value,
                 "vulkanmod-extra.option.system_toast.tooltip"
             );
             toastOptions.add(systemToastOption);
 
             Object tutorialToastOption = createSwitchOption(
                 "vulkanmod-extra.option.tutorial_toast",
-                () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast,
-                value -> VulkanModExtra.CONFIG.extraSettings.tutorialToast = value,
+                () -> VulkanModExtra.CONFIG.hudSettings.tutorialToast,
+                value -> VulkanModExtra.CONFIG.hudSettings.tutorialToast = value,
                 "vulkanmod-extra.option.tutorial_toast.tooltip"
             );
             toastOptions.add(tutorialToastOption);
