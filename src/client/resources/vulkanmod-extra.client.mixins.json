@@ -7,6 +7,7 @@
 		"particle.MixinParticleEngine",
 		"biome_colors.MixinBiomeColors",
 		"fog.MixinFogRenderer",
+		"light_updates.MixinLevelLightEngine",
 		"instant_sneak.MixinCamera",
 		"cloud.MixinDimensionType",
 		"fps.MixinGameRenderer",

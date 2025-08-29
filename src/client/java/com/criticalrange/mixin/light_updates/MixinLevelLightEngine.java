@@ -10,32 +10,56 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Light updates control mixin based on Sodium Extra implementation
- * Controls light calculations for better performance
+ * Light updates control mixin - SAFE implementation
+ * Provides light throttling when enabled, minimal interference when disabled
  */
 @Mixin(LevelLightEngine.class)
 public class MixinLevelLightEngine {
-    @Inject(at = @At("HEAD"), method = "checkBlock", cancellable = true)
-    public void vulkanmodExtra$checkBlock(BlockPos pos, CallbackInfo ci) {
-        try {
-            if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.lightUpdates) {
-                ci.cancel();
-            }
-        } catch (Exception e) {
-            // If config access fails, let vanilla lighting work
-            VulkanModExtra.LOGGER.warn("Light updates mixin config access failed: {}", e.getMessage());
-        }
-    }
+    private static int throttleCounter = 0;
 
-    @Inject(at = @At("RETURN"), method = "runLightUpdates", cancellable = true)
-    public void vulkanmodExtra$doLightUpdates(CallbackInfoReturnable<Integer> cir) {
+    @Inject(at = @At("HEAD"), method = "runLightUpdates", cancellable = true)
+    public void vulkanmodExtra$throttleLightUpdates(CallbackInfoReturnable<Integer> cir) {
         try {
-            if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.lightUpdates) {
+            // Safety check - if config is null, let vanilla handle everything
+            if (VulkanModExtra.CONFIG == null) {
+                return;
+            }
+
+            // If light updates are enabled, apply mild throttling for performance
+            if (VulkanModExtra.CONFIG.renderSettings.lightUpdates) {
+                throttleCounter++;
+                
+                // Very conservative throttling - only skip every 4th update
+                // This provides performance benefit without breaking critical lighting
+                if (throttleCounter % 4 == 0) {
+                    cir.setReturnValue(0);
+                }
+                
+                // Reset counter to prevent overflow
+                if (throttleCounter > 1000) {
+                    throttleCounter = 0;
+                }
+                return;
+            }
+            
+            // If disabled: Apply heavy throttling but NEVER completely block
+            // This maintains basic lighting functionality while reducing performance impact
+            throttleCounter++;
+            
+            // When disabled, only allow every 8th light update
+            // This gives significant performance boost while maintaining basic lighting
+            if (throttleCounter % 8 != 0) {
                 cir.setReturnValue(0);
             }
+            
+            // Reset counter to prevent overflow
+            if (throttleCounter > 1000) {
+                throttleCounter = 0;
+            }
+            
         } catch (Exception e) {
-            // If config access fails, let vanilla lighting work
-            VulkanModExtra.LOGGER.warn("Light updates mixin config access failed: {}", e.getMessage());
+            // If anything goes wrong, let vanilla lighting work normally
+            VulkanModExtra.LOGGER.warn("Light updates mixin error: {}", e.getMessage());
         }
     }
 }
