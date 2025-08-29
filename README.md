@@ -1,22 +1,8 @@
 # VulkanMod Extra
 
-A high-performance, modular enhancement mod for VulkanMod with cutting-edge optimizations and modern architecture.
+A comprehensive performance and quality-of-life enhancement mod for VulkanMod.
 
-## 📊 Current Status & Version
-
-**🚀 Version 0.2.0-beta3** - Major Refactoring & Optimization Release
-
-**✅ Production Ready**: Complete architectural overhaul with 99% build warning reduction, 85% memory optimization, and enhanced performance. All features are working with the new system while maintaining full compatibility.
-
-**⚡ Performance Optimized**: Significant memory and performance improvements with modular feature system.
-
-**🏆 Quality Metrics**:
-- **Build Warnings**: Reduced from 100+ to 1 (99% improvement)
-- **Memory Usage**: 85% reduction in particle settings memory footprint
-- **Code Quality**: Production-ready with proper logging and error handling
-- **Architecture**: Modern modular design with clean separation of concerns
-
-## 🏗️ Architecture
+## Architecture
 
 ### Modern Modular Design
 - **Feature-Based Architecture**: Each feature is now a self-contained module with clean interfaces
@@ -64,9 +50,9 @@ src/
 │       └── ...                             # Additional features
 ```
 
-## ✨ Features & Optimizations
+## Features & Optimizations
 
-### 🎮 HUD Features (Optimized)
+### HUD Features (Optimized)
 - **FPS Display**: High-performance FPS counter with optimized rendering
 - **Extended FPS**: Detailed FPS metrics with memory-efficient data structures
 - **Coordinates**: Lightweight coordinate display with proper caching
@@ -77,14 +63,14 @@ src/
   - System toasts with minimal overhead
   - Tutorial toasts with proper lifecycle management
 
-### ⚡ Performance Features (Major Optimizations)
+### Performance Features (Major Optimizations)
 - **Instant Sneak**: Zero-latency camera transitions using optimized math
 - **Adaptive Sync**: Smart VSync with hardware detection and fallback
 - **Steady Debug HUD**: Consistent debug screen with efficient text caching
 - **Light Updates**: Throttled light calculations with performance monitoring
 - **Memory Optimization**: 85% reduction in configuration memory usage
 
-### 🎨 Animation & Particles (Highly Optimized)
+### Animation & Particles (Highly Optimized)
 - **Texture Animations**: Efficient control of water, lava, fire, and portal animations
 - **Particle Effects**: Optimized particle system with O(1) lookup performance:
   - 100+ particle types supported with minimal memory footprint
@@ -92,20 +78,20 @@ src/
   - Efficient particle lifecycle handling
 - **Biome Colors**: Optimized biome color calculations with caching
 
-### 🛠️ Advanced Features
+### Advanced Features
 - **Shader Prevention**: Intelligent shader loading optimization
 - **Mac Resolution Reduction**: Hardware-aware resolution optimization for macOS
 - **Configuration System**: Robust config management with automatic backups
 - **Logging System**: Professional SLF4J logging with configurable levels
 
-### 🔧 Technical Improvements
+### Technical Improvements
 - **Build Quality**: 99% reduction in build warnings (100+ → 1)
 - **Code Optimization**: Streamlined algorithms and data structures
 - **Memory Management**: Efficient object pooling and garbage collection optimization
 - **Thread Safety**: Proper synchronization for multi-threaded operations
 - **Error Handling**: Comprehensive exception handling with graceful degradation
 
-## 📋 Commands
+## Commands
 
 ### Status Check
 ```
@@ -208,7 +194,7 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **Graceful Fallback**: Safe defaults for missing configuration values
 - **Version Detection**: Automatic configuration version management
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Requirements
 - **Minecraft**: 1.21.1
@@ -262,7 +248,7 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **Compatibility**: Full backward compatibility with existing configurations
 - **Performance**: Optimized algorithms with O(1) lookup performance
 
-## 📊 Performance & Quality Metrics
+## Performance & Quality Metrics
 
 ### Build Quality
 - **Warnings**: Reduced from 100+ to 1 (99% improvement)
@@ -282,11 +268,10 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **Configuration Access**: Instant configuration loading and saving
 - **Event Handling**: Efficient event processing with minimal latency
 
-## 🎯 Development Roadmap
+## Development Roadmap
 
 ### ✅ Completed (v0.2.0-beta3)
 - **Major Refactoring**: Complete architectural overhaul
-- **Performance Optimization**: 85% memory reduction, 99% warning reduction
 - **Modular Architecture**: Feature-based system with clean separation
 - **Configuration System**: Advanced config management with backups
 - **Quality Assurance**: Professional logging and error handling
@@ -297,7 +282,6 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **Performance Monitoring**: Built-in performance metrics and profiling
 
 ### 🔮 Planned Features
-- **Keybind System**: Customizable hotkeys for quick feature toggles
 - **Advanced Profiles**: Performance presets for different use cases
 - **Plugin API**: Third-party extension support
 - **Network Optimization**: Multiplayer performance improvements
@@ -323,11 +307,7 @@ The refactored version features a sophisticated, hierarchical configuration syst
 **License**: MIT License - Open source and community-driven
 
 **Credits**:
-- Original VulkanMod Extra development
+- Original VulkanMod development
 - Sodium Extra for inspiration and best practices
 - Fabric community for excellent documentation and support
 - Minecraft modding community for continuous innovation
-
----
-
-**VulkanMod Extra v0.2.0-beta3** - Where Performance Meets Innovation 🚀
