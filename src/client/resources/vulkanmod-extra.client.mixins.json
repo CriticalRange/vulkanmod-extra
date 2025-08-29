@@ -18,10 +18,10 @@
 		"toasts.MixinToastManager",
 		"sky.MixinSkyRenderer",
 		"steady_debug_hud.MixinDebugScreenOverlay",
-		"adaptive_sync.MixinWindow",
 		"entity_rendering.MixinItemFrameRenderer",
 		"entity_rendering.MixinPaintingRenderer",
 		"block_rendering.MixinPistonRenderer",
+		"client.MixinGui",
 		"client.gui.MixinVOptionScreen"
 	],
 	"injectors": {

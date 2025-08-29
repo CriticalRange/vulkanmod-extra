@@ -5,6 +5,10 @@ build/
 out/
 classes/
 
+# claude
+CLAUDE.md
+.claude/
+
 # eclipse
 
 *.launch
@@ -40,4 +44,5 @@ replay_*.log
 *.jfr
 
 # projects
-sodium-extra/VulkanMod/
+sodium-extra/
+VulkanMod/

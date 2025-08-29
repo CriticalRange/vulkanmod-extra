@@ -49,7 +49,7 @@ public class MixinParticleEngine {
             return true;
         }
         if ((particleOptions.getType() == ParticleTypes.CAMPFIRE_COSY_SMOKE || particleOptions.getType() == ParticleTypes.CAMPFIRE_SIGNAL_SMOKE)
-            && !com.criticalrange.VulkanModExtra.CONFIG.particleSettings.campfireSmoke) {
+            && !com.criticalrange.VulkanModExtra.CONFIG.particleSettings.campfireCosySmoke) {
             return true;
         }
         if (particleOptions.getType() == ParticleTypes.BUBBLE && !com.criticalrange.VulkanModExtra.CONFIG.particleSettings.bubble) {

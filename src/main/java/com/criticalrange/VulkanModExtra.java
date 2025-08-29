@@ -50,7 +50,8 @@ public class VulkanModExtra implements ModInitializer {
 					// HUD Features
 					source.sendSuccess(() -> Component.literal("§eHUD Features:"), false);
 					source.sendSuccess(() -> Component.literal("§7  FPS Display: " + (CONFIG.extraSettings.showFps ? "§aEnabled" : "§cDisabled")), false);
-					source.sendSuccess(() -> Component.literal("§7  Extended FPS: " + (CONFIG.extraSettings.showFPSExtended ? "§aEnabled" : "§cDisabled")), false);
+					var fpsMode = CONFIG.extraSettings.fpsDisplayMode;
+					source.sendSuccess(() -> Component.literal("§7  FPS Mode: §a" + fpsMode.name()), false);
 					source.sendSuccess(() -> Component.literal("§7  Coordinates: " + (CONFIG.extraSettings.showCoords ? "§aEnabled" : "§cDisabled")), false);
 					source.sendSuccess(() -> Component.literal("§7  Toasts: " + (CONFIG.extraSettings.toasts ? "§aEnabled" : "§cDisabled")), false);
 

@@ -58,15 +58,19 @@ public class VulkanModExtraIntegration {
         }
     }
 
+
+
     /**
      * Safe method to inject pages into the currently active VulkanMod screen
      * Called by the mixin after screen initialization is complete
      */
     public static void injectPagesIntoCurrentScreen() {
-        VulkanModExtra.LOGGER.info("Starting VulkanMod Extra screen injection...");
-
+        // Check if GUI integration is disabled
+        if (!VulkanModExtra.CONFIG.extraSettings.enableVulkanModGuiIntegration) {
+            return;
+        }
+        
         if (integrationAttempted && !integrationSuccessful) {
-            VulkanModExtra.LOGGER.info("Integration already attempted and failed, skipping...");
             return; // Don't retry if we already failed
         }
 
@@ -105,12 +109,9 @@ public class VulkanModExtraIntegration {
             // Try to add our pages to this screen
             List<Object> extraPages = createVulkanModExtraPages();
             if (extraPages != null && !extraPages.isEmpty()) {
-                VulkanModExtra.LOGGER.info("Created {} extra pages, attempting to add them...", extraPages.size());
                 addPagesToScreen(currentScreen, extraPages);
                 integrationSuccessful = true;
                 VulkanModExtra.LOGGER.info("Successfully injected VulkanMod Extra pages into active screen!");
-            } else {
-                VulkanModExtra.LOGGER.warn("No extra pages were created");
             }
 
         } catch (Exception e) {
@@ -141,37 +142,28 @@ public class VulkanModExtraIntegration {
      * Try to add extra pages to an active screen
      */
     private static void addPagesToScreen(Object screen, List<Object> extraPages) {
-        VulkanModExtra.LOGGER.info("Attempting to add {} pages to screen: {}", extraPages.size(), screen.getClass().getName());
-
         try {
             // Look for common field names that might hold option pages
             String[] possibleFieldNames = {"optionPages", "pages", "tabs", "categories"};
 
             for (String fieldName : possibleFieldNames) {
                 try {
-                    VulkanModExtra.LOGGER.debug("Trying field: {}", fieldName);
                     java.lang.reflect.Field field = screen.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
                     Object fieldValue = field.get(screen);
 
-                    VulkanModExtra.LOGGER.debug("Field {} value: {}", fieldName, fieldValue);
-
                     if (fieldValue instanceof List) {
                         @SuppressWarnings("unchecked")
                         List<Object> pages = (List<Object>) fieldValue;
-                        VulkanModExtra.LOGGER.debug("Found List with {} existing pages", pages.size());
                         pages.addAll(extraPages);
                         VulkanModExtra.LOGGER.info("Added {} extra pages to VulkanMod screen via field {}", extraPages.size(), fieldName);
                         return;
                     }
                 } catch (NoSuchFieldException e) {
-                    VulkanModExtra.LOGGER.debug("Field {} not found", fieldName);
-                } catch (Exception e) {
-                    VulkanModExtra.LOGGER.debug("Error accessing field {}: {}", fieldName, e.getMessage());
+                    // Field not found, continue trying other fields
                 }
             }
 
-            VulkanModExtra.LOGGER.warn("Could not find pages field, trying method approach...");
             // If we couldn't find a pages field, try to call addPage methods
             tryAddPagesViaMethods(screen, extraPages);
 
@@ -184,119 +176,130 @@ public class VulkanModExtraIntegration {
      * Try to add pages using method calls
      */
     private static void tryAddPagesViaMethods(Object screen, List<Object> extraPages) {
-        VulkanModExtra.LOGGER.info("Trying to add pages via method calls...");
-
         try {
             // Look for methods like addPage, addTab, etc.
             String[] possibleMethods = {"addPage", "addTab", "addCategory", "addOptionPage"};
 
             for (String methodName : possibleMethods) {
                 try {
-                    VulkanModExtra.LOGGER.debug("Trying method: {}", methodName);
                     java.lang.reflect.Method method = screen.getClass().getDeclaredMethod(methodName, Object.class);
                     method.setAccessible(true);
 
-                    VulkanModExtra.LOGGER.debug("Found method {}, invoking for {} pages", methodName, extraPages.size());
                     for (Object page : extraPages) {
                         method.invoke(screen, page);
                     }
                     VulkanModExtra.LOGGER.info("Added {} pages via method {} to VulkanMod screen", extraPages.size(), methodName);
                     return;
                 } catch (NoSuchMethodException e) {
-                    VulkanModExtra.LOGGER.debug("Method {} not found", methodName);
-                } catch (Exception e) {
-                    VulkanModExtra.LOGGER.debug("Error calling method {}: {}", methodName, e.getMessage());
+                    // Method not found, continue trying other methods
                 }
             }
-
-            VulkanModExtra.LOGGER.warn("Could not find any suitable method to add pages");
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Could not add pages via methods: {}", e.getMessage());
         }
     }
 
+    // Cache VulkanMod classes to avoid repeated reflection lookups
+    private static Class<?> cachedOptionPageClass;
+    private static Class<?> cachedOptionBlockClass;
+    private static Class<?> cachedSwitchOptionClass;
+    private static Class<?> cachedCyclingOptionClass;
+    private static Class<?> cachedOptionClass;
+    private static boolean classesLoaded = false;
+    
+    private static boolean loadVulkanModClasses() {
+        if (classesLoaded) return true;
+        
+        try {
+            cachedOptionPageClass = Class.forName("net.vulkanmod.config.option.OptionPage");
+            cachedOptionBlockClass = Class.forName("net.vulkanmod.config.gui.OptionBlock");
+            cachedSwitchOptionClass = Class.forName("net.vulkanmod.config.option.SwitchOption");
+            cachedCyclingOptionClass = Class.forName("net.vulkanmod.config.option.CyclingOption");
+            cachedOptionClass = Class.forName("net.vulkanmod.config.option.Option");
+            classesLoaded = true;
+            return true;
+        } catch (ClassNotFoundException e) {
+            VulkanModExtra.LOGGER.error("Failed to load VulkanMod classes for GUI integration", e);
+            return false;
+        }
+    }
+
     /**
-     * Create VulkanMod-compatible option pages using reflection for VulkanMod classes and direct imports for Minecraft classes
+     * Create VulkanMod-compatible option pages using cached reflection classes
      */
     public static List<Object> createVulkanModExtraPages() {
-        System.out.println("[VulkanMod Extra] Creating VulkanMod Extra pages...");
+        if (!loadVulkanModClasses()) {
+            VulkanModExtra.LOGGER.warn("Cannot create VulkanMod Extra pages - VulkanMod classes not available");
+            return new ArrayList<>();
+        }
+        
+        VulkanModExtra.LOGGER.debug("Creating VulkanMod Extra pages...");
         List<Object> pages = new ArrayList<>();
 
         try {
-            // Load VulkanMod classes using reflection
-            System.out.println("[VulkanMod Extra] Loading VulkanMod classes...");
-            Class<?> optionPageClass = Class.forName("net.vulkanmod.config.option.OptionPage");
-            Class<?> optionBlockClass = Class.forName("net.vulkanmod.config.gui.OptionBlock");
-            Class<?> switchOptionClass = Class.forName("net.vulkanmod.config.option.SwitchOption");
 
-            System.out.println("[VulkanMod Extra] VulkanMod classes loaded successfully");
+            VulkanModExtra.LOGGER.debug("VulkanMod classes loaded successfully");
 
-            // Create Animation page
-            System.out.println("[VulkanMod Extra] Creating animation page...");
-            List<Object> animationOptions = createAnimationOptions(switchOptionClass);
-            // Convert to properly typed Option array
-            Class<?> optionClass = Class.forName("net.vulkanmod.config.option.Option");
-            Object[] animationArray = animationOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, animationOptions.size()));
-            Class<?> optionArrayClass = java.lang.reflect.Array.newInstance(optionClass, 0).getClass();
-            Object animationBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Animation Settings", animationArray);
+            // Pre-calculate array classes for performance
+            Class<?> optionArrayClass = java.lang.reflect.Array.newInstance(cachedOptionClass, 0).getClass();
+            Class<?> optionBlockArrayClass = java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 0).getClass();
+
+            // Create Animation page with comprehensive options
+            VulkanModExtra.LOGGER.debug("Creating animation page...");
+            List<Object> animationOptions = createComprehensiveAnimationOptions(cachedSwitchOptionClass);
+            Object[] animationArray = animationOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, animationOptions.size()));
+            Object animationBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Animation Settings", animationArray);
 
             // Create OptionBlock array for OptionPage constructor
-            Object[] animationBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
+            Object[] animationBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             animationBlocks[0] = animationBlock;
-            Class<?> optionBlockArrayClass = java.lang.reflect.Array.newInstance(optionBlockClass, 0).getClass();
 
-            Object animationPage = optionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Animations", animationBlocks);
+            Object animationPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Animations", animationBlocks);
             pages.add(animationPage);
 
-            // Create Particle page
-            System.out.println("[VulkanMod Extra] Creating particle page...");
-            List<Object> particleOptions = createParticleOptions(switchOptionClass);
-            Object[] particleArray = particleOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, particleOptions.size()));
-            Object particleBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Particle Settings", particleArray);
-
-            // Create OptionBlock array for OptionPage constructor
-            Object[] particleBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
+            // Create Particle page with comprehensive options
+            VulkanModExtra.LOGGER.debug("Creating particle page...");
+            List<Object> particleOptions = createComprehensiveParticleOptions(cachedSwitchOptionClass);
+            Object[] particleArray = particleOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, particleOptions.size()));
+            Object particleBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Particle Settings", particleArray);
+            Object[] particleBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             particleBlocks[0] = particleBlock;
-
-            Object particlePage = optionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Particles", particleBlocks);
+            Object particlePage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Particles", particleBlocks);
             pages.add(particlePage);
 
-            // Create Details page
-            System.out.println("[VulkanMod Extra] Creating details page...");
-            List<Object> detailOptions = createDetailOptions(switchOptionClass);
-            Object[] detailArray = detailOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, detailOptions.size()));
-            Object detailBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Detail Settings", detailArray);
-            Object[] detailBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
+            // Create Details page with comprehensive options
+            VulkanModExtra.LOGGER.debug("Creating details page...");
+            List<Object> detailOptions = createComprehensiveDetailOptions(cachedSwitchOptionClass);
+            Object[] detailArray = detailOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, detailOptions.size()));
+            Object detailBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Detail Settings", detailArray);
+            Object[] detailBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             detailBlocks[0] = detailBlock;
-            Object detailPage = optionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Details", detailBlocks);
+            Object detailPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Details", detailBlocks);
             pages.add(detailPage);
 
-            // Create Render page
-            System.out.println("[VulkanMod Extra] Creating render page...");
-            List<Object> renderOptions = createRenderOptions(switchOptionClass);
-            Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, renderOptions.size()));
-            Object renderBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
-            Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
+            // Create Render page with comprehensive options including fog
+            VulkanModExtra.LOGGER.debug("Creating render page...");
+            List<Object> renderOptions = createComprehensiveRenderOptions(cachedSwitchOptionClass);
+            Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, renderOptions.size()));
+            Object renderBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
+            Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             renderBlocks[0] = renderBlock;
-            Object renderPage = optionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Render", renderBlocks);
+            Object renderPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("Render", renderBlocks);
             pages.add(renderPage);
 
-            // Create HUD page
-            System.out.println("[VulkanMod Extra] Creating HUD page...");
-            List<Object> hudOptions = createHUDOptions(switchOptionClass);
-            Object[] hudArray = hudOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, hudOptions.size()));
-            Object hudBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("HUD Settings", hudArray);
-            Object[] hudBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
+            // Create HUD page with comprehensive options
+            VulkanModExtra.LOGGER.debug("Creating HUD page...");
+            List<Object> hudOptions = createComprehensiveHUDOptions(cachedSwitchOptionClass, cachedCyclingOptionClass);
+            Object[] hudArray = hudOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, hudOptions.size()));
+            Object hudBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("HUD Settings", hudArray);
+            Object[] hudBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             hudBlocks[0] = hudBlock;
-            Object hudPage = optionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("HUD", hudBlocks);
+            Object hudPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance("HUD", hudBlocks);
             pages.add(hudPage);
 
-            System.out.println("[VulkanMod Extra] Successfully created " + pages.size() + " pages");
             VulkanModExtra.LOGGER.info("Successfully created {} VulkanMod Extra pages", pages.size());
 
         } catch (Exception e) {
-            System.out.println("[VulkanMod Extra] Failed to create pages: " + e.getMessage());
-            e.printStackTrace();
             VulkanModExtra.LOGGER.error("Failed to create VulkanMod Extra pages", e);
         }
 
@@ -307,22 +310,22 @@ public class VulkanModExtraIntegration {
      * Create VulkanMod Extra pages with proper typing for direct mixin injection
      */
     public static List<net.vulkanmod.config.option.OptionPage> createVulkanModExtraOptionPages() {
-        System.out.println("[VulkanMod Extra] Creating typed VulkanMod Extra pages...");
+
         List<net.vulkanmod.config.option.OptionPage> pages = new ArrayList<>();
 
         try {
             // Load VulkanMod classes
             Class<?> optionBlockClass = Class.forName("net.vulkanmod.config.gui.OptionBlock");
             Class<?> switchOptionClass = Class.forName("net.vulkanmod.config.option.SwitchOption");
+            Class<?> cyclingOptionClass = Class.forName("net.vulkanmod.config.option.CyclingOption");
             Class<?> optionClass = Class.forName("net.vulkanmod.config.option.Option");
             Class<?> optionPageClass = Class.forName("net.vulkanmod.config.option.OptionPage");
 
             Class<?> optionArrayClass = java.lang.reflect.Array.newInstance(optionClass, 0).getClass();
             Class<?> optionBlockArrayClass = java.lang.reflect.Array.newInstance(optionBlockClass, 0).getClass();
 
-            // Create Animation page
-            System.out.println("[VulkanMod Extra] Creating animation page...");
-            List<Object> animationOptions = createAnimationOptions(switchOptionClass);
+            // Create Animation page with comprehensive options
+            List<Object> animationOptions = createComprehensiveAnimationOptions(switchOptionClass);
             Object[] animationArray = animationOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, animationOptions.size()));
             Object animationBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Animation Settings", animationArray);
             Object[] animationBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
@@ -331,9 +334,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance("Animations", animationBlocks);
             pages.add(animationPage);
 
-            // Create Particle page
-            System.out.println("[VulkanMod Extra] Creating particle page...");
-            List<Object> particleOptions = createParticleOptions(switchOptionClass);
+            // Create Particle page with comprehensive options
+            List<Object> particleOptions = createComprehensiveParticleOptions(switchOptionClass);
             Object[] particleArray = particleOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, particleOptions.size()));
             Object particleBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Particle Settings", particleArray);
             Object[] particleBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
@@ -342,9 +344,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance("Particles", particleBlocks);
             pages.add(particlePage);
 
-            // Create Details page
-            System.out.println("[VulkanMod Extra] Creating details page...");
-            List<Object> detailOptions = createDetailOptions(switchOptionClass);
+            // Create Details page with comprehensive options
+            List<Object> detailOptions = createComprehensiveDetailOptions(switchOptionClass);
             Object[] detailArray = detailOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, detailOptions.size()));
             Object detailBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Detail Settings", detailArray);
             Object[] detailBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
@@ -353,9 +354,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance("Details", detailBlocks);
             pages.add(detailPage);
 
-            // Create Render page
-            System.out.println("[VulkanMod Extra] Creating render page...");
-            List<Object> renderOptions = createRenderOptions(switchOptionClass);
+            // Create Render page with comprehensive options including fog
+            List<Object> renderOptions = createComprehensiveRenderOptions(switchOptionClass);
             Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, renderOptions.size()));
             Object renderBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
             Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
@@ -364,9 +364,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance("Render", renderBlocks);
             pages.add(renderPage);
 
-            // Create HUD page
-            System.out.println("[VulkanMod Extra] Creating HUD page...");
-            List<Object> hudOptions = createHUDOptions(switchOptionClass);
+            // Create HUD page with comprehensive options
+            List<Object> hudOptions = createComprehensiveHUDOptions(switchOptionClass, cyclingOptionClass);
             Object[] hudArray = hudOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, hudOptions.size()));
             Object hudBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("HUD Settings", hudArray);
             Object[] hudBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
@@ -375,11 +374,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance("HUD", hudBlocks);
             pages.add(hudPage);
 
-            System.out.println("[VulkanMod Extra] Successfully created " + pages.size() + " typed pages");
-
         } catch (Exception e) {
-            System.out.println("[VulkanMod Extra] Failed to create typed pages: " + e.getMessage());
-            e.printStackTrace();
+            VulkanModExtra.LOGGER.error("Failed to create VulkanMod Extra pages", e);
         }
 
         return pages;
@@ -388,27 +384,45 @@ public class VulkanModExtraIntegration {
     private static List<Object> createAnimationOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Create animation master toggle
-        Component animationComponent = Component.translatable("vulkanmod-extra.option.animation");
-        Object animationOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(animationComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.animationSettings.animation = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.animationSettings.animation);
-        options.add(animationOption);
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.animationSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
 
-        // Create water animation option
-        Component waterComponent = Component.translatable("vulkanmod-extra.option.water");
-        Object waterOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(waterComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.animationSettings.water = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.animationSettings.water);
-        options.add(waterOption);
+        // Animation master toggle
+        options.add(createOption.apply("animation", value -> {
+            VulkanModExtra.CONFIG.animationSettings.animation = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        }));
+
+        // Individual animation options
+        String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
+        for (String type : animationTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.animationSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set animation option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
 
         return options;
     }
@@ -416,49 +430,72 @@ public class VulkanModExtraIntegration {
     private static List<Object> createParticleOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Create particles master toggle
-        Component particlesComponent = Component.translatable("vulkanmod-extra.option.particles");
-        Object particlesOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(particlesComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.particleSettings.particles = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.particleSettings.particles);
-        options.add(particlesOption);
+        // Helper for creating particle options
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.particleSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
 
-        // Rain splash particles
-        Component rainSplashComponent = Component.translatable("vulkanmod-extra.option.rain_splash");
-        Object rainSplashOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(rainSplashComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.particleSettings.rainSplash = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.particleSettings.rainSplash);
-        options.add(rainSplashOption);
+        // Particles master toggle
+        options.add(createOption.apply("particles", value -> {
+            VulkanModExtra.CONFIG.particleSettings.particles = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        }));
 
-        // Block break particles
-        Component blockBreakComponent = Component.translatable("vulkanmod-extra.option.block_break");
-        Object blockBreakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(blockBreakComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.particleSettings.blockBreak = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.particleSettings.blockBreak);
-        options.add(blockBreakOption);
+        // Core particle types (most commonly used)
+        String[] coreParticles = {
+            "rainSplash", "blockBreak", "blockBreaking", "flame", "smoke", 
+            "bubble", "splash", "rain", "drippingWater", "explosion", "heart", 
+            "crit", "enchant", "note", "portal", "lava", "firework", "happyVillager", 
+            "angryVillager", "ash", "campfireCosySmoke", "effect", "dust", "poof"
+        };
 
-        // Block breaking particles
-        Component blockBreakingComponent = Component.translatable("vulkanmod-extra.option.block_breaking");
-        Object blockBreakingOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(blockBreakingComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.particleSettings.blockBreaking = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.particleSettings.blockBreaking);
-        options.add(blockBreakingOption);
+        for (String particle : coreParticles) {
+            Object option = createOption.apply(particle, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(particle);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.particleSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set particle option: " + particle, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+
+        // Environmental particles
+        String[] environmentalParticles = {
+            "cherryLeaves", "crimsonSpore", "warpedSpore", "whiteAsh", "sporeBlossomAir", 
+            "mycelium", "cloud", "composter", "drippingHoney", "fallingHoney", "landingHoney"
+        };
+
+        for (String particle : environmentalParticles) {
+            Object option = createOption.apply(particle, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(particle);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.particleSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.debug("Particle field not found: " + particle);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
 
         return options;
     }
@@ -466,61 +503,38 @@ public class VulkanModExtraIntegration {
     private static List<Object> createDetailOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Sky rendering
-        Component skyComponent = Component.translatable("vulkanmod-extra.option.sky");
-        Object skyOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(skyComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.sky = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.sky);
-        options.add(skyOption);
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.detailSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
 
-        // Sun rendering
-        Component sunComponent = Component.translatable("vulkanmod-extra.option.sun");
-        Object sunOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(sunComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.sun = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.sun);
-        options.add(sunOption);
-
-        // Moon rendering
-        Component moonComponent = Component.translatable("vulkanmod-extra.option.moon");
-        Object moonOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(moonComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.moon = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.moon);
-        options.add(moonOption);
-
-        // Stars rendering
-        Component starsComponent = Component.translatable("vulkanmod-extra.option.stars");
-        Object starsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(starsComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.stars = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.stars);
-        options.add(starsOption);
-
-        // Rain/Snow rendering
-        Component rainSnowComponent = Component.translatable("vulkanmod-extra.option.rain_snow");
-        Object rainSnowOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(rainSnowComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.rainSnow = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.rainSnow);
-        options.add(rainSnowOption);
-
-        // Biome colors
-        Component biomeColorsComponent = Component.translatable("vulkanmod-extra.option.biome_colors");
-        Object biomeColorsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(biomeColorsComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.biomeColors = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.biomeColors);
-        options.add(biomeColorsOption);
-
-        // Sky colors
-        Component skyColorsComponent = Component.translatable("vulkanmod-extra.option.sky_colors");
-        Object skyColorsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(skyColorsComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().detailSettings.skyColors = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().detailSettings.skyColors);
-        options.add(skyColorsOption);
+        // Detail options from sodium-extra
+        String[] detailTypes = {"sky", "sun", "moon", "stars", "rainSnow", "biomeColors", "skyColors"};
+        for (String type : detailTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.detailSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set detail option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
 
         return options;
     }
@@ -528,104 +542,52 @@ public class VulkanModExtraIntegration {
     private static List<Object> createRenderOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Prevent shaders
-        Component preventShadersComponent = Component.translatable("vulkanmod-extra.option.prevent_shaders");
-        Object preventShadersOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(preventShadersComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.preventShaders);
-        options.add(preventShadersOption);
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.renderSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
 
-        // Light updates
-        Component lightUpdatesComponent = Component.translatable("vulkanmod-extra.option.light_updates");
-        Object lightUpdatesOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(lightUpdatesComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value; // Map to existing config option
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
-        options.add(lightUpdatesOption);
-
-        // Item frame rendering
-        Component itemFrameComponent = Component.translatable("vulkanmod-extra.option.item_frame");
-        Object itemFrameOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(itemFrameComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.itemFrame = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.itemFrame);
-        options.add(itemFrameOption);
-
-        // Armor stand rendering
-        Component armorStandComponent = Component.translatable("vulkanmod-extra.option.armor_stand");
-        Object armorStandOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(armorStandComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.armorStand = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.armorStand);
-        options.add(armorStandOption);
-
-        // Painting rendering
-        Component paintingComponent = Component.translatable("vulkanmod-extra.option.painting");
-        Object paintingOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(paintingComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.painting = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.painting);
-        options.add(paintingOption);
-
-        // Piston rendering
-        Component pistonComponent = Component.translatable("vulkanmod-extra.option.piston");
-        Object pistonOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(pistonComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.piston = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.piston);
-        options.add(pistonOption);
-
-        // Beacon beam rendering
-        Component beaconBeamComponent = Component.translatable("vulkanmod-extra.option.beacon_beam");
-        Object beaconBeamOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(beaconBeamComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.beaconBeam = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.beaconBeam);
-        options.add(beaconBeamOption);
-
-        // Limit beacon beam height
-        Component limitBeaconBeamComponent = Component.translatable("vulkanmod-extra.option.limit_beacon_beam_height");
-        Object limitBeaconBeamOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(limitBeaconBeamComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.limitBeaconBeamHeight = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.limitBeaconBeamHeight);
-        options.add(limitBeaconBeamOption);
-
-        // Enchanting table book
-        Component enchantingTableBookComponent = Component.translatable("vulkanmod-extra.option.enchanting_table_book");
-        Object enchantingTableBookOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(enchantingTableBookComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.enchantingTableBook = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.enchantingTableBook);
-        options.add(enchantingTableBookOption);
-
-        // Item frame name tags
-        Component itemFrameNameTagComponent = Component.translatable("vulkanmod-extra.option.item_frame_name_tag");
-        Object itemFrameNameTagOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(itemFrameNameTagComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.itemFrameNameTag = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.itemFrameNameTag);
-        options.add(itemFrameNameTagOption);
-
-        // Player name tags
-        Component playerNameTagComponent = Component.translatable("vulkanmod-extra.option.player_name_tag");
-        Object playerNameTagOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(playerNameTagComponent,
-                    (java.util.function.Consumer<Boolean>) value -> VulkanModExtraClientConfig.getInstance().renderSettings.playerNameTag = value,
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtraClientConfig.getInstance().renderSettings.playerNameTag);
-        options.add(playerNameTagOption);
+        // Render options from sodium-extra
+        String[] renderTypes = {"lightUpdates", "itemFrame", "armorStand", "painting", "piston", 
+                               "beaconBeam", "limitBeaconBeamHeight", "enchantingTableBook", "itemFrameNameTag", "playerNameTag"};
+        for (String type : renderTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.renderSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set render option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+        
+        // Add prevent shaders from extra settings
+        Object preventShadersOption = createOption.apply("preventShaders", value -> {
+            VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        });
+        if (preventShadersOption != null) options.add(preventShadersOption);
 
         return options;
     }
 
-    private static List<Object> createHUDOptions(Class<?> switchOptionClass) throws Exception {
+    private static List<Object> createHUDOptions(Class<?> switchOptionClass, Class<?> cyclingOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
         // FPS display
@@ -639,16 +601,101 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
         options.add(fpsOption);
 
-        // Extended FPS display
-        Component fpsExtendedComponent = Component.translatable("vulkanmod-extra.option.show_fps_extended");
-        Object fpsExtendedOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(fpsExtendedComponent,
-                    (java.util.function.Consumer<Boolean>) value -> {
-                        VulkanModExtra.CONFIG.extraSettings.showFPSExtended = value;
-                        VulkanModExtra.CONFIG.writeChanges();
-                    },
-                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFPSExtended);
-        options.add(fpsExtendedOption);
+        // FPS Display Mode using CyclingOption pattern
+        try {
+            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.fps_display_mode");
+            
+            // Create CyclingOption with FPSDisplayMode enum values
+            var fpsDisplayModeValues = com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.values();
+            Object fpsModeOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeComponent,
+                        fpsDisplayModeValues, // All enum values as options
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) () -> 
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode);
+            
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod.invoke(fpsModeOption, 
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value -> 
+                    Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
+            
+            options.add(fpsModeOption);
+        } catch (Exception e) {
+            // Fallback to switch option if CyclingOption is not available
+            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.fps_display_mode");
+            Object fpsModeOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeComponent,
+                        (java.util.function.Consumer<Boolean>) value -> {
+                            // Cycle through FPS modes: BASIC -> EXTENDED -> DETAILED -> BASIC
+                            var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
+                            var nextMode = switch (currentMode) {
+                                case BASIC -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.EXTENDED;
+                                case EXTENDED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.DETAILED;
+                                case DETAILED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC;
+                            };
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = nextMode;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
+            options.add(fpsModeOption);
+        }
+
+        // Overlay Corner using CyclingOption
+        try {
+            Component overlayCornerComponent = Component.translatable("vulkanmod-extra.option.overlay_corner");
+            var overlayCornerValues = com.criticalrange.config.VulkanModExtraConfig.OverlayCorner.values();
+            Object overlayCornerOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(overlayCornerComponent,
+                        overlayCornerValues,
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) () -> 
+                            VulkanModExtra.CONFIG.extraSettings.overlayCorner);
+                            
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod.invoke(overlayCornerOption, 
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value -> 
+                    Component.translatable("vulkanmod-extra.option.overlay_corner." + value.toString().toLowerCase()));
+                    
+            options.add(overlayCornerOption);
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.warn("Failed to create Overlay Corner cycling option", e);
+        }
+
+        // Text Contrast using CyclingOption
+        try {
+            Component textContrastComponent = Component.translatable("vulkanmod-extra.option.text_contrast");
+            var textContrastValues = com.criticalrange.config.VulkanModExtraConfig.TextContrast.values();
+            Object textContrastOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(textContrastComponent,
+                        textContrastValues,
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.textContrast = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) () -> 
+                            VulkanModExtra.CONFIG.extraSettings.textContrast);
+                            
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod2.invoke(textContrastOption, 
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value -> 
+                    Component.translatable("vulkanmod-extra.option.text_contrast." + value.toString().toLowerCase()));
+                    
+            options.add(textContrastOption);
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.warn("Failed to create Text Contrast cycling option", e);
+        }
 
         // Coordinates display
         Component coordsComponent = Component.translatable("vulkanmod-extra.option.show_coords");
@@ -776,9 +823,6 @@ public class VulkanModExtraIntegration {
             // Add all pages to this list
             addAll(originalPages);
             addAll(extraPages);
-
-            System.out.println("[VulkanMod Extra] CustomPageList created with " +
-                originalPages.size() + " original + " + extraPages.size() + " extra = " + size() + " total pages");
         }
 
         @Override
@@ -794,11 +838,9 @@ public class VulkanModExtraIntegration {
                 }
                 // If index is out of bounds, return null instead of crashing
                 else {
-                    System.out.println("[VulkanMod Extra] Index " + index + " out of bounds, returning null");
                     return null;
                 }
             } catch (Exception e) {
-                System.out.println("[VulkanMod Extra] Error accessing page at index " + index + ": " + e.getMessage());
                 return null;
             }
         }
@@ -830,22 +872,17 @@ public class VulkanModExtraIntegration {
      * This would be called by the MixinVOptionScreen
      */
     public static void injectPagesIntoVulkanMod(Object vOptionScreenInstance) {
-        System.out.println("[VulkanMod Extra] Starting page injection...");
-
         try {
             // Check if this screen instance has already been injected
             if (injectedInstances.containsKey(vOptionScreenInstance)) {
-                System.out.println("[VulkanMod Extra] This screen instance already has pages injected, skipping...");
                 return;
             }
 
             // Get the VulkanMod Extra pages
             List<Object> extraPages = createVulkanModExtraPages();
-            System.out.println("[VulkanMod Extra] Created " + extraPages.size() + " extra pages");
 
             // Get the optionPages field from VOptionScreen
             Class<?> vOptionScreenClass = vOptionScreenInstance.getClass();
-            System.out.println("[VulkanMod Extra] VOptionScreen class: " + vOptionScreenClass.getName());
 
             java.lang.reflect.Field optionPagesField = vOptionScreenClass.getDeclaredField("optionPages");
             optionPagesField.setAccessible(true);
@@ -853,8 +890,6 @@ public class VulkanModExtraIntegration {
             // Cast to the correct type
             @SuppressWarnings("unchecked")
             List<Object> originalOptionPages = (List<Object>) optionPagesField.get(vOptionScreenInstance);
-
-            System.out.println("[VulkanMod Extra] Found " + originalOptionPages.size() + " existing pages");
 
             // Create a custom page list that wraps the original and adds our pages
             CustomPageList customPageList = new CustomPageList(originalOptionPages, extraPages);
@@ -877,20 +912,12 @@ public class VulkanModExtraIntegration {
                            try {
                                java.lang.reflect.Method createListMethod = page.getClass().getMethod("createList", int.class, int.class, int.class, int.class, int.class);
                                createListMethod.invoke(page, leftMargin, top, listWidth, listHeight, itemHeight);
-
-                               // Get the VOptionList and modify its input handling
-                               java.lang.reflect.Method getOptionListMethod = page.getClass().getMethod("getOptionList");
-                               Object optionList = getOptionListMethod.invoke(page);
-                               // Keep VulkanMod's standard fixed height for consistency
-                               System.out.println("[VulkanMod Extra] Using fixed height (160) for all pages");
-
-                               System.out.println("[VulkanMod Extra] Initialized VOptionList for page: " + page.getClass().getSimpleName());
                            } catch (Exception e) {
-                               System.out.println("[VulkanMod Extra] Failed to initialize VOptionList for page: " + e.getMessage());
+                               // Page initialization failed, continue with other pages
                            }
                        }
                    } catch (Exception e) {
-                       System.out.println("[VulkanMod Extra] Failed to initialize page lists: " + e.getMessage());
+                       // Page list initialization failed
                    }
 
                    // Refresh the UI to include our new pages
@@ -898,19 +925,16 @@ public class VulkanModExtraIntegration {
                        java.lang.reflect.Method buildPageMethod = vOptionScreenInstance.getClass().getDeclaredMethod("buildPage");
                        buildPageMethod.setAccessible(true);
                        buildPageMethod.invoke(vOptionScreenInstance);
-                       System.out.println("[VulkanMod Extra] Refreshed UI to include new pages");
                    } catch (Exception e) {
-                       System.out.println("[VulkanMod Extra] Failed to refresh UI: " + e.getMessage());
+                       // UI refresh failed
                    }
 
-                   System.out.println("[VulkanMod Extra] Successfully injected pages! Total pages now: " + customPageList.size());
                    VulkanModExtra.LOGGER.info("Successfully injected {} VulkanMod Extra pages into GUI", extraPages.size());
 
                    // Mark this screen instance as injected to prevent multiple injections for this instance
                    injectedInstances.put(vOptionScreenInstance, true);
 
         } catch (Exception e) {
-            System.out.println("[VulkanMod Extra] Failed to inject pages: " + e.getMessage());
             VulkanModExtra.LOGGER.error("Failed to inject pages into VulkanMod GUI", e);
         }
     }
@@ -952,5 +976,438 @@ public class VulkanModExtraIntegration {
 
     public static boolean isIntegrationSuccessful() {
         return integrationSuccessful;
+    }
+
+    // Comprehensive option creation methods
+
+    private static List<Object> createComprehensiveAnimationOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.animationSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+
+        // Animation master toggle
+        options.add(createOption.apply("animation", value -> {
+            VulkanModExtra.CONFIG.animationSettings.animation = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        }));
+
+        // Individual animation options
+        String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
+        for (String type : animationTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.animationSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set animation option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+
+        return options;
+    }
+
+    private static List<Object> createComprehensiveParticleOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+
+        // Helper for creating particle options
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.particleSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+
+        // Particles master toggle
+        options.add(createOption.apply("particles", value -> {
+            VulkanModExtra.CONFIG.particleSettings.particles = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        }));
+
+        // Core particle types (comprehensive list)
+        String[] coreParticles = {
+            "rainSplash", "blockBreak", "blockBreaking", "flame", "smoke",
+            "bubble", "splash", "rain", "drippingWater", "explosion", "heart",
+            "crit", "enchant", "note", "portal", "lava", "firework", "happyVillager",
+            "angryVillager", "ash", "campfireCosySmoke", "effect", "dust", "poof",
+            "largeSmoke", "smallFlame", "smallGust", "sneeze", "snowflake", "sonicBoom",
+            "soul", "soulFireFlame", "spit", "splash", "sporeBlossomAir", "squidInk",
+            "sweepAttack", "totemOfUndying", "trialOmen", "trialSpawnerDetection",
+            "trialSpawnerDetectionOminous", "underwater", "vaultConnection", "vibration",
+            "warpedSpore", "waxOff", "waxOn", "whiteAsh", "whiteSmoke", "witch",
+            "ambientEntityEffect", "barrier", "block", "blockCrumble", "blockMarker",
+            "bubbleColumnUp", "bubblePop", "campfireSignalSmoke", "cherryLeaves",
+            "cloud", "composter", "crimsonSpore", "currentDown", "damageIndicator",
+            "dolphin", "dragonBreath", "drippingDripstoneLava", "drippingDripstoneWater",
+            "drippingHoney", "drippingLava", "drippingObsidianTear", "dustColorTransition",
+            "dustPillar", "dustPlume", "eggCrack", "elderGuardian", "electricSpark",
+            "enchantedHit", "endRod", "entityEffect", "explosionEmitter", "fallingDripstoneLava",
+            "fallingDripstoneWater", "fallingDust", "fallingHoney", "fallingLava",
+            "fallingNectar", "fallingObsidianTear", "fallingSporeBlossom", "fallingWater",
+            "fishing", "flash", "glow", "glowSquidInk", "gust", "gustEmitterLarge",
+            "gustEmitterSmall", "happyVillager", "infested", "instantEffect", "item",
+            "itemCobweb", "itemSlime", "itemSnowball", "landingHoney", "landingLava",
+            "landingObsidianTear", "mycelium", "nautilus", "raidOmen", "reversePortal",
+            "scrape", "sculkCharge", "sculkChargePop", "sculkSoul", "shriek", "trail"
+        };
+
+        for (String particle : coreParticles) {
+            Object option = createOption.apply(particle, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(particle);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.particleSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.debug("Particle field not found: " + particle);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+
+        return options;
+    }
+
+    private static List<Object> createComprehensiveDetailOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.detailSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+
+        // Detail options from sodium-extra
+        String[] detailTypes = {"sky", "sun", "moon", "stars", "rainSnow", "biomeColors", "skyColors"};
+        for (String type : detailTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.detailSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set detail option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+
+        return options;
+    }
+
+    private static List<Object> createComprehensiveRenderOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Component.translatable("vulkanmod-extra.option." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.renderSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+
+        // Basic render options
+        String[] renderTypes = {"lightUpdates", "itemFrame", "armorStand", "painting", "piston",
+                               "beaconBeam", "limitBeaconBeamHeight", "enchantingTableBook", "itemFrameNameTag", "playerNameTag"};
+        for (String type : renderTypes) {
+            Object option = createOption.apply(type, value -> {
+                try {
+                    var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(type);
+                    field.setAccessible(true);
+                    field.setBoolean(VulkanModExtra.CONFIG.renderSettings, value);
+                    VulkanModExtra.CONFIG.writeChanges();
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.error("Failed to set render option: " + type, e);
+                }
+                return null;
+            });
+            if (option != null) options.add(option);
+        }
+
+        // Add fog options
+        Object fogOption = createOption.apply("global_fog", value -> {
+            VulkanModExtra.CONFIG.renderSettings.globalFog = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        });
+        if (fogOption != null) options.add(fogOption);
+
+        Object multiDimFogOption = createOption.apply("multi_dimension_fog", value -> {
+            VulkanModExtra.CONFIG.renderSettings.multiDimensionFog = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        });
+        if (multiDimFogOption != null) options.add(multiDimFogOption);
+
+        // Add prevent shaders from extra settings
+        Object preventShadersOption = createOption.apply("preventShaders", value -> {
+            VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
+            VulkanModExtra.CONFIG.writeChanges();
+            return null;
+        });
+        if (preventShadersOption != null) options.add(preventShadersOption);
+
+        return options;
+    }
+
+    private static List<Object> createComprehensiveHUDOptions(Class<?> switchOptionClass, Class<?> cyclingOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+
+        // FPS display
+        Component fpsComponent = Component.translatable("vulkanmod-extra.option.show_fps");
+        Object fpsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(fpsComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.showFps = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
+        options.add(fpsOption);
+
+        // FPS Display Mode using CyclingOption pattern
+        try {
+            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.fps_display_mode");
+
+            // Create CyclingOption with FPSDisplayMode enum values
+            var fpsDisplayModeValues = com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.values();
+            Object fpsModeOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeComponent,
+                        fpsDisplayModeValues, // All enum values as options
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) () ->
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode);
+
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod.invoke(fpsModeOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value ->
+                    Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
+
+            options.add(fpsModeOption);
+        } catch (Exception e) {
+            // Fallback to switch option if CyclingOption is not available
+            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.fps_display_mode");
+            Object fpsModeOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeComponent,
+                        (java.util.function.Consumer<Boolean>) value -> {
+                            // Cycle through FPS modes: BASIC -> EXTENDED -> DETAILED -> BASIC
+                            var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
+                            var nextMode = switch (currentMode) {
+                                case BASIC -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.EXTENDED;
+                                case EXTENDED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.DETAILED;
+                                case DETAILED -> com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC;
+                            };
+                            VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = nextMode;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode != com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.BASIC);
+            options.add(fpsModeOption);
+        }
+
+        // Overlay Corner using CyclingOption
+        try {
+            Component overlayCornerComponent = Component.translatable("vulkanmod-extra.option.overlay_corner");
+            var overlayCornerValues = com.criticalrange.config.VulkanModExtraConfig.OverlayCorner.values();
+            Object overlayCornerOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(overlayCornerComponent,
+                        overlayCornerValues,
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) () ->
+                            VulkanModExtra.CONFIG.extraSettings.overlayCorner);
+
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod.invoke(overlayCornerOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value ->
+                    Component.translatable("vulkanmod-extra.option.overlay_corner." + value.toString().toLowerCase()));
+
+            options.add(overlayCornerOption);
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.warn("Failed to create Overlay Corner cycling option", e);
+        }
+
+        // Text Contrast using CyclingOption
+        try {
+            Component textContrastComponent = Component.translatable("vulkanmod-extra.option.text_contrast");
+            var textContrastValues = com.criticalrange.config.VulkanModExtraConfig.TextContrast.values();
+            Object textContrastOption = cyclingOptionClass
+                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(textContrastComponent,
+                        textContrastValues,
+                        (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
+                            VulkanModExtra.CONFIG.extraSettings.textContrast = value;
+                            VulkanModExtra.CONFIG.writeChanges();
+                        },
+                        (java.util.function.Supplier<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) () ->
+                            VulkanModExtra.CONFIG.extraSettings.textContrast);
+
+            // Set translator for display names
+            java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
+            setTranslatorMethod2.invoke(textContrastOption,
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value ->
+                    Component.translatable("vulkanmod-extra.option.text_contrast." + value.toString().toLowerCase()));
+
+            options.add(textContrastOption);
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.warn("Failed to create Text Contrast cycling option", e);
+        }
+
+        // Coordinates display
+        Component coordsComponent = Component.translatable("vulkanmod-extra.option.show_coords");
+        Object coordsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(coordsComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.showCoords = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showCoords);
+        options.add(coordsOption);
+
+        // Toasts
+        Component toastsComponent = Component.translatable("vulkanmod-extra.option.toasts");
+        Object toastsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(toastsComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.toasts = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.toasts);
+        options.add(toastsOption);
+
+        // Advancement toasts
+        Component advancementToastComponent = Component.translatable("vulkanmod-extra.option.advancement_toast");
+        Object advancementToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(advancementToastComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.advancementToast);
+        options.add(advancementToastOption);
+
+        // Recipe toasts
+        Component recipeToastComponent = Component.translatable("vulkanmod-extra.option.recipe_toast");
+        Object recipeToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(recipeToastComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.recipeToast);
+        options.add(recipeToastOption);
+
+        // System toasts
+        Component systemToastComponent = Component.translatable("vulkanmod-extra.option.system_toast");
+        Object systemToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(systemToastComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.systemToast = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.systemToast);
+        options.add(systemToastOption);
+
+        // Tutorial toasts
+        Component tutorialToastComponent = Component.translatable("vulkanmod-extra.option.tutorial_toast");
+        Object tutorialToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(tutorialToastComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast);
+        options.add(tutorialToastOption);
+
+        // Instant sneak
+        Component instantSneakComponent = Component.translatable("vulkanmod-extra.option.instant_sneak");
+        Object instantSneakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(instantSneakComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.instantSneak);
+        options.add(instantSneakOption);
+
+        // Adaptive sync
+        Component adaptiveSyncComponent = Component.translatable("vulkanmod-extra.option.use_adaptive_sync");
+        Object adaptiveSyncOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(adaptiveSyncComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.useAdaptiveSync);
+        options.add(adaptiveSyncOption);
+
+        // Steady debug HUD
+        Component steadyDebugHudComponent = Component.translatable("vulkanmod-extra.option.steady_debug_hud");
+        Object steadyDebugHudOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(steadyDebugHudComponent,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
+                        VulkanModExtra.CONFIG.writeChanges();
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
+        options.add(steadyDebugHudOption);
+
+        return options;
     }
 }
