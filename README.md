@@ -214,7 +214,7 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **GUI Integration**: VulkanMod Extra settings appear automatically in VulkanMod's menu
 - **Performance Tuning**: Smart defaults configured for optimal performance
 
-## 🔧 Troubleshooting & Support
+## Troubleshooting & Support
 
 ### GUI Settings Not Appearing
 1. **Verify Installation**: Ensure both VulkanMod and VulkanMod Extra are in the mod list
@@ -270,25 +270,24 @@ The refactored version features a sophisticated, hierarchical configuration syst
 
 ## Development Roadmap
 
-### ✅ Completed (v0.2.0-beta3)
-- **Major Refactoring**: Complete architectural overhaul
-- **Modular Architecture**: Feature-based system with clean separation
+### Completed
 - **Configuration System**: Advanced config management with backups
 - **Quality Assurance**: Professional logging and error handling
 
-### 🚧 In Progress
+### In Progress
+- **Modular Architecture**: Feature-based system with clean separation
 - **Additional Features**: More performance and visual enhancements
 - **Advanced Configuration**: Dynamic configuration profiles
 - **Performance Monitoring**: Built-in performance metrics and profiling
 
-### 🔮 Planned Features
+### Planned Features
 - **Advanced Profiles**: Performance presets for different use cases
 - **Plugin API**: Third-party extension support
 - **Network Optimization**: Multiplayer performance improvements
 - **Visual Enhancements**: Additional rendering optimizations
 - **Accessibility**: Better support for accessibility features
 
-## 🤝 Contributing & Support
+## Contributing & Support
 
 ### Development
 - **Architecture**: Modular design allows easy feature additions
@@ -302,9 +301,9 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **Wiki**: Comprehensive documentation and guides
 - **Performance**: Share your performance improvements and optimizations
 
-## 📜 License & Credits
+## License & Credits
 
-**License**: MIT License - Open source and community-driven
+**License**: CC0-1.0 License
 
 **Credits**:
 - Original VulkanMod development
