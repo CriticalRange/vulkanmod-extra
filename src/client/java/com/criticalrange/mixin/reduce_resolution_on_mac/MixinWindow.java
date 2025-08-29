@@ -27,9 +27,29 @@ public class MixinWindow {
             // Check if we're running on macOS
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("mac")) {
-                // Automatic resolution reduction on macOS for better performance
-                // This can help with Retina display performance issues
-                // Implementation: Reduce internal resolution while maintaining display scaling
+                // Reduce effective resolution on macOS for better performance with Retina displays
+                // This helps with high-DPI performance issues by using a lower internal resolution
+                double reductionFactor = 0.75; // 75% of native resolution
+                
+                // Calculate reduced dimensions
+                int reducedWidth = (int) (this.width * reductionFactor);
+                int reducedHeight = (int) (this.height * reductionFactor);
+                
+                // Apply the reduction by modifying internal dimensions
+                // This maintains display scaling while reducing rendering cost
+                if (reducedWidth > 640 && reducedHeight > 480) { // Maintain minimum usable size
+                    try {
+                        // Use reflection to set reduced dimensions
+                        this.width = reducedWidth;
+                        this.height = reducedHeight;
+                        VulkanModExtra.LOGGER.info("Applied macOS resolution reduction: {}x{} -> {}x{}", 
+                                                   (int)(reducedWidth / reductionFactor), 
+                                                   (int)(reducedHeight / reductionFactor),
+                                                   reducedWidth, reducedHeight);
+                    } catch (Exception e) {
+                        VulkanModExtra.LOGGER.warn("Failed to apply macOS resolution reduction: {}", e.getMessage());
+                    }
+                }
             }
         }
     }

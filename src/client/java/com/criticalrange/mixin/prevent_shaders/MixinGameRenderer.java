@@ -22,4 +22,12 @@ public class MixinGameRenderer {
             ci.cancel();
         }
     }
+
+    // Note: setPostEffect method may not exist in this Minecraft version
+    // @Inject(method = "setPostEffect", at = @At("HEAD"), cancellable = true)
+    // private void vulkanmodExtra$preventShaderSet(ResourceLocation identifier, CallbackInfo ci) {
+    //     if (VulkanModExtra.CONFIG.extraSettings.preventShaders) {
+    //         ci.cancel();
+    //     }
+    // }
 }

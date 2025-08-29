@@ -13,8 +13,10 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.resources.ResourceLocation;
 
 public class VulkanModExtraConfig {
     private static final Gson GSON = new GsonBuilder()
@@ -325,7 +327,8 @@ public class VulkanModExtraConfig {
         public boolean whiteSmoke = true;
         public boolean witch = true;
 
-
+        // Dynamic particle type map for particles not explicitly listed above
+        public transient Map<ResourceLocation, Boolean> otherMap = new HashMap<>();
     }
 
     public enum OverlayCorner {
