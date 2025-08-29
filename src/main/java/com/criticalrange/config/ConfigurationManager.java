@@ -25,6 +25,7 @@ public class ConfigurationManager {
 
     private ConfigurationManager() {
         this.configDirectory = FabricLoader.getInstance().getConfigDir().resolve("vulkanmod-extra");
+        LOGGER.info("ConfigurationManager initialized with config directory: {}", configDirectory);
     }
 
     public static ConfigurationManager getInstance() {
@@ -40,18 +41,35 @@ public class ConfigurationManager {
     public VulkanModExtraConfig loadConfig() {
         try {
             Files.createDirectories(configDirectory);
-            Path configFile = configDirectory.resolve("config.json");
 
-            if (Files.exists(configFile)) {
+            // Try to load from multiple possible locations
+            Path[] possibleConfigFiles = {
+                configDirectory.resolve("config.json"),
+                configDirectory.getParent().resolve("vulkanmod-extra-config.json"),
+                configDirectory.getParent().resolve("vulkanmod-extra-options.json")
+            };
+
+            Path configFile = null;
+            for (Path possibleFile : possibleConfigFiles) {
+                if (Files.exists(possibleFile)) {
+                    configFile = possibleFile;
+                    LOGGER.info("Found existing config file: {}", possibleFile);
+                    break;
+                }
+            }
+
+            if (configFile != null) {
                 try {
                     String json = Files.readString(configFile);
                     config = GSON.fromJson(json, VulkanModExtraConfig.class);
                     if (config == null) {
                         LOGGER.warn("Config file exists but is empty, creating default config");
                         config = new VulkanModExtraConfig();
+                    } else {
+                        LOGGER.info("Successfully loaded config from: {}", configFile);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Failed to parse config file, creating backup and default config", e);
+                    LOGGER.error("Failed to parse config file {}, creating backup and default config", configFile, e);
                     createBackup(configFile);
                     config = new VulkanModExtraConfig();
                 }
@@ -75,18 +93,45 @@ public class ConfigurationManager {
      */
     public void saveConfig() {
         if (config == null) {
-            LOGGER.warn("No config to save");
+            LOGGER.warn("No config to save - config is null");
             return;
         }
 
         try {
+            // Try to save to the intended location first
             Files.createDirectories(configDirectory);
             Path configFile = configDirectory.resolve("config.json");
             String json = GSON.toJson(config);
             Files.writeString(configFile, json);
-            LOGGER.debug("Configuration saved successfully");
+            LOGGER.info("Configuration saved successfully to: {}", configFile);
+
+            // Also try to save to the root config directory as a fallback
+            Path fallbackConfigFile = configDirectory.getParent().resolve("vulkanmod-extra-config.json");
+            Files.writeString(fallbackConfigFile, json);
+            LOGGER.info("Configuration also saved to fallback location: {}", fallbackConfigFile);
+
+            // Update the static CONFIG reference to ensure all code sees the latest values
+            updateStaticConfigReference();
+
         } catch (IOException e) {
-            LOGGER.error("Failed to save configuration", e);
+            LOGGER.error("Failed to save configuration: {}", e.getMessage());
+            LOGGER.error("Config directory: {}", configDirectory);
+            LOGGER.error("Config directory exists: {}", Files.exists(configDirectory));
+        }
+    }
+
+    /**
+     * Update the static CONFIG reference in VulkanModExtra
+     */
+    private void updateStaticConfigReference() {
+        try {
+            Class<?> vulkanModExtraClass = Class.forName("com.criticalrange.VulkanModExtra");
+            java.lang.reflect.Field configField = vulkanModExtraClass.getDeclaredField("CONFIG");
+            configField.setAccessible(true);
+            configField.set(null, this.config);
+            LOGGER.debug("Updated static CONFIG reference successfully");
+        } catch (Exception e) {
+            LOGGER.warn("Failed to update static CONFIG reference: {}", e.getMessage());
         }
     }
 

@@ -23,6 +23,36 @@ public class VulkanModExtraIntegration {
 
     // Track which screen instances have already been injected to prevent multiple injections
     private static final Map<Object, Boolean> injectedInstances = new WeakHashMap<>();
+    
+    // Debounced resource reload to prevent multiple reloads when changing multiple settings
+    private static java.util.concurrent.ScheduledFuture<?> pendingResourceReload;
+    private static final java.util.concurrent.ScheduledExecutorService resourceReloadScheduler = 
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "VulkanModExtra-ResourceReload");
+            t.setDaemon(true);
+            return t;
+        });
+
+    /**
+     * Schedule a debounced resource reload to avoid multiple reloads when changing multiple settings
+     */
+    private static void scheduleResourceReload() {
+        // Cancel any pending reload
+        if (pendingResourceReload != null && !pendingResourceReload.isDone()) {
+            pendingResourceReload.cancel(false);
+        }
+        
+        // Schedule a new reload with a 500ms delay
+        pendingResourceReload = resourceReloadScheduler.schedule(() -> {
+            net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+            if (minecraft != null) {
+                minecraft.execute(() -> {
+                    VulkanModExtra.LOGGER.info("Reloading resources due to animation setting changes");
+                    minecraft.reloadResourcePacks();
+                });
+            }
+        }, 500, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
 
     /**
      * Attempt to integrate with VulkanMod's GUI system at runtime
@@ -384,7 +414,7 @@ public class VulkanModExtraIntegration {
     private static List<Object> createAnimationOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Helper for consistent option creation
+        // Helper for consistent option creation with master toggle awareness
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
                 return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
@@ -392,6 +422,7 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
+                                // Simply check the individual animation setting - no master toggle
                                 var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
                                 return field.getBoolean(VulkanModExtra.CONFIG.animationSettings);
@@ -400,24 +431,7 @@ public class VulkanModExtraIntegration {
             } catch (Exception e) { return null; }
         };
 
-        // Animation master toggle
-        Object animationMasterOption = createOption.apply("animation", value -> {
-            VulkanModExtra.CONFIG.animationSettings.animations = value;
-            VulkanModExtra.CONFIG.writeChanges();
-            return null;
-        });
-        if (animationMasterOption != null) {
-            try {
-                // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(animationMasterOption, Component.translatable("vulkanmod-extra.option.animation.tooltip"));
-            } catch (Exception e) {
-                // Tooltip setting failed, continue without tooltip
-            }
-            options.add(animationMasterOption);
-        }
-
-        // Individual animation options
+        // Individual animation options - each can be controlled independently
         String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
         for (String type : animationTypes) {
             Object option = createOption.apply(type, value -> {
@@ -426,6 +440,9 @@ public class VulkanModExtraIntegration {
                     field.setAccessible(true);
                     field.setBoolean(VulkanModExtra.CONFIG.animationSettings, value);
                     VulkanModExtra.CONFIG.writeChanges();
+                    
+                    // Schedule a debounced resource reload to apply animation changes
+                    scheduleResourceReload();
                 } catch (Exception e) {
                     VulkanModExtra.LOGGER.error("Failed to set animation option: " + type, e);
                 }
@@ -449,7 +466,7 @@ public class VulkanModExtraIntegration {
     private static List<Object> createParticleOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Helper for creating particle options
+        // Helper for creating particle options with master toggle awareness
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
                 return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
@@ -457,6 +474,10 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
+                                // For individual options, check if master toggle is enabled first
+                                if (!key.equals("particles") && !VulkanModExtra.CONFIG.particleSettings.particles) {
+                                    return false; // Master toggle is disabled
+                                }
                                 var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
                                 return field.getBoolean(VulkanModExtra.CONFIG.particleSettings);
@@ -1135,7 +1156,7 @@ public class VulkanModExtraIntegration {
     private static List<Object> createComprehensiveAnimationOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Helper for consistent option creation
+        // Helper for consistent option creation with master toggle awareness
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
                 return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
@@ -1143,6 +1164,7 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
+                                // Simply check the individual animation setting - no master toggle
                                 var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
                                 return field.getBoolean(VulkanModExtra.CONFIG.animationSettings);
@@ -1151,24 +1173,7 @@ public class VulkanModExtraIntegration {
             } catch (Exception e) { return null; }
         };
 
-        // Animation master toggle
-        Object animationMasterOption = createOption.apply("animation", value -> {
-            VulkanModExtra.CONFIG.animationSettings.animations = value;
-            VulkanModExtra.CONFIG.writeChanges();
-            return null;
-        });
-        if (animationMasterOption != null) {
-            try {
-                // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(animationMasterOption, Component.translatable("vulkanmod-extra.option.animation.tooltip"));
-            } catch (Exception e) {
-                // Tooltip setting failed, continue without tooltip
-            }
-            options.add(animationMasterOption);
-        }
-
-        // Individual animation options
+        // Individual animation options - each can be controlled independently
         String[] animationTypes = {"water", "lava", "fire", "portal", "blockAnimations", "sculkSensor"};
         for (String type : animationTypes) {
             Object option = createOption.apply(type, value -> {
@@ -1177,6 +1182,9 @@ public class VulkanModExtraIntegration {
                     field.setAccessible(true);
                     field.setBoolean(VulkanModExtra.CONFIG.animationSettings, value);
                     VulkanModExtra.CONFIG.writeChanges();
+                    
+                    // Schedule a debounced resource reload to apply animation changes
+                    scheduleResourceReload();
                 } catch (Exception e) {
                     VulkanModExtra.LOGGER.error("Failed to set animation option: " + type, e);
                 }
@@ -1200,7 +1208,7 @@ public class VulkanModExtraIntegration {
     private static List<Object> createComprehensiveParticleOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
 
-        // Helper for creating particle options
+        // Helper for creating particle options with master toggle awareness
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
                 return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
@@ -1208,6 +1216,10 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
+                                // For individual options, check if master toggle is enabled first
+                                if (!key.equals("particles") && !VulkanModExtra.CONFIG.particleSettings.particles) {
+                                    return false; // Master toggle is disabled
+                                }
                                 var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(key);
                                 field.setAccessible(true);
                                 return field.getBoolean(VulkanModExtra.CONFIG.particleSettings);

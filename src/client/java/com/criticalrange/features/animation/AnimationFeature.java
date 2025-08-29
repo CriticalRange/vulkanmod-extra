@@ -23,7 +23,7 @@ public class AnimationFeature extends BaseFeature {
     @Override
     public boolean isEnabled() {
         VulkanModExtraConfig config = getConfig();
-        return config != null && config.animationSettings.animations && enabled;
+        return config != null && enabled;
     }
 
     /**

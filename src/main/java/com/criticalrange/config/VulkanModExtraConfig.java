@@ -47,6 +47,7 @@ public class VulkanModExtraConfig {
      * Write configuration changes with force option
      */
     public void writeChanges(boolean force) {
+        // Note: Configuration save is handled by ConfigurationManager
         ConfigurationManager.getInstance().saveConfig();
     }
 
@@ -61,7 +62,6 @@ public class VulkanModExtraConfig {
     }
 
     public static class AnimationSettings {
-        public boolean animations = true;
         public boolean water = true;
         public boolean lava = true;
         public boolean fire = true;
