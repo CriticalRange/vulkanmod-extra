@@ -182,10 +182,11 @@ All settings are automatically saved to `.minecraft/config/vulkanmod-extra-optio
 - **VulkanMod**: 0.5.5+ (Required)
 
 ### Installation Steps
-1. Download the latest version from [Modrinth](https://modrinth.com/mod/vulkanmod-extra/versions)
-2. Install VulkanMod and VulkanMod Extra in your `.minecraft/mods/` folder
-3. Launch Minecraft with Fabric
-4. Settings will appear automatically in VulkanMod's options menu
+0. VulkanMod Extra is designed to work specifically with [VulkanMod](https://modrinth.com/mod/vulkanmod) and won't function without it
+1. Download the latest version from [Modrinth](https://modrinth.com/mod/vulkanmod-extra/versions).
+2. Install [VulkanMod](https://modrinth.com/mod/vulkanmod/versions) and VulkanMod Extra in your `.minecraft/mods/` folder.
+3. Launch Minecraft with Fabric.
+4. Video Options menu will be automatically edited to fit VulkanMod's design and everything will (hopefully) work with no issues.
 
 ## Troubleshooting
 
@@ -193,18 +194,24 @@ This will be added later.
 
 ## Roadmap
 
+- [x] VulkanMod GUI Integration
+- [x] Animations and particles
+- [x] Details and Render pages
+- [x] Extra Features (FPS Display, Toasts)
 - [ ] Performance presets (Potato, Balanced, Quality)
 - [ ] Chunk rendering optimizations (Especially that lag spike)
 - [ ] Memory usage profiling tools
+- [ ] Rewrite the GUI for more compact Video Options screen
 - [ ] Compatibility with more mods
 - [ ] Maybe shader support?
 
 ## Contributing & Support
 
-Found a bug or have a feature request? We'd love to hear from you! Feel free to open an issue on GitHub or contribute to the project. Whether it's code, testing, or just feedback, every contribution helps make VulkanMod Extra better for everyone.
+Found a bug or have a feature request? Feel free to open an [issue](https://github.com/CriticalRange/vulkanmod-extra/issues) or contribute to the project. Whether it's code, testing, translation or just feedback, every contribution helps make VulkanMod Extra better for everyone.
 
-For support, check the GitHub issues page or join the discussion. We're a friendly community and always happy to help troubleshoot performance issues or explain how features work.
+For support, check the GitHub issues page or join the discussion. We're a friendly community and always happy to help troubleshoot performance issues.
 
 ---
+## LICENSE
 
-**Note**: VulkanMod Extra is designed to work specifically with VulkanMod and won't function without it
+VulkanMod Extra is licensed under CC0-1.0 license. For more information, [click here](https://github.com/CriticalRange/vulkanmod-extra?tab=CC0-1.0-1-ov-file) for more information.
