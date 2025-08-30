@@ -12,6 +12,7 @@ import java.nio.file.Path;
 
 /**
  * Centralized configuration management system for VulkanMod Extra
+ * Uses single config file: vulkanmod-extra-options.json in root config directory
  */
 public class ConfigurationManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("VulkanMod Extra Config");
@@ -40,13 +41,11 @@ public class ConfigurationManager {
      */
     public VulkanModExtraConfig loadConfig() {
         try {
-            Files.createDirectories(configDirectory);
-
-            // Try to load from multiple possible locations
+            // Load from the single config file location
             Path[] possibleConfigFiles = {
+                configDirectory.getParent().resolve("vulkanmod-extra-options.json"),
                 configDirectory.resolve("config.json"),
-                configDirectory.getParent().resolve("vulkanmod-extra-config.json"),
-                configDirectory.getParent().resolve("vulkanmod-extra-options.json")
+                configDirectory.getParent().resolve("vulkanmod-extra-config.json")
             };
 
             Path configFile = null;
@@ -98,17 +97,11 @@ public class ConfigurationManager {
         }
 
         try {
-            // Try to save to the intended location first
-            Files.createDirectories(configDirectory);
-            Path configFile = configDirectory.resolve("config.json");
+            // Save to the single config file location
+            Path configFile = configDirectory.getParent().resolve("vulkanmod-extra-options.json");
             String json = GSON.toJson(config);
             Files.writeString(configFile, json);
             LOGGER.info("Configuration saved successfully to: {}", configFile);
-
-            // Also try to save to the root config directory as a fallback
-            Path fallbackConfigFile = configDirectory.getParent().resolve("vulkanmod-extra-config.json");
-            Files.writeString(fallbackConfigFile, json);
-            LOGGER.info("Configuration also saved to fallback location: {}", fallbackConfigFile);
 
             // Update the static CONFIG reference to ensure all code sees the latest values
             updateStaticConfigReference();

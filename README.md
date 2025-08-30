@@ -203,8 +203,8 @@ The refactored version features a sophisticated, hierarchical configuration syst
 - **VulkanMod**: 0.5.5+ (Required for Vulkan rendering)
 
 ### Installation Steps
-1. **Download**: Get the latest `vulkanmod-extra-0.2.0-beta3+1.21.1.jar` from releases
-2. **Install Mods**: Place both `vulkanmod-0.5.5.jar` and `vulkanmod-extra-0.2.0-beta3+1.21.1.jar` in `.minecraft/mods/`
+1. **Download**: Get the latest `vulkanmod-extra-0.2.0-beta4+1.21.1.jar` from releases
+2. **Install Mods**: Place both `vulkanmod-0.5.5.jar` and `vulkanmod-extra-0.2.0-beta4+1.21.1.jar` in `.minecraft/mods/`
 3. **Launch**: Start Minecraft with Fabric profile
 4. **Verify**: Check mod list for both VulkanMod and VulkanMod Extra
 5. **Configure**: Access settings through VulkanMod's GUI or use `/vulkanmod-extra` commands

@@ -26,7 +26,7 @@ public class ParticleFeature extends BaseFeature {
     @Override
     public boolean isEnabled() {
         VulkanModExtraConfig config = getConfig();
-        return config != null && config.particleSettings.particles && enabled;
+        return config != null && enabled;
     }
 
     /**
@@ -54,7 +54,11 @@ public class ParticleFeature extends BaseFeature {
             case "ash" -> settings.ash;
             case "barrier" -> settings.barrier;
             case "block" -> settings.block;
+            case "blockdust" -> settings.blockdust;
+            case "block_marker" -> settings.blockMarker;
             case "bubble" -> settings.bubble;
+            case "bubble_column_up" -> settings.bubbleColumnUp;
+            case "bubble_pop" -> settings.bubblePop;
             case "campfire_cosy_smoke" -> settings.campfireCosySmoke;
             case "campfire_signal_smoke" -> settings.campfireSignalSmoke;
             case "cherry_leaves" -> settings.cherryLeaves;
@@ -86,6 +90,8 @@ public class ParticleFeature extends BaseFeature {
             case "entity_effect" -> settings.entityEffect;
             case "explosion" -> settings.explosion;
             case "explosion_emitter" -> settings.explosionEmitter;
+            case "falling_dripstone_lava" -> settings.fallingDripstoneLava;
+            case "falling_dripstone_water" -> settings.fallingDripstoneWater;
             case "falling_dust" -> settings.fallingDust;
             case "falling_honey" -> settings.fallingHoney;
             case "falling_lava" -> settings.fallingLava;

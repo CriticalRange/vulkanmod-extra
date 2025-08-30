@@ -5,9 +5,10 @@ build/
 out/
 classes/
 
-# claude
+# AI
 CLAUDE.md
 .claude/
+.cursor/
 
 # eclipse
 

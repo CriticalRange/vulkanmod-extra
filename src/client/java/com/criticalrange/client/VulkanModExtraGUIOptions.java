@@ -2,7 +2,7 @@ package com.criticalrange.client;
 
 import com.criticalrange.VulkanModExtra;
 import com.criticalrange.client.config.VulkanModExtraClientConfig;
-import net.minecraft.world.level.material.FogType;
+import com.criticalrange.config.FogType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -222,10 +222,10 @@ public class VulkanModExtraGUIOptions {
             options.add(rainOption);
 
             Object drippingWaterOption = createSwitchOption(
-                "vulkanmod-extra.option.drippingWater",
+                "vulkanmod-extra.option.dripping_water",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.drippingWater,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.drippingWater = value,
-                "vulkanmod-extra.option.drippingWater.tooltip"
+                "vulkanmod-extra.option.dripping_water.tooltip"
             );
             options.add(drippingWaterOption);
 
@@ -286,18 +286,18 @@ public class VulkanModExtraGUIOptions {
             options.add(fireworkOption);
 
             Object happyVillagerOption = createSwitchOption(
-                "vulkanmod-extra.option.happyVillager",
+                "vulkanmod-extra.option.happy_villager",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.happyVillager,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.happyVillager = value,
-                "vulkanmod-extra.option.happyVillager.tooltip"
+                "vulkanmod-extra.option.happy_villager.tooltip"
             );
             options.add(happyVillagerOption);
 
             Object angryVillagerOption = createSwitchOption(
-                "vulkanmod-extra.option.angryVillager",
+                "vulkanmod-extra.option.angry_villager",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.angryVillager,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.angryVillager = value,
-                "vulkanmod-extra.option.angryVillager.tooltip"
+                "vulkanmod-extra.option.angry_villager.tooltip"
             );
             options.add(angryVillagerOption);
 
@@ -310,10 +310,10 @@ public class VulkanModExtraGUIOptions {
             options.add(ashOption);
 
             Object campfireCosySmokeOption = createSwitchOption(
-                "vulkanmod-extra.option.campfireCosySmoke",
+                "vulkanmod-extra.option.campfire_cosy_smoke",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.campfireCosySmoke,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.campfireCosySmoke = value,
-                "vulkanmod-extra.option.campfireCosySmoke.tooltip"
+                "vulkanmod-extra.option.campfire_cosy_smoke.tooltip"
             );
             options.add(campfireCosySmokeOption);
 
@@ -342,42 +342,42 @@ public class VulkanModExtraGUIOptions {
             options.add(poofOption);
 
             Object cherryLeavesOption = createSwitchOption(
-                "vulkanmod-extra.option.cherryLeaves",
+                "vulkanmod-extra.option.cherry_leaves",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.cherryLeaves,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.cherryLeaves = value,
-                "vulkanmod-extra.option.cherryLeaves.tooltip"
+                "vulkanmod-extra.option.cherry_leaves.tooltip"
             );
             options.add(cherryLeavesOption);
 
             Object crimsonSporeOption = createSwitchOption(
-                "vulkanmod-extra.option.crimsonSpore",
+                "vulkanmod-extra.option.crimson_spore",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.crimsonSpore,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.crimsonSpore = value,
-                "vulkanmod-extra.option.crimsonSpore.tooltip"
+                "vulkanmod-extra.option.crimson_spore.tooltip"
             );
             options.add(crimsonSporeOption);
 
             Object warpedSporeOption = createSwitchOption(
-                "vulkanmod-extra.option.warpedSpore",
+                "vulkanmod-extra.option.warped_spore",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.warpedSpore,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.warpedSpore = value,
-                "vulkanmod-extra.option.warpedSpore.tooltip"
+                "vulkanmod-extra.option.warped_spore.tooltip"
             );
             options.add(warpedSporeOption);
 
             Object whiteAshOption = createSwitchOption(
-                "vulkanmod-extra.option.whiteAsh",
+                "vulkanmod-extra.option.white_ash",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.whiteAsh,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.whiteAsh = value,
-                "vulkanmod-extra.option.whiteAsh.tooltip"
+                "vulkanmod-extra.option.white_ash.tooltip"
             );
             options.add(whiteAshOption);
 
             Object sporeBlossomAirOption = createSwitchOption(
-                "vulkanmod-extra.option.sporeBlossomAir",
+                "vulkanmod-extra.option.spore_blossom_air",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.sporeBlossomAir,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.sporeBlossomAir = value,
-                "vulkanmod-extra.option.sporeBlossomAir.tooltip"
+                "vulkanmod-extra.option.spore_blossom_air.tooltip"
             );
             options.add(sporeBlossomAirOption);
 
@@ -406,26 +406,26 @@ public class VulkanModExtraGUIOptions {
             options.add(composterOption);
 
             Object drippingHoneyOption = createSwitchOption(
-                "vulkanmod-extra.option.drippingHoney",
+                "vulkanmod-extra.option.dripping_honey",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.drippingHoney,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.drippingHoney = value,
-                "vulkanmod-extra.option.drippingHoney.tooltip"
+                "vulkanmod-extra.option.dripping_honey.tooltip"
             );
             options.add(drippingHoneyOption);
 
             Object fallingHoneyOption = createSwitchOption(
-                "vulkanmod-extra.option.fallingHoney",
+                "vulkanmod-extra.option.falling_honey",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.fallingHoney,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.fallingHoney = value,
-                "vulkanmod-extra.option.fallingHoney.tooltip"
+                "vulkanmod-extra.option.falling_honey.tooltip"
             );
             options.add(fallingHoneyOption);
 
             Object landingHoneyOption = createSwitchOption(
-                "vulkanmod-extra.option.landingHoney",
+                "vulkanmod-extra.option.landing_honey",
                 () -> VulkanModExtraClientConfig.getInstance().particleSettings.landingHoney,
                 value -> VulkanModExtraClientConfig.getInstance().particleSettings.landingHoney = value,
-                "vulkanmod-extra.option.landingHoney.tooltip"
+                "vulkanmod-extra.option.landing_honey.tooltip"
             );
             options.add(landingHoneyOption);
 

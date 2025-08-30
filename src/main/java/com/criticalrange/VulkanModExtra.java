@@ -78,7 +78,6 @@ public class VulkanModExtra implements ModInitializer {
 					source.sendSuccess(() -> Component.literal("§7  Lava: " + (CONFIG.animationSettings.lava ? "§aEnabled" : "§cDisabled")), false);
 					source.sendSuccess(() -> Component.literal("§7  Fire: " + (CONFIG.animationSettings.fire ? "§aEnabled" : "§cDisabled")), false);
 					source.sendSuccess(() -> Component.literal("§7  Portal: " + (CONFIG.animationSettings.portal ? "§aEnabled" : "§cDisabled")), false);
-					source.sendSuccess(() -> Component.literal("§7  Particles: " + (CONFIG.particleSettings.particles ? "§aEnabled" : "§cDisabled")), false);
 
 					// Environment Features
 					source.sendSuccess(() -> Component.literal("§eEnvironment Features:"), false);

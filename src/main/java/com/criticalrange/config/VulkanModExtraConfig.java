@@ -3,7 +3,7 @@ package com.criticalrange.config;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.world.level.material.FogType;
+import com.criticalrange.config.FogType;
 
 /**
  * Refactored configuration system for VulkanMod Extra
@@ -62,17 +62,95 @@ public class VulkanModExtraConfig {
     }
 
     public static class AnimationSettings {
+        // Individual animation controls
+        
+        // Fluid animations
         public boolean water = true;
+        public boolean waterStill = true;
+        public boolean waterFlow = true;
         public boolean lava = true;
+        public boolean lavaStill = true;
+        public boolean lavaFlow = true;
+        
+        // Fire & light animations
         public boolean fire = true;
+        public boolean fire0 = true;
+        public boolean fire1 = true;
+        public boolean soulFire = true;
+        public boolean soulFire0 = true;
+        public boolean soulFire1 = true;
+        public boolean campfireFire = true;
+        public boolean soulCampfireFire = true;
+        public boolean lantern = true;
+        public boolean soulLantern = true;
+        public boolean seaLantern = true;
+        
+        // Portal animations
         public boolean portal = true;
+        public boolean netherPortal = true;
+        public boolean endPortal = true;
+        public boolean endGateway = true;
+        
+        // Block animations
         public boolean blockAnimations = true;
+        public boolean magma = true;
+        public boolean prismarine = true;
+        public boolean prismarineBricks = true;
+        public boolean darkPrismarine = true;
+        public boolean conduit = true;
+        public boolean respawnAnchor = true;
+        public boolean stonecutterSaw = true;
+        
+        // Machine animations (when active)
+        public boolean machineAnimations = true;
+        public boolean blastFurnaceFrontOn = true;
+        public boolean smokerFrontOn = true;
+        public boolean furnaceFrontOn = true;
+        
+        // Plant animations
+        public boolean plantAnimations = true;
+        public boolean kelp = true;
+        public boolean kelpPlant = true;
+        public boolean seagrass = true;
+        public boolean tallSeagrassBottom = true;
+        public boolean tallSeagrassTop = true;
+        
+        // Nether stem animations
+        public boolean stemAnimations = true;
+        public boolean warpedStem = true;
+        public boolean crimsonStem = true;
+        public boolean warpedHyphae = true;
+        public boolean crimsonHyphae = true;
+        
+        // Sculk animations
+        public boolean sculkAnimations = true;
+        public boolean sculk = true;
+        public boolean sculkVein = true;
         public boolean sculkSensor = true;
-        public boolean textureAnimations = true;
+        public boolean sculkSensorSide = true;
+        public boolean sculkSensorTop = true;
+        public boolean sculkShrieker = true;
+        public boolean sculkShriekerSide = true;
+        public boolean sculkShriekerTop = true;
+        public boolean calibratedSculkSensor = true;
+        public boolean calibratedSculkSensorSide = true;
+        public boolean calibratedSculkSensorTop = true;
+        
+        // Command block animations
+        public boolean commandBlockAnimations = true;
+        public boolean commandBlockFront = true;
+        public boolean chainCommandBlockFront = true;
+        public boolean repeatingCommandBlockFront = true;
+        
+        // Additional animated elements
+        public boolean additionalAnimations = true;
+        public boolean beacon = true;
+        public boolean dragonEgg = true;
+        public boolean brewingStandBase = true;
+        public boolean cauldronWater = true;
     }
 
     public static class ParticleSettings {
-        public boolean particles = true;
         public boolean rainSplash = true;
         public boolean blockBreak = true;
         public boolean blockBreaking = true;
@@ -81,7 +159,11 @@ public class VulkanModExtraConfig {
         public boolean ash = true;
         public boolean barrier = true;
         public boolean block = true;
+        public boolean blockdust = true;
+        public boolean blockMarker = true;
         public boolean bubble = true;
+        public boolean bubbleColumnUp = true;
+        public boolean bubblePop = true;
         public boolean campfireCosySmoke = true;
         public boolean campfireSignalSmoke = true;
         public boolean cherryLeaves = true;
@@ -113,6 +195,8 @@ public class VulkanModExtraConfig {
         public boolean entityEffect = true;
         public boolean explosion = true;
         public boolean explosionEmitter = true;
+        public boolean fallingDripstoneLava = true;
+        public boolean fallingDripstoneWater = true;
         public boolean fallingDust = true;
         public boolean fallingHoney = true;
         public boolean fallingLava = true;
@@ -310,9 +394,9 @@ public class VulkanModExtraConfig {
 
         public static String getComponentName(FPSDisplayMode mode) {
             return switch (mode) {
-                case BASIC -> "vulkanmod-extra.option.fps_display_mode.basic";
-                case EXTENDED -> "vulkanmod-extra.option.fps_display_mode.extended";
-                case DETAILED -> "vulkanmod-extra.option.fps_display_mode.detailed";
+                case BASIC -> "vulkanmod-extra.option.extra.fps_display_mode.basic";
+                case EXTENDED -> "vulkanmod-extra.option.extra.fps_display_mode.extended";
+                case DETAILED -> "vulkanmod-extra.option.extra.fps_display_mode.detailed";
             };
         }
     }
