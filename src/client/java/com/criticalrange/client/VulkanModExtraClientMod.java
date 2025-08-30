@@ -23,7 +23,6 @@ public class VulkanModExtraClientMod {
         }
 
         LOGGER.info("VulkanMod Extra Client initialized successfully!");
-        LOGGER.info("All features are active - use '/vulkanmod-extra' command to check status.");
     }
 
     public static void onHudRender(GuiGraphics guiGraphics, float partialTicks) {
