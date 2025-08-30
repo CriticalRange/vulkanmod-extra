@@ -214,4 +214,4 @@ For support, check the GitHub issues page or join the discussion. We're a friend
 ---
 ## LICENSE
 
-VulkanMod Extra is licensed under CC0-1.0 license. For more information, [click here](https://github.com/CriticalRange/vulkanmod-extra?tab=CC0-1.0-1-ov-file) for more information.
+VulkanMod Extra is licensed under MIT license. For more information, [click here](https://github.com/CriticalRange/vulkanmod-extra?tab=MIT-1-ov-file) for more information.
