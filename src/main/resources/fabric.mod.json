@@ -11,7 +11,7 @@
 		"homepage": "https://github.com/CriticalRange/vulkanmod-extra",
 		"sources": "https://github.com/CriticalRange/vulkanmod-extra"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/vulkanmod-extra/icon.png",
 	"environment": "*",
 	"entrypoints": {
