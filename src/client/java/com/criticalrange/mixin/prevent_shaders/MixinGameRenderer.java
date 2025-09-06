@@ -18,7 +18,7 @@ public class MixinGameRenderer {
 
     @Inject(method = "togglePostEffect", at = @At("HEAD"), cancellable = true)
     private void vulkanmodExtra$preventShaderToggle(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG.performanceSettings.preventShaders) {
+        if (VulkanModExtra.CONFIG.extraSettings.preventShaders) {
             ci.cancel();
         }
     }

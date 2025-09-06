@@ -23,7 +23,7 @@ FPS counter (because we all need to know exactly how much our modpacks are destr
 
 ## Configuration System
 
-All settings are automatically saved to `.minecraft/config/vulkanmod-extra-options.json` and can be configured through VulkanMod's GUI or by editing the file directly.
+All settings are saved to `.minecraft/config/vulkanmod-extra-options.json` when you click "Apply" in VulkanMod's GUI or by editing the file directly.
 
 * Configuration Template as of [v0.2.0-beta4](https://modrinth.com/mod/vulkanmod-extra/version/0.2.0-beta4+1.21.1):
 
@@ -32,9 +32,7 @@ All settings are automatically saved to `.minecraft/config/vulkanmod-extra-optio
   "coreSettings": {
     "enableMod": true,
     "enableGuiIntegration": true,
-    "enableDebugLogging": false,
-    "autoSaveConfig": true,
-    "configSaveInterval": 300
+    "enableDebugLogging": false
   },
   "animationSettings": {
     "water": false,
@@ -109,32 +107,7 @@ All settings are automatically saved to `.minecraft/config/vulkanmod-extra-optio
     },
     "multiDimensionFog": false
   },
-  "hudSettings": {
-    "overlayCorner": "TOP_LEFT",
-    "textContrast": "BACKGROUND",
-    "showFps": true,
-    "fpsDisplayMode": "DETAILED",
-    "showFPSExtended": true,
-    "showCoords": true,
-    "toasts": true,
-    "advancementToast": true,
-    "recipeToast": true,
-    "systemToast": true,
-    "tutorialToast": true
-  },
-  "performanceSettings": {
-    "instantSneak": true,
-    "useAdaptiveSync": true,
-    "steadyDebugHud": true,
-    "steadyDebugHudRefreshInterval": 1,
-    "reduceResolutionOnMac": false,
-    "preventShaders": false,
-    "optimizeConfigWrites": true,
-    "useFastRandom": false,
-    "linearFlatColorBlender": false,
-    "advancedItemTooltips": false
-  },
-  "environmentSettings": {
+  "detailSettings": {
     "sky": true,
     "sun": true,
     "moon": true,

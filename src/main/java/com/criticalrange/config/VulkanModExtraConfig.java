@@ -18,23 +18,9 @@ public class VulkanModExtraConfig {
     public final AnimationSettings animationSettings = new AnimationSettings();
     public final ParticleSettings particleSettings = new ParticleSettings();
     public final RenderSettings renderSettings = new RenderSettings();
-    public final HudSettings hudSettings = new HudSettings();
-    public final PerformanceSettings performanceSettings = new PerformanceSettings();
-    public final EnvironmentSettings environmentSettings = new EnvironmentSettings();
-
-    // Legacy compatibility - maps old config paths to new ones
-    @Deprecated
+    public final DetailSettings detailSettings = new DetailSettings();
     public final ExtraSettings extraSettings = new ExtraSettings();
 
-    // Settings categories for compatibility
-    @Deprecated
-    public AnimationSettings getAnimationSettings() { return animationSettings; }
-    @Deprecated
-    public ParticleSettings getParticleSettings() { return particleSettings; }
-    @Deprecated
-    public DetailSettings getDetailSettings() { return new DetailSettings(); }
-    @Deprecated
-    public RenderSettings getRenderSettings() { return renderSettings; }
 
     /**
      * Write configuration changes
@@ -57,8 +43,6 @@ public class VulkanModExtraConfig {
         public boolean enableMod = true;
         public boolean enableGuiIntegration = true;
         public boolean enableDebugLogging = false;
-        public boolean autoSaveConfig = true;
-        public int configSaveInterval = 300; // seconds
     }
 
     public static class AnimationSettings {
@@ -299,34 +283,9 @@ public class VulkanModExtraConfig {
         }
     }
 
-    public static class HudSettings {
-        public OverlayCorner overlayCorner = OverlayCorner.TOP_LEFT;
-        public TextContrast textContrast = TextContrast.NONE;
-        public boolean showFps = false;
-        public FPSDisplayMode fpsDisplayMode = FPSDisplayMode.BASIC;
-        public boolean showFPSExtended = true;
-        public boolean showCoords = false;
-        public boolean toasts = true;
-        public boolean advancementToast = true;
-        public boolean recipeToast = true;
-        public boolean systemToast = true;
-        public boolean tutorialToast = true;
-    }
 
-    public static class PerformanceSettings {
-        public boolean instantSneak = false;
-        public boolean useAdaptiveSync = false;
-        public boolean steadyDebugHud = true;
-        public int steadyDebugHudRefreshInterval = 1;
-        public boolean reduceResolutionOnMac = false;
-        public boolean preventShaders = false;
-        public boolean optimizeConfigWrites = true;
-        public boolean useFastRandom = false;
-        public boolean linearFlatColorBlender = false;
-        public boolean advancedItemTooltips = false;
-    }
 
-    public static class EnvironmentSettings {
+    public static class DetailSettings {
         public boolean sky = true;
         public boolean sun = true;
         public boolean moon = true;
@@ -338,9 +297,6 @@ public class VulkanModExtraConfig {
         public int cloudDistance = 100;
     }
 
-    // ===== LEGACY COMPATIBILITY CLASSES =====
-
-    @Deprecated
     public static class ExtraSettings {
         public OverlayCorner overlayCorner = OverlayCorner.TOP_LEFT;
         public TextContrast textContrast = TextContrast.NONE;
@@ -366,17 +322,6 @@ public class VulkanModExtraConfig {
         public boolean advancedItemTooltips = false;
         public boolean useFastRandom = false;
         public boolean linearFlatColorBlender = false;
-    }
-
-    @Deprecated
-    public static class DetailSettings {
-        public boolean sky = true;
-        public boolean sun = true;
-        public boolean moon = true;
-        public boolean stars = true;
-        public boolean rainSnow = true;
-        public boolean biomeColors = true;
-        public boolean skyColors = true;
     }
 
     // ===== ENUMS =====

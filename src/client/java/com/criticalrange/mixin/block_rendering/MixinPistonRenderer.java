@@ -1,6 +1,6 @@
 package com.criticalrange.mixin.block_rendering;
 
-import com.criticalrange.client.config.VulkanModExtraClientConfig;
+import com.criticalrange.VulkanModExtra;
 import net.minecraft.client.renderer.blockentity.PistonHeadRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +16,7 @@ public class MixinPistonRenderer {
 
     @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
     private void onRender(CallbackInfo ci) {
-        if (!VulkanModExtraClientConfig.getInstance().renderSettings.piston) {
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.piston) {
             ci.cancel();
         }
     }

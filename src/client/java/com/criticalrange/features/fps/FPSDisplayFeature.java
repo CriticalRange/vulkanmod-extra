@@ -36,7 +36,7 @@ public class FPSDisplayFeature extends BaseFeature {
     @Override
     public boolean isEnabled() {
         VulkanModExtraConfig config = getConfig();
-        return config != null && config.hudSettings.showFps && enabled;
+        return config != null && config.extraSettings.showFps && enabled;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class FPSDisplayFeature extends BaseFeature {
         StringBuilder text = new StringBuilder();
         text.append("FPS: ").append(fpsCounter.getCurrentFPS());
 
-        if (config.hudSettings.showFPSExtended && showExtended) {
+        if (config.extraSettings.showFPSExtended && showExtended) {
             text.append(" (")
                 .append("avg: ").append(fpsCounter.getAverageFPS())
                 .append(", min: ").append(fpsCounter.getMinFPS())
@@ -97,7 +97,7 @@ public class FPSDisplayFeature extends BaseFeature {
             return 0xFFFFFF;
         }
 
-        return switch (config.hudSettings.textContrast) {
+        return switch (config.extraSettings.textContrast) {
             case NONE -> 0xFFFFFF;
             case BACKGROUND -> 0x000000;
             case SHADOW -> 0xFFFFFF;
@@ -110,7 +110,7 @@ public class FPSDisplayFeature extends BaseFeature {
             return 2;
         }
 
-        return switch (config.hudSettings.overlayCorner) {
+        return switch (config.extraSettings.overlayCorner) {
             case TOP_LEFT, BOTTOM_LEFT -> 2;
             case TOP_RIGHT, BOTTOM_RIGHT -> screenWidth - 100; // Approximate text width
         };
@@ -122,7 +122,7 @@ public class FPSDisplayFeature extends BaseFeature {
             return 2;
         }
 
-        return switch (config.hudSettings.overlayCorner) {
+        return switch (config.extraSettings.overlayCorner) {
             case TOP_LEFT, TOP_RIGHT -> 2;
             case BOTTOM_LEFT, BOTTOM_RIGHT -> screenHeight - 12; // Font height + padding
         };

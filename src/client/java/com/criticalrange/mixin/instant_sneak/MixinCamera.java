@@ -25,7 +25,7 @@ public class MixinCamera {
 
     @Inject(at = @At("HEAD"), method = "tick")
     public void vulkanmodExtra$noLerp(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG.performanceSettings.instantSneak && this.entity != null) {
+        if (VulkanModExtra.CONFIG.extraSettings.instantSneak && this.entity != null) {
             this.eyeHeight = this.entity.getEyeHeight();
         }
     }

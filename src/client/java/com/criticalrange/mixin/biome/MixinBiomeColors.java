@@ -1,6 +1,6 @@
 package com.criticalrange.mixin.biome;
 
-import com.criticalrange.client.config.VulkanModExtraClientConfig;
+import com.criticalrange.VulkanModExtra;
 import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,14 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinBiomeColors {
     @Inject(method = "getGrassColor", at = @At("HEAD"), cancellable = true)
     private void getGrassColor(double x, double z, CallbackInfoReturnable<Integer> cir) {
-        if (!VulkanModExtraClientConfig.getInstance().detailSettings.biomeColors) {
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.biomeColors) {
             cir.setReturnValue(0xFF8DB360); // Default grass color
         }
     }
 
     @Inject(method = "getFoliageColor", at = @At("HEAD"), cancellable = true)
     private void getFoliageColor(CallbackInfoReturnable<Integer> cir) {
-        if (!VulkanModExtraClientConfig.getInstance().detailSettings.biomeColors) {
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.biomeColors) {
             cir.setReturnValue(0xFF71A74D); // Default foliage color
         }
     }

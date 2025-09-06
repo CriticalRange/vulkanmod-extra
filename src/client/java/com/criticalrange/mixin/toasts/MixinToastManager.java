@@ -21,7 +21,7 @@ public class MixinToastManager {
     @Inject(method = "addToast", at = @At("HEAD"))
     private void vulkanmodExtra$controlToastDisplay(Toast toast, CallbackInfo ci) {
         // Check if toasts are globally disabled
-        if (!VulkanModExtra.CONFIG.hudSettings.toasts) {
+        if (!VulkanModExtra.CONFIG.extraSettings.toasts) {
             VulkanModExtra.LOGGER.debug("Toast display disabled globally");
             return;
         }
@@ -30,25 +30,25 @@ public class MixinToastManager {
         String toastClassName = toast.getClass().getSimpleName();
 
         // Advancement toasts
-        if (toastClassName.contains("Advancement") && !VulkanModExtra.CONFIG.hudSettings.advancementToast) {
+        if (toastClassName.contains("Advancement") && !VulkanModExtra.CONFIG.extraSettings.advancementToast) {
             VulkanModExtra.LOGGER.debug("Advancement toast blocked: {}", toastClassName);
             return;
         }
 
         // Recipe toasts
-        if (toastClassName.contains("Recipe") && !VulkanModExtra.CONFIG.hudSettings.recipeToast) {
+        if (toastClassName.contains("Recipe") && !VulkanModExtra.CONFIG.extraSettings.recipeToast) {
             VulkanModExtra.LOGGER.debug("Recipe toast blocked: {}", toastClassName);
             return;
         }
 
         // System toasts
-        if (toastClassName.contains("System") && !VulkanModExtra.CONFIG.hudSettings.systemToast) {
+        if (toastClassName.contains("System") && !VulkanModExtra.CONFIG.extraSettings.systemToast) {
             VulkanModExtra.LOGGER.debug("System toast blocked: {}", toastClassName);
             return;
         }
 
         // Tutorial toasts
-        if (toast instanceof TutorialToast && !VulkanModExtra.CONFIG.hudSettings.tutorialToast) {
+        if (toast instanceof TutorialToast && !VulkanModExtra.CONFIG.extraSettings.tutorialToast) {
             VulkanModExtra.LOGGER.debug("Tutorial toast blocked");
             return;
         }

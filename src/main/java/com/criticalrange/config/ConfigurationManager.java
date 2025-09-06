@@ -13,6 +13,9 @@ import java.nio.file.Path;
 /**
  * Centralized configuration management system for VulkanMod Extra
  * Uses single config file: vulkanmod-extra-options.json in root config directory
+ * 
+ * Configuration changes are only saved when explicitly calling saveConfig().
+ * Changes are discarded if the user closes the settings without applying.
  */
 public class ConfigurationManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("VulkanMod Extra Config");

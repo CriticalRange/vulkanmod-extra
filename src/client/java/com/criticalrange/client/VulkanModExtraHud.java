@@ -1,7 +1,6 @@
 package com.criticalrange.client;
 
 import com.criticalrange.VulkanModExtra;
-import com.criticalrange.client.config.VulkanModExtraClientConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -52,7 +51,7 @@ public class VulkanModExtraHud {
             lastUpdateTime = currentTime;
             
             // Debug log to see if HUD is being called and what the config values are (only once per second)
-            var config = VulkanModExtra.CONFIG.hudSettings;
+            var config = VulkanModExtra.CONFIG.extraSettings;
             var fpsMode = config.fpsDisplayMode;
             VulkanModExtra.LOGGER.debug("FPS updated - showFps: {}, fpsDisplayMode: {}, FPS: {}", config.showFps, fpsMode, fps);
         }
@@ -61,8 +60,7 @@ public class VulkanModExtraHud {
     }
 
     private void renderOverlay(GuiGraphics guiGraphics) {
-        var config = VulkanModExtra.CONFIG.hudSettings;
-        var clientConfig = VulkanModExtraClientConfig.getInstance();
+        var config = VulkanModExtra.CONFIG.extraSettings;
 
         int screenWidth = minecraft.getWindow().getGuiScaledWidth();
         int screenHeight = minecraft.getWindow().getGuiScaledHeight();
@@ -123,7 +121,7 @@ public class VulkanModExtraHud {
     }
     
     private int renderFpsDisplay(GuiGraphics guiGraphics, int x, int y, int lineHeight,
-                                com.criticalrange.config.VulkanModExtraConfig.HudSettings config) {
+                                com.criticalrange.config.VulkanModExtraConfig.ExtraSettings config) {
         int linesRendered = 0;
         var fpsMode = config.fpsDisplayMode;
         var textContrast = config.textContrast;
