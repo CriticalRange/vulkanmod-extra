@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      issues: write
       
     steps:
       - name: Checkout repository
@@ -89,51 +90,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Comment with publishing instructions
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Create an issue with publishing instructions
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `📦 Ready to Publish: VulkanMod Extra ${{ steps.get_version.outputs.VERSION }}`,
-              body: `## 🚀 Release ${{ steps.get_version.outputs.VERSION }} is Ready for Publishing!
-              
-              **Status:** ✅ Build completed successfully, draft release created
-              
-              ### 📋 Pre-Publishing Checklist:
-              - [ ] Review the [draft release](https://github.com/${{ github.repository }}/releases)
-              - [ ] Test the built JAR file locally
-              - [ ] Verify compatibility with VulkanMod 0.5.5
-              - [ ] Check that all features work as expected
-              - [ ] Confirm changelog is accurate
-              
-              ### 📦 Publishing Options:
-              
-              **Option 1: GitHub Only**
-              1. Go to [Releases](https://github.com/${{ github.repository }}/releases)
-              2. Edit the draft release
-              3. Click "Publish release"
-              
-              **Option 2: GitHub + Modrinth + CurseForge (Automated)**
-              1. Close this issue with comment: \`/publish-full\`
-              2. The automation will publish everywhere
-              
-              **Option 3: GitHub + Modrinth Only**
-              1. Close this issue with comment: \`/publish-modrinth\`
-              2. Will publish to GitHub and Modrinth only
-              
-              ### 🔧 Manual Commands Available:
-              - \`/publish-full\` - Publish to all platforms
-              - \`/publish-modrinth\` - Publish to GitHub + Modrinth
-              - \`/publish-github\` - Just publish the GitHub draft
-              - \`/cancel\` - Delete draft release and cancel
-              
-              ---
-              *This issue was automatically created. You can safely ignore it if you want to publish manually.*`,
-              labels: ['release', 'automation', 'needs-action']
-            });
+      - name: Display publishing instructions
+        run: |
+          echo "## 🚀 Release ${{ steps.get_version.outputs.VERSION }} is Ready for Publishing!"
+          echo ""
+          echo "**Status:** ✅ Build completed successfully, draft release created"
+          echo ""
+          echo "### 📦 Publishing Options:"
+          echo ""
+          echo "**Option 1: GitHub Only**"
+          echo "1. Go to https://github.com/${{ github.repository }}/releases"
+          echo "2. Edit the draft release"
+          echo "3. Click 'Publish release'"
+          echo ""
+          echo "**Option 2: Automated Publishing**"
+          echo "Create a GitHub issue with label 'release' and comment:"
+          echo "- /publish-full - Publish to all platforms"
+          echo "- /publish-modrinth - Publish to GitHub + Modrinth"
+          echo "- /publish-github - Just publish the GitHub draft"
+          echo ""
+          echo "Draft release created successfully! 🎉"
 
       # NOTE: Platform publishing is now removed from automatic workflow
       # It will be triggered by manual commands through the publish workflow
