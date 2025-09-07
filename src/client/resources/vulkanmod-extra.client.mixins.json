@@ -21,12 +21,12 @@
 		"block_rendering.MixinPistonRenderer",
 		"weather.MixinLevelRenderer",
 		"client.MixinGui",
-		"client.gui.MixinVOptionScreen",
-		"vulkanmod.MixinVulkanModOptions"
+		"client.gui.MixinVOptionScreen"
 	],
 	"injectors": {
 		"defaultRequire": 1
 	},
+	"minVersion": "0.8",
 	"overwrites": {
 		"requireAnnotations": true
 	}
