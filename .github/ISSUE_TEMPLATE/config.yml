@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔧 VulkanMod Issues
+    url: https://github.com/xCollateral/VulkanMod/issues
+    about: Report issues with VulkanMod itself (the base mod that VulkanMod Extra extends)
+  - name: 📦 Fabric Issues
+    url: https://github.com/FabricMC/fabric/issues
+    about: Report issues with Fabric Loader or Fabric API

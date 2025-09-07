@@ -1,0 +1,141 @@
+name: 🐛 Bug Report
+description: Report a bug or issue with VulkanMod Extra
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+assignees: [CriticalRange]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report for VulkanMod Extra!
+        
+        Please search existing issues before creating a new one to avoid duplicates.
+        
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues and this is not a duplicate
+          required: true
+        - label: I am using the latest version of VulkanMod Extra
+          required: true
+        - label: I have VulkanMod installed and working properly
+          required: true
+        - label: I have read the README.md and checked the configuration documentation
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Bug Category
+      description: What type of issue are you experiencing?
+      options:
+        - Animation Issues (water, fire, portal, etc.)
+        - Particle Issues (rain, smoke, explosions, etc.)
+        - GUI/Settings Issues (VulkanMod integration, options not working)
+        - Performance Issues (FPS drops, stuttering)
+        - HUD/Overlay Issues (FPS display, coordinates, toasts)
+        - Rendering Issues (fog, lighting, environmental effects)
+        - Configuration Issues (settings not saving, config corruption)
+        - Compatibility Issues (other mods, VulkanMod versions)
+        - Crash/Fatal Error
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Set option to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Please provide your system and mod environment details
+      value: |
+        **Minecraft Version:** 
+        **Fabric Loader Version:** 
+        **Fabric API Version:** 
+        **VulkanMod Version:** 
+        **VulkanMod Extra Version:** 
+        **Operating System:** 
+        **GPU:** 
+        **GPU Driver Version:** 
+        **Java Version:** 
+        **Other Mods Installed:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: If relevant, please share your VulkanMod Extra configuration
+      placeholder: |
+        Please paste the contents of your `.minecraft/config/vulkanmod-extra-options.json` file here.
+        You can redact any sensitive information, but please include the relevant settings sections.
+      render: json
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Please provide relevant log output
+      placeholder: |
+        Paste relevant portions of your latest.log or crash report here.
+        Look for lines containing "vulkanmod-extra", "VulkanModExtra", or error messages.
+        
+        Logs are typically found in `.minecraft/logs/latest.log`
+      render: text
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots/Videos
+      description: If needed, add screenshots or videos to help explain the problem
+      placeholder: |
+        Drag and drop screenshots or videos here, or paste image URLs.
+        
+        For animation/particle issues, videos are especially helpful.
+        For GUI issues, screenshots showing the problem are very useful.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: |
+        - Does this happen in single-player, multiplayer, or both?
+        - Did this work in a previous version?
+        - Any workarounds you've found?
+        - Related issues or discussions?
+
+  - type: checkboxes
+    id: tested
+    attributes:
+      label: Testing
+      description: Please confirm you have tested these scenarios
+      options:
+        - label: I have tested with only VulkanMod and VulkanMod Extra installed (no other mods)
+        - label: I have tested with a fresh Minecraft instance
+        - label: I have verified my VulkanMod Extra configuration is not corrupted

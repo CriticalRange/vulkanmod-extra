@@ -1,0 +1,165 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement for VulkanMod Extra
+title: "[Feature] "
+labels: ["enhancement", "needs-discussion"]
+assignees: [CriticalRange]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature for VulkanMod Extra!
+        
+        Please search existing issues and discussions before creating a new feature request.
+        
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues and discussions for similar requests
+          required: true
+        - label: I have checked the README.md and current feature list
+          required: true
+        - label: This feature would be beneficial for VulkanMod Extra users in general
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What type of feature are you requesting?
+      options:
+        - New Animation Controls (specific blocks, items, entities)
+        - New Particle Controls (specific particle types)
+        - GUI/Settings Improvements (better organization, new options)
+        - Performance Features (optimizations, toggles)
+        - HUD/Overlay Enhancements (new display modes, positioning)
+        - Rendering Features (fog controls, lighting, visual effects)
+        - Configuration Features (presets, import/export, profiles)
+        - VulkanMod Integration Improvements
+        - Compatibility Features (other mods, versions)
+        - Developer/Debug Features
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Briefly describe what you want to be added
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem/Use Case
+      description: What problem would this feature solve? What's your use case?
+      placeholder: |
+        Is your feature request related to a problem? Please describe.
+        A clear and concise description of what the problem is.
+        
+        Examples:
+        - "I'm always frustrated when..."
+        - "It would be helpful to..."
+        - "Currently there's no way to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: |
+        A clear and concise description of what you want to happen.
+        
+        Consider:
+        - How would this feature work?
+        - Where would it appear in the UI?
+        - What settings/options would it have?
+        - How would it interact with existing features?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or features?
+      placeholder: |
+        A clear and concise description of any alternative solutions or features you've considered.
+        
+        Examples:
+        - Other mods that have similar features
+        - Workarounds you currently use
+        - Different approaches to solve the same problem
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Mockups/Examples
+      description: Visual examples of what you're proposing
+      placeholder: |
+        If applicable, add screenshots, mockups, or examples to help explain your feature request.
+        
+        - Screenshots from other mods with similar features
+        - Hand-drawn mockups of UI changes
+        - Examples from other games or applications
+        - Videos showing the desired behavior
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority/Impact
+      description: How important is this feature to you and other users?
+      options:
+        - Critical - Significantly impacts usability
+        - High - Would greatly improve user experience  
+        - Medium - Nice to have improvement
+        - Low - Minor convenience feature
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas
+      description: Do you have any thoughts on how this could be implemented?
+      placeholder: |
+        If you have technical knowledge or ideas about implementation:
+        
+        - Configuration structure changes needed
+        - New mixin targets required
+        - Integration points with VulkanMod
+        - Performance considerations
+        - Compatibility concerns
+        
+        This section is optional but helpful!
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope & Compatibility
+      description: Please consider the scope of your request
+      options:
+        - label: This feature should work with the current VulkanMod version (0.5.5)
+        - label: I understand this feature may require VulkanMod Extra configuration changes
+        - label: I'm willing to test this feature if implemented
+        - label: This feature would not conflict with VulkanMod's core functionality
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context or information about the feature request
+      placeholder: |
+        Any additional information that might be helpful:
+        
+        - Related GitHub issues or discussions
+        - Community feedback or requests you've seen
+        - Specific Minecraft versions this applies to
+        - Performance impact considerations

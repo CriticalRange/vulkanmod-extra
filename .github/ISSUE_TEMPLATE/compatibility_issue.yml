@@ -1,0 +1,202 @@
+name: 🔗 Compatibility Issue
+description: Report mod compatibility problems or conflicts
+title: "[Compatibility] "
+labels: ["compatibility", "needs-investigation"]
+assignees: [CriticalRange]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a compatibility issue with VulkanMod Extra!
+        
+        Compatibility issues can involve other mods, Minecraft versions, or specific configurations.
+        
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have tested with only the conflicting mods + VulkanMod + VulkanMod Extra
+          required: true
+        - label: I have verified this works without VulkanMod Extra installed
+          required: true
+        - label: I have checked that all mods are using compatible versions
+          required: true
+        - label: I have searched for existing compatibility reports
+          required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Compatibility Issue Type
+      description: What kind of compatibility problem are you experiencing?
+      options:
+        - Mod Conflict (crashes, errors with other mods)
+        - Visual Conflicts (rendering issues with other mods)
+        - Feature Conflicts (overlapping functionality)
+        - Performance Issues with Other Mods
+        - VulkanMod Version Compatibility
+        - Minecraft Version Issues
+        - Fabric/Loader Compatibility
+        - Resource Pack Conflicts
+        - Shader Compatibility
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: conflicting_mod
+    attributes:
+      label: Conflicting Mod(s)
+      description: Which mod(s) are causing compatibility issues?
+      placeholder: |
+        **Primary conflicting mod:**
+        - Mod Name: 
+        - Mod Version: 
+        - Mod Source: (CurseForge, Modrinth, GitHub, etc.)
+        - Mod Link: 
+        
+        **Additional conflicting mods (if any):**
+        - Mod Name: 
+        - Mod Version: 
+        
+        **Related mods that might be relevant:**
+        - List any mods that might be related to the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the compatibility problem in detail
+      placeholder: |
+        Provide a clear and detailed description of the compatibility issue:
+        
+        - What exactly happens when both mods are installed?
+        - What should happen instead?
+        - Are there any error messages or crashes?
+        - Does the issue affect specific features or general functionality?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can this compatibility issue be reproduced?
+      placeholder: |
+        1. Install mods: VulkanMod X.X.X, VulkanMod Extra X.X.X, [Conflicting Mod] X.X.X
+        2. Start Minecraft/Load world
+        3. Access/Use feature '...'
+        4. Observe the issue
+        
+        **Minimal mod list to reproduce:**
+        - List only the essential mods needed to reproduce the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: System and mod environment information
+      value: |
+        **Minecraft Environment:**
+        - Minecraft Version: 
+        - Fabric Loader Version: 
+        - Fabric API Version: 
+        - VulkanMod Version: 
+        - VulkanMod Extra Version: 
+        
+        **System:**
+        - Operating System: 
+        - Java Version: 
+        - GPU: 
+        - GPU Driver Version: 
+        
+        **Complete Mod List:**
+        (Please provide your complete mod list, or at least all mods that might be related)
+        
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Crash Logs/Error Messages
+      description: Relevant crash reports, logs, or error messages
+      placeholder: |
+        Please include:
+        - Full crash report (if applicable)
+        - Relevant portions of latest.log
+        - Any error messages in console
+        - VulkanMod or VulkanMod Extra specific log entries
+        
+        Look for entries containing:
+        - "vulkanmod-extra", "VulkanModExtra"
+        - The conflicting mod's name
+        - Java stack traces
+        - "Exception", "Error", "Failed"
+      render: text
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen when both mods are installed together?
+      placeholder: |
+        Describe what you expected to happen:
+        - Should both mods work normally?
+        - Should there be specific integration features?
+        - Are there settings that should resolve conflicts?
+
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: Workarounds/Temporary Solutions
+      description: Have you found any ways to work around this issue?
+      placeholder: |
+        - Specific VulkanMod Extra settings that help
+        - Conflicting mod settings that need to be changed
+        - Load order considerations
+        - Alternative mods that work better
+        - Partial functionality that still works
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Issue Severity
+      description: How severe is this compatibility issue?
+      options:
+        - Critical - Complete incompatibility, crashes, or data loss
+        - High - Major features broken, significantly impacts gameplay
+        - Medium - Some features affected, workarounds available
+        - Low - Minor issues, mostly cosmetic or edge cases
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: testing
+    attributes:
+      label: Testing Scenarios
+      description: Please confirm which scenarios you've tested
+      options:
+        - label: Fresh Minecraft instance with only required mods
+        - label: Different mod versions (if available)
+        - label: Different VulkanMod Extra configuration settings
+        - label: Both single-player and multiplayer (if applicable)
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other relevant information about this compatibility issue
+      placeholder: |
+        - Is this a regression from a previous version?
+        - Are there similar issues reported for the conflicting mod?
+        - Community discussions or solutions you've found
+        - Screenshots/videos showing the issue
+        - Any communication with other mod developers
+        - Specific features of VulkanMod Extra that seem to cause the conflict

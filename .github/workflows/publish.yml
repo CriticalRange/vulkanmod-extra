@@ -1,0 +1,245 @@
+name: Manual Publish
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-publish-command:
+    if: |
+      github.event.issue.user.login == github.repository_owner &&
+      contains(github.event.issue.labels.*.name, 'release') &&
+      (
+        contains(github.event.comment.body, '/publish-full') ||
+        contains(github.event.comment.body, '/publish-modrinth') ||
+        contains(github.event.comment.body, '/publish-github') ||
+        contains(github.event.comment.body, '/cancel')
+      )
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+          
+      - name: Extract version from issue title
+        id: extract_version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue.title;
+            const match = title.match(/VulkanMod Extra (v[\d\.-\w]+)/);
+            const version = match ? match[1] : '';
+            core.setOutput('version', version);
+            return version;
+            
+      - name: Handle cancel command
+        if: contains(github.event.comment.body, '/cancel')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.extract_version.outputs.version }}';
+            
+            // Find and delete the draft release
+            try {
+              const { data: releases } = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              
+              const draftRelease = releases.find(release => 
+                release.tag_name === version && release.draft
+              );
+              
+              if (draftRelease) {
+                await github.rest.repos.deleteRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: draftRelease.id
+                });
+                
+                // Also delete the tag
+                try {
+                  await github.rest.git.deleteRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `tags/${version}`
+                  });
+                } catch (e) {
+                  console.log('Tag deletion failed or already deleted');
+                }
+              }
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `❌ **Release Cancelled**\n\nDraft release ${version} has been deleted.`
+              });
+              
+              await github.rest.issues.update({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'closed'
+              });
+            } catch (error) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `❌ **Error cancelling release**: ${error.message}`
+              });
+            }
+            
+      - name: Publish GitHub release
+        if: |
+          contains(github.event.comment.body, '/publish-full') ||
+          contains(github.event.comment.body, '/publish-modrinth') ||
+          contains(github.event.comment.body, '/publish-github')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.extract_version.outputs.version }}';
+            
+            // Find the draft release and publish it
+            try {
+              const { data: releases } = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              
+              const draftRelease = releases.find(release => 
+                release.tag_name === version && release.draft
+              );
+              
+              if (draftRelease) {
+                await github.rest.repos.updateRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: draftRelease.id,
+                  draft: false
+                });
+                
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `✅ **GitHub Release Published**\n\n[View Release](${draftRelease.html_url})`
+                });
+              } else {
+                throw new Error('Draft release not found');
+              }
+            } catch (error) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `❌ **Error publishing GitHub release**: ${error.message}`
+              });
+            }
+            
+      - name: Publish to Modrinth and CurseForge
+        if: |
+          contains(github.event.comment.body, '/publish-full') ||
+          contains(github.event.comment.body, '/publish-modrinth')
+        run: |
+          # Make Gradle wrapper executable
+          chmod +x ./gradlew
+          
+          # Build the project
+          ./gradlew build
+          
+      - name: Upload to platforms
+        if: |
+          contains(github.event.comment.body, '/publish-full') ||
+          contains(github.event.comment.body, '/publish-modrinth')
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: YOUR_MODRINTH_PROJECT_ID # Replace with your actual project ID  
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          
+          curseforge-id: ${{ contains(github.event.comment.body, '/publish-full') && 'YOUR_CURSEFORGE_PROJECT_ID' || '' }}
+          curseforge-token: ${{ contains(github.event.comment.body, '/publish-full') && secrets.CURSEFORGE_TOKEN || '' }}
+          
+          files: build/libs/!(*-dev-shadow.jar|*-sources.jar)
+          name: VulkanMod Extra ${{ steps.extract_version.outputs.version }}
+          version: ${{ steps.extract_version.outputs.version }}
+          version-type: ${{ contains(steps.extract_version.outputs.version, 'alpha') || contains(steps.extract_version.outputs.version, 'beta') || contains(steps.extract_version.outputs.version, 'rc') && 'beta' || 'release' }}
+          changelog-file: CHANGELOG.md
+          
+          loaders: fabric
+          game-versions: "1.21.1"
+          dependencies: |
+            fabric-api | depends
+            vulkanmod | depends
+          
+          java: 21
+          
+      - name: Update issue with success
+        if: |
+          success() && (
+            contains(github.event.comment.body, '/publish-full') ||
+            contains(github.event.comment.body, '/publish-modrinth') ||
+            contains(github.event.comment.body, '/publish-github')
+          )
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const command = '${{ github.event.comment.body }}';
+            let platforms = '';
+            
+            if (command.includes('/publish-full')) {
+              platforms = 'GitHub, Modrinth, and CurseForge';
+            } else if (command.includes('/publish-modrinth')) {
+              platforms = 'GitHub and Modrinth';
+            } else if (command.includes('/publish-github')) {
+              platforms = 'GitHub';
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🎉 **Successfully Published!**
+              
+              VulkanMod Extra ${{ steps.extract_version.outputs.version }} has been published to: **${platforms}**
+              
+              ### 📦 Available on:
+              ${command.includes('/publish-full') || command.includes('/publish-modrinth') ? '- 🟢 [Modrinth](https://modrinth.com/mod/YOUR_PROJECT_SLUG)' : ''}
+              ${command.includes('/publish-full') ? '- 🟠 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/YOUR_PROJECT_SLUG)' : ''}
+              - 🐙 [GitHub Releases](https://github.com/${{ github.repository }}/releases)
+              
+              Release is now live! 🚀`
+            });
+            
+            await github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            });
+            
+      - name: Handle errors
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `❌ **Publishing Failed**
+              
+              There was an error during the publishing process. Please check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+              
+              You can:
+              1. Fix the issue and try the command again
+              2. Publish manually from the GitHub releases page
+              3. Contact support if the issue persists`
+            });`

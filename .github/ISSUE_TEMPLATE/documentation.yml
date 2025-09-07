@@ -1,0 +1,193 @@
+name: 📚 Documentation Issue
+description: Report problems with documentation, guides, or request documentation improvements
+title: "[Docs] "
+labels: ["documentation", "good first issue"]
+assignees: [CriticalRange]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve VulkanMod Extra documentation!
+        
+        Good documentation helps everyone use VulkanMod Extra more effectively.
+        
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues for similar documentation requests
+          required: true
+        - label: I have checked the current README.md and wiki pages
+          required: true
+        - label: This documentation would benefit other VulkanMod Extra users
+          required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Documentation Issue Type
+      description: What kind of documentation issue are you reporting?
+      options:
+        - Missing Documentation (feature not documented)
+        - Incorrect/Outdated Information (docs are wrong)
+        - Unclear Instructions (confusing or ambiguous)
+        - Missing Examples (need code samples or screenshots)
+        - Formatting Issues (display problems, broken links)
+        - Translation Request (language support)
+        - New Guide Request (tutorial or walkthrough)
+        - FAQ Addition (common questions)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation issue located?
+      placeholder: |
+        Please specify where the documentation issue is located:
+        
+        - README.md (main project page)
+        - Wiki page: [page name]
+        - Code comments in: [file path]
+        - Configuration file comments
+        - Release notes/changelog
+        - Issue template
+        - Other: [specify location]
+        
+        If requesting new documentation, specify where it should be added.
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Issue Description
+      description: Describe the documentation problem or request in detail
+      placeholder: |
+        Please provide a clear description of the documentation issue:
+        
+        **For existing documentation problems:**
+        - What information is missing, incorrect, or unclear?
+        - What specifically needs to be fixed or improved?
+        - What confusion does this cause for users?
+        
+        **For new documentation requests:**
+        - What topic needs documentation?
+        - Who would benefit from this documentation?
+        - What level of detail is needed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_content
+    attributes:
+      label: Current Content (if applicable)
+      description: Quote or reference the current problematic content
+      placeholder: |
+        If reporting an issue with existing documentation, please quote the problematic content:
+        
+        ```
+        [Current text that has issues]
+        ```
+        
+        Or provide a link to the specific section:
+        - Direct link to the documentation
+        - Section heading or line numbers
+      render: text
+
+  - type: textarea
+    id: suggested_improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: |
+        **For corrections:**
+        Provide the corrected version of the content.
+        
+        **For new documentation:**
+        Outline what should be covered:
+        - Key topics to include
+        - Structure or format suggestions  
+        - Target audience (beginners, advanced users, developers)
+        
+        **For unclear content:**
+        Suggest clearer wording or additional explanations needed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples/References
+      description: Provide examples, screenshots, or references that would help
+      placeholder: |
+        If applicable, provide:
+        
+        **Screenshots:**
+        - Current confusing documentation
+        - Examples from other projects
+        - UI elements that need documentation
+        
+        **Code Examples:**
+        - Configuration examples
+        - Usage examples
+        - Before/after comparisons
+        
+        **References:**
+        - Links to good documentation examples
+        - Related discussions or issues
+        - External resources that explain the topic well
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this documentation improvement?
+      options:
+        - Critical - Blocks users from using key features
+        - High - Causes significant confusion for many users
+        - Medium - Would improve user experience notably  
+        - Low - Nice to have improvement
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who would benefit most from this documentation?
+      options:
+        - New Users (first-time installation and setup)
+        - General Users (everyday usage and configuration)
+        - Advanced Users (complex configurations and optimization)
+        - Mod Developers (integration and compatibility)
+        - All Users
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help improve the documentation?
+      options:
+        - label: I can help write or improve this documentation
+        - label: I can provide screenshots or examples
+        - label: I can test documentation accuracy
+        - label: I can review proposed documentation changes
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that would help improve the documentation
+      placeholder: |
+        - Common questions you've seen about this topic
+        - Related features that should be cross-referenced
+        - Technical details that might be important
+        - User feedback you've received about confusion
+        - Links to community discussions about this topic

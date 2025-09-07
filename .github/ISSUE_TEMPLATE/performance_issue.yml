@@ -1,0 +1,217 @@
+name: ⚡ Performance Issue
+description: Report performance problems, FPS drops, or optimization suggestions
+title: "[Performance] "
+labels: ["performance", "needs-investigation"]
+assignees: [CriticalRange]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a performance issue with VulkanMod Extra!
+        
+        Performance issues can be complex to diagnose, so please provide as much detail as possible.
+        
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have tested with only VulkanMod and VulkanMod Extra installed
+          required: true
+        - label: I have compared performance with VulkanMod Extra disabled
+          required: true
+        - label: I have checked that my GPU drivers are up to date
+          required: true
+        - label: I have verified this is not a VulkanMod core issue
+          required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Performance Issue Type
+      description: What kind of performance issue are you experiencing?
+      options:
+        - FPS Drop/Stuttering
+        - Memory Usage (High RAM usage)
+        - VRAM Usage (High video memory usage)
+        - CPU Usage (High processor usage)
+        - Long Load Times
+        - Frame Pacing Issues
+        - Specific Feature Performance (animations, particles, etc.)
+        - Startup Performance
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Performance Issue Description
+      description: Describe the performance problem you're experiencing
+      placeholder: |
+        Provide a clear description of the performance issue:
+        - What symptoms are you experiencing?
+        - When does the issue occur?
+        - How severe is the impact?
+    validations:
+      required: true
+
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Performance Measurements
+      description: Provide specific performance data if available
+      placeholder: |
+        **Without VulkanMod Extra:**
+        - Average FPS: 
+        - 1% Low FPS: 
+        - Frame Time: 
+        - RAM Usage: 
+        - VRAM Usage: 
+        
+        **With VulkanMod Extra (default settings):**
+        - Average FPS: 
+        - 1% Low FPS: 
+        - Frame Time: 
+        - RAM Usage: 
+        - VRAM Usage: 
+        
+        **With VulkanMod Extra (your settings):**
+        - Average FPS: 
+        - 1% Low FPS: 
+        - Frame Time: 
+        - RAM Usage: 
+        - VRAM Usage: 
+        
+        **Testing Conditions:**
+        - World type: 
+        - Render distance: 
+        - Graphics settings: 
+        - Resource pack: 
+        - Duration of test: 
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can the performance issue be reproduced?
+      placeholder: |
+        1. Load world '...' or create new world with seed '...'
+        2. Set render distance to '...'
+        3. Enable/configure '...' in VulkanMod Extra settings
+        4. Go to coordinates '...' or perform action '...'
+        5. Observe performance drop
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: System Information
+      description: Detailed system specifications
+      value: |
+        **Minecraft & Mods:**
+        - Minecraft Version: 
+        - Fabric Loader Version: 
+        - Fabric API Version: 
+        - VulkanMod Version: 
+        - VulkanMod Extra Version: 
+        
+        **Hardware:**
+        - CPU: 
+        - GPU: 
+        - RAM: 
+        - VRAM: 
+        - Storage (SSD/HDD): 
+        - Operating System: 
+        
+        **Drivers & Settings:**
+        - GPU Driver Version: 
+        - Java Version: 
+        - Java Arguments/Memory Allocation: 
+        - VSync Enabled: 
+        - Fullscreen/Windowed: 
+        - Resolution: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: VulkanMod Extra Configuration
+      description: Your current VulkanMod Extra settings
+      placeholder: |
+        Please share your configuration, especially settings that might affect performance:
+        
+        **Animation Settings:**
+        - All Animations: 
+        - Specific disabled animations: 
+        
+        **Particle Settings:**
+        - All Particles: 
+        - Specific disabled particles: 
+        
+        **Performance Settings:**
+        - Fast Random: 
+        - Linear Flat Color Blender: 
+        
+        **Render Settings:**
+        - Light Updates: 
+        - Fog settings: 
+        - Other rendering options: 
+        
+        Or paste relevant sections of your vulkanmod-extra-options.json file here.
+      render: text
+
+  - type: textarea
+    id: profiling
+    attributes:
+      label: Profiling Data
+      description: If you have profiling data, please share it
+      placeholder: |
+        If you've done any profiling or have additional performance data:
+        
+        - F3 debug screen information
+        - JProfiler, VisualVM, or other profiler results
+        - GPU profiling data (MSI Afterburner, etc.)
+        - Spark profiler reports
+        - Any relevant performance metrics
+      render: text
+
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: Workarounds/Settings Changes
+      description: Have you found any settings that improve performance?
+      placeholder: |
+        - Which VulkanMod Extra settings help when disabled?
+        - Any VulkanMod core settings that affect the issue?
+        - Java arguments that make a difference?
+        - Other workarounds you've discovered?
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Performance Impact
+      description: How severe is the performance impact?
+      options:
+        - Severe - Game is unplayable (below 30 FPS average)
+        - High - Significantly impacts gameplay (30-45 FPS average)
+        - Medium - Noticeable but playable (45-60 FPS average)
+        - Low - Minor impact (above 60 FPS average)
+        - Variable - Depends on specific conditions
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might help diagnose the issue
+      placeholder: |
+        - Does this happen in specific biomes or world types?
+        - Does it happen immediately or after playing for a while?
+        - Any correlation with specific in-game actions?
+        - Comparison with other performance mods (Sodium, etc.)
+        - Any crash logs or error messages related to performance?

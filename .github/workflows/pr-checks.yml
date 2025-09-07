@@ -1,0 +1,232 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ main, develop ]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+          
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+        
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true
+          
+      - name: Run build and tests
+        run: ./gradlew build
+        
+      - name: Check code style
+        run: ./gradlew checkstyle
+        continue-on-error: true
+        
+      - name: Validate configuration changes
+        run: |
+          # Check if config files have been modified
+          if git diff --name-only ${{ github.event.pull_request.base.sha }} | grep -E "(config|Config)" ; then
+            echo "⚠️ Configuration files modified - ensure backward compatibility"
+            echo "CONFIG_CHANGED=true" >> $GITHUB_ENV
+          else
+            echo "CONFIG_CHANGED=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Check for breaking changes
+        run: |
+          # Look for potential breaking changes in commit messages or files
+          BREAKING_CHANGES=$(git log --oneline ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -i "breaking\|break\|remove\|delete" || echo "")
+          
+          if [ ! -z "$BREAKING_CHANGES" ]; then
+            echo "⚠️ Potential breaking changes detected:"
+            echo "$BREAKING_CHANGES"
+            echo "BREAKING_CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "BREAKING_CHANGES=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Comment on PR with analysis
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const configChanged = process.env.CONFIG_CHANGED === 'true';
+            const breakingChanges = process.env.BREAKING_CHANGES === 'true';
+            
+            let comment = '## 🔍 PR Analysis\n\n';
+            
+            // Build status
+            comment += '✅ **Build Status**: All checks passed!\n\n';
+            
+            // Configuration changes
+            if (configChanged) {
+              comment += '⚠️ **Configuration Changes Detected**\n';
+              comment += '- Ensure backward compatibility with existing configs\n';
+              comment += '- Test with both new and existing configuration files\n';
+              comment += '- Update documentation if new options are added\n\n';
+            }
+            
+            // Breaking changes
+            if (breakingChanges) {
+              comment += '🚨 **Potential Breaking Changes**\n';
+              comment += '- Review commit messages mentioning breaking changes\n';
+              comment += '- Ensure proper version bump (major version)\n';
+              comment += '- Update changelog and migration guide\n\n';
+            }
+            
+            // Testing checklist
+            comment += '## 🧪 Testing Checklist\n';
+            comment += '- [ ] Test with VulkanMod 0.5.5\n';
+            comment += '- [ ] Test GUI integration works correctly\n';
+            comment += '- [ ] Test configuration loading/saving\n';
+            comment += '- [ ] Test with minimal mod setup (VulkanMod + VulkanMod Extra only)\n';
+            comment += '- [ ] Test master toggle functionality\n\n';
+            
+            if (configChanged || breakingChanges) {
+              comment += '- [ ] Test with existing configuration files\n';
+              comment += '- [ ] Verify no crashes with old configs\n\n';
+            }
+            
+            comment += '---\n';
+            comment += '*This analysis is automated. Please review the checklist above before merging.*';
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  security-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Run security scan
+        uses: securecodewarrior/github-action-add-sarif@v1
+        continue-on-error: true
+        with:
+          sarif-file: 'security-scan.sarif'
+          
+      - name: Check for secrets in code
+        run: |
+          # Simple check for common secret patterns
+          if grep -r -E "(password|secret|key|token)" --include="*.java" --include="*.json" --exclude-dir=".git" . | grep -v -E "(//|/\*|\*|#)" | grep -v "translation\|component\|translatable"; then
+            echo "⚠️ Potential secrets found in code. Please review:"
+            grep -r -E "(password|secret|key|token)" --include="*.java" --include="*.json" --exclude-dir=".git" . | grep -v -E "(//|/\*|\*|#)" | grep -v "translation\|component\|translatable"
+            exit 1
+          else
+            echo "✅ No obvious secrets detected in code"
+          fi
+
+  performance-impact-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+          
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+        
+      - name: Build and analyze
+        run: |
+          ./gradlew build
+          
+          # Check for potentially performance-impacting changes
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} | grep -E "\.(java)$" || echo "")
+          
+          if [ ! -z "$CHANGED_FILES" ]; then
+            echo "Checking for performance-impacting patterns..."
+            
+            # Look for common performance issues in Java files
+            for file in $CHANGED_FILES; do
+              if [ -f "$file" ]; then
+                echo "Analyzing $file..."
+                
+                # Check for potential performance issues
+                if grep -n -E "(new.*ArrayList|new.*HashMap|\.stream\(\)|synchronized)" "$file"; then
+                  echo "⚠️ Found potential performance patterns in $file"
+                fi
+                
+                # Check for mixin changes that might affect performance
+                if grep -n -E "@Mixin|@Inject|@Redirect|@ModifyVariable" "$file"; then
+                  echo "ℹ️ Mixin changes detected in $file - verify performance impact"
+                fi
+              fi
+            done
+          fi
+
+  changelog-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check if changelog should be updated
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const hasSourceChanges = files.some(file => 
+              file.filename.match(/\.(java|json)$/) && 
+              !file.filename.includes('test') &&
+              file.status !== 'removed'
+            );
+            
+            const hasChangelogUpdate = files.some(file => 
+              file.filename.match(/(CHANGELOG|changelog)/i)
+            );
+            
+            if (hasSourceChanges && !hasChangelogUpdate) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 📝 Changelog Reminder
+                
+                This PR includes source code changes but doesn't update the changelog.
+                
+                **Consider adding an entry to CHANGELOG.md if this PR:**
+                - Adds new features or options
+                - Fixes bugs that affect users  
+                - Changes existing behavior
+                - Improves performance
+                - Updates compatibility
+                
+                **Skip this if the changes are:**
+                - Internal refactoring only
+                - Documentation updates
+                - Test improvements
+                - Build system changes
+                
+                *This is just a reminder - use your judgment on whether a changelog entry is needed.*`
+              });
+            }

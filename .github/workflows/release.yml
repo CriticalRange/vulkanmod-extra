@@ -1,0 +1,139 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+          
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+        
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true
+          
+      - name: Build release
+        run: ./gradlew build
+        
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+      - name: Check for manual changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          # Check if there's a manual CHANGELOG.md or RELEASE_NOTES.md
+          if [ -f "CHANGELOG.md" ]; then
+            echo "Using manual CHANGELOG.md"
+            cp CHANGELOG.md release_notes.md
+          elif [ -f "RELEASE_NOTES.md" ]; then
+            echo "Using manual RELEASE_NOTES.md"  
+            cp RELEASE_NOTES.md release_notes.md
+          else
+            echo "No manual changelog found, generating simple changelog"
+            # Simple changelog generation
+            if [ -z "$LAST_TAG" ]; then
+              COMMITS=$(git log --oneline --pretty=format:"• %s" HEAD | head -20)
+            else
+              COMMITS=$(git log --oneline --pretty=format:"• %s" $LAST_TAG..HEAD)
+            fi
+            
+            cat > release_notes.md << EOF
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG:-HEAD}...$VERSION
+          
+          ## $VERSION
+          
+          ### Changes:
+          $COMMITS
+          
+          ### Compatibility:
+          • **Minecraft**: 1.21.1
+          • **Fabric Loader**: 0.17.2+
+          • **Fabric API**: 0.116.5+1.21.1
+          • **VulkanMod**: 0.5.5
+          EOF
+          fi
+          
+          echo "CHANGELOG_PATH=release_notes.md" >> $GITHUB_OUTPUT
+        
+      - name: Create GitHub Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: VulkanMod Extra ${{ steps.get_version.outputs.VERSION }}
+          body_path: ${{ steps.changelog.outputs.CHANGELOG_PATH }}
+          files: |
+            build/libs/*.jar
+          draft: true  # Creates as draft - you manually publish later
+          prerelease: ${{ contains(steps.get_version.outputs.VERSION, 'alpha') || contains(steps.get_version.outputs.VERSION, 'beta') || contains(steps.get_version.outputs.VERSION, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Comment with publishing instructions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Create an issue with publishing instructions
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📦 Ready to Publish: VulkanMod Extra ${{ steps.get_version.outputs.VERSION }}`,
+              body: `## 🚀 Release ${{ steps.get_version.outputs.VERSION }} is Ready for Publishing!
+              
+              **Status:** ✅ Build completed successfully, draft release created
+              
+              ### 📋 Pre-Publishing Checklist:
+              - [ ] Review the [draft release](https://github.com/${{ github.repository }}/releases)
+              - [ ] Test the built JAR file locally
+              - [ ] Verify compatibility with VulkanMod 0.5.5
+              - [ ] Check that all features work as expected
+              - [ ] Confirm changelog is accurate
+              
+              ### 📦 Publishing Options:
+              
+              **Option 1: GitHub Only**
+              1. Go to [Releases](https://github.com/${{ github.repository }}/releases)
+              2. Edit the draft release
+              3. Click "Publish release"
+              
+              **Option 2: GitHub + Modrinth + CurseForge (Automated)**
+              1. Close this issue with comment: \`/publish-full\`
+              2. The automation will publish everywhere
+              
+              **Option 3: GitHub + Modrinth Only**
+              1. Close this issue with comment: \`/publish-modrinth\`
+              2. Will publish to GitHub and Modrinth only
+              
+              ### 🔧 Manual Commands Available:
+              - \`/publish-full\` - Publish to all platforms
+              - \`/publish-modrinth\` - Publish to GitHub + Modrinth
+              - \`/publish-github\` - Just publish the GitHub draft
+              - \`/cancel\` - Delete draft release and cancel
+              
+              ---
+              *This issue was automatically created. You can safely ignore it if you want to publish manually.*`,
+              labels: ['release', 'automation', 'needs-action']
+            });
+
+      # NOTE: Platform publishing is now removed from automatic workflow
+      # It will be triggered by manual commands through the publish workflow
