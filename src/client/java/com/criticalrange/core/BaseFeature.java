@@ -1,7 +1,7 @@
 package com.criticalrange.core;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 /**
  * Abstract base class for features providing common functionality
@@ -65,16 +65,16 @@ public abstract class BaseFeature implements Feature {
      * Check if we're on the client side
      */
     protected boolean isClientSide() {
-        return Minecraft.getInstance() != null;
+        return MinecraftClient.getInstance() != null;
     }
 
     /**
      * Safe way to get Minecraft instance with null checks
      */
-    protected Minecraft getMinecraft() {
-        Minecraft minecraft = Minecraft.getInstance();
+    protected MinecraftClient getMinecraft() {
+        MinecraftClient minecraft = MinecraftClient.getInstance();
         if (minecraft == null) {
-            getLogger().warn("Minecraft instance is null!");
+            getLogger().warn("MinecraftClient instance is null!");
         }
         return minecraft;
     }

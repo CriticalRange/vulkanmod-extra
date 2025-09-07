@@ -2,7 +2,7 @@ package com.criticalrange.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 /**
  * Optimized ParticleSettings - replaces 100+ individual boolean fields with efficient map storage
@@ -87,9 +87,9 @@ public class OptimizedParticleSettings {
     }
 
     /**
-     * Check if a ResourceLocation particle is enabled
+     * Check if an Identifier particle is enabled
      */
-    public boolean isParticleEnabled(ResourceLocation particleId) {
+    public boolean isParticleEnabled(Identifier particleId) {
         return isParticleEnabled(particleId.getPath());
     }
 
@@ -209,7 +209,7 @@ public class OptimizedParticleSettings {
     public boolean isWitherArmor() { return getParticleState("wither_armor"); }
 
     // Dynamic particle type map for particles not explicitly listed above
-    public final Map<ResourceLocation, Boolean> otherParticles = new HashMap<>();
+    public final Map<Identifier, Boolean> otherParticles = new HashMap<>();
 
     /**
      * Get the number of configured particles (for debugging)

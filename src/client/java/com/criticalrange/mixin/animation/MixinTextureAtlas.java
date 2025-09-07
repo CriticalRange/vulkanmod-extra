@@ -1,10 +1,10 @@
 package com.criticalrange.mixin.animation;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,17 +17,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  * Each animation setting controls ONLY its own behavior (no master/global controls)
  * Removed all AND logic - individual toggles work independently
  */
-@Mixin(TextureAtlas.class)
+@Mixin(SpriteAtlasTexture.class)
 public abstract class MixinTextureAtlas extends AbstractTexture {
     
 
-    @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;createTicker()Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Ticker;"))
-    public TextureAtlasSprite.Ticker vulkanmodExtra$tickAnimatedSprites(TextureAtlasSprite instance) {
-        TextureAtlasSprite.Ticker tickableAnimation = instance.createTicker();
+    @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/Sprite;createAnimation()Lnet/minecraft/client/texture/Sprite$TickableAnimation;"))
+    public Sprite.TickableAnimation vulkanmodExtra$tickAnimatedSprites(Sprite instance) {
+        Sprite.TickableAnimation tickableAnimation = instance.createAnimation();
         
         if (tickableAnimation != null) {
-            String textureName = instance.contents().name().toString();
-            boolean shouldAnimate = this.shouldAnimate(instance.contents().name());
+            String textureName = instance.getContents().getId().toString();
+            boolean shouldAnimate = this.shouldAnimate(instance.getContents().getId());
             
             
             if (shouldAnimate) {
@@ -39,7 +39,7 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
     }
 
     @Unique
-    private boolean shouldAnimate(ResourceLocation identifier) {
+    private boolean shouldAnimate(Identifier identifier) {
         if (identifier == null) {
             return true;
         }

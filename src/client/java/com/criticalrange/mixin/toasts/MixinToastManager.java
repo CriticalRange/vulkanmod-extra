@@ -1,11 +1,11 @@
 package com.criticalrange.mixin.toasts;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.client.toast.Toast;
+import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.toast.TutorialToast;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementDisplay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,10 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Toast notification control mixin
  * Controls toast display based on user preferences
  */
-@Mixin(ToastComponent.class)
+@Mixin(ToastManager.class)
 public class MixinToastManager {
 
-    @Inject(method = "addToast", at = @At("HEAD"))
+    @Inject(method = "add", at = @At("HEAD"))
     private void vulkanmodExtra$controlToastDisplay(Toast toast, CallbackInfo ci) {
         // Check if toasts are globally disabled
         if (!VulkanModExtra.CONFIG.extraSettings.toasts) {

@@ -1,7 +1,7 @@
 package com.criticalrange.mixin.fog;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.render.BackgroundRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Performance-focused fog optimization mixin
  * Optimizes fog calculations for better performance - simplified implementation
  */
-@Mixin(FogRenderer.class)
+@Mixin(BackgroundRenderer.class)
 public class MixinFogRenderer {
 
     // Simplified fog optimization - just tracks setup calls
     private static int fogUpdateCounter = 0;
 
-    @Inject(method = "setupFog", at = @At("HEAD"))
+    @Inject(method = "applyFog", at = @At("HEAD"))
     private static void vulkanmodExtra$trackFogUpdates(CallbackInfo ci) {
         fogUpdateCounter++;
         

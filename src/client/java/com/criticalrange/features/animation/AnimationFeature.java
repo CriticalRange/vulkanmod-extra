@@ -3,7 +3,7 @@ package com.criticalrange.features.animation;
 import com.criticalrange.core.BaseFeature;
 import com.criticalrange.core.FeatureCategory;
 import com.criticalrange.config.VulkanModExtraConfig;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 /**
  * Animation feature - controls various texture and block animations
@@ -17,7 +17,7 @@ public class AnimationFeature extends BaseFeature {
     }
 
     @Override
-    public void initialize(Minecraft minecraft) {
+    public void initialize(MinecraftClient minecraft) {
         getLogger().info("Animation feature initialized");
     }
 

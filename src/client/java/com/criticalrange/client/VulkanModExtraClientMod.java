@@ -1,7 +1,7 @@
 package com.criticalrange.client;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.DrawContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +25,9 @@ public class VulkanModExtraClientMod {
         LOGGER.info("VulkanMod Extra Client initialized successfully!");
     }
 
-    public static void onHudRender(GuiGraphics guiGraphics, float partialTicks) {
+    public static void onHudRender(DrawContext drawContext, float partialTicks) {
         if (hud != null) {
-            hud.onHudRender(guiGraphics, partialTicks);
+            hud.onHudRender(drawContext, partialTicks);
         }
     }
 }

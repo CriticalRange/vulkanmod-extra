@@ -1,7 +1,7 @@
 package com.criticalrange.mixin.reduce_resolution_on_mac;
 
 import com.criticalrange.VulkanModExtra;
-import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.util.Window;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,8 +20,8 @@ public class MixinWindow {
     @Shadow
     private int height;
 
-    @Inject(method = "setGuiScale", at = @At("HEAD"))
-    private void vulkanmodExtra$optimizeMacResolution(CallbackInfo ci) {
+    @Inject(method = "setScaleFactor", at = @At("HEAD"))
+    private void vulkanmodExtra$optimizeMacResolution(double d, CallbackInfo ci) {
         // Check if macOS resolution reduction is enabled
         if (VulkanModExtra.CONFIG.extraSettings.reduceResolutionOnMac) {
             // Check if we're running on macOS

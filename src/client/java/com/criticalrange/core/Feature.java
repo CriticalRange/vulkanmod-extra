@@ -1,6 +1,6 @@
 package com.criticalrange.core;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 /**
  * Base interface for all VulkanMod Extra features.
@@ -21,7 +21,7 @@ public interface Feature {
     /**
      * Initialize the feature. Called once during client initialization.
      */
-    default void initialize(Minecraft minecraft) {
+    default void initialize(MinecraftClient minecraft) {
         // Default implementation - override if needed
     }
 
@@ -52,7 +52,7 @@ public interface Feature {
     /**
      * Called every client tick
      */
-    default void onTick(Minecraft minecraft) {
+    default void onTick(MinecraftClient minecraft) {
         // Default implementation - override if needed
     }
 

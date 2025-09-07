@@ -1,9 +1,10 @@
 package com.criticalrange.mixin.client;
 
 import com.criticalrange.client.VulkanModExtraClientMod;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,10 +14,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Mixin to hook into Minecraft's GUI rendering system
  * This allows us to render VulkanMod Extra HUD elements
  */
-@Mixin(Gui.class)
+@Mixin(InGameHud.class)
 public class MixinGui {
     @Inject(method = "render", at = @At("TAIL"))
-    private void vulkanmodExtra$onRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        VulkanModExtraClientMod.onHudRender(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false));
+    private void vulkanmodExtra$onRender(DrawContext drawContext, net.minecraft.client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
+        // Use the render tick counter
+        float tickDelta = tickCounter.getTickDelta(true);
+        VulkanModExtraClientMod.onHudRender(drawContext, tickDelta);
     }
 }

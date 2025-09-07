@@ -161,10 +161,10 @@ jobs:
           contains(github.event.comment.body, '/publish-modrinth')
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: YOUR_MODRINTH_PROJECT_ID # Replace with your actual project ID  
+          modrinth-id: gglzOxJ8
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           
-          curseforge-id: ${{ contains(github.event.comment.body, '/publish-full') && 'YOUR_CURSEFORGE_PROJECT_ID' || '' }}
+          curseforge-id: ${{ contains(github.event.comment.body, '/publish-full') && '1342527' || '' }}
           curseforge-token: ${{ contains(github.event.comment.body, '/publish-full') && secrets.CURSEFORGE_TOKEN || '' }}
           
           files: build/libs/!(*-dev-shadow.jar|*-sources.jar)
@@ -211,8 +211,8 @@ jobs:
               VulkanMod Extra ${{ steps.extract_version.outputs.version }} has been published to: **${platforms}**
               
               ### 📦 Available on:
-              ${command.includes('/publish-full') || command.includes('/publish-modrinth') ? '- 🟢 [Modrinth](https://modrinth.com/mod/YOUR_PROJECT_SLUG)' : ''}
-              ${command.includes('/publish-full') ? '- 🟠 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/YOUR_PROJECT_SLUG)' : ''}
+              ${command.includes('/publish-full') || command.includes('/publish-modrinth') ? '- 🟢 [Modrinth](https://modrinth.com/mod/vulkanmod-extra)' : ''}
+              ${command.includes('/publish-full') ? '- 🟠 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/vulkanmod-extra)' : ''}
               - 🐙 [GitHub Releases](https://github.com/${{ github.repository }}/releases)
               
               Release is now live! 🚀`

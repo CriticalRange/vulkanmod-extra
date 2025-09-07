@@ -379,7 +379,7 @@
   "vulkanmod-extra.option.particle.witch.tooltip": "Witch particles",
 
   "vulkanmod-extra.option.details.sky": "Sky",
-  "vulkanmod-extra.option.details.sky.tooltip": "Controls the gradient sky background rendering. Disabling creates a solid color sky but doesn't affect weather or lighting calculations.",
+  "vulkanmod-extra.option.details.sky.tooltip": "Controls sky rendering. Disabling removes the entire sky (including sun, moon, and stars) but weather and lighting calculations remain unchanged. Individual celestial object controls may be added in future updates.",
   "vulkanmod-extra.option.details.sun": "Sun",
   "vulkanmod-extra.option.details.sun.tooltip": "Controls sun rendering in the sky. Disabling removes the sun but doesn't affect daylight cycle or lighting - only the visual sun disk is hidden.",
   "vulkanmod-extra.option.details.moon": "Moon",
@@ -430,7 +430,7 @@
   "vulkanmod-extra.option.extra.fps_display_mode.basic": "Basic",
   "vulkanmod-extra.option.extra.fps_display_mode.extended": "Extended", 
   "vulkanmod-extra.option.extra.fps_display_mode.detailed": "Detailed",
-  "vulkanmod-extra.option.extra.fps_display_mode.tooltip": "Controls the amount of information shown in the FPS counter overlay. 'Basic' shows just FPS, 'Extended' adds min/max/average FPS, 'Detailed' includes system performance metrics like CPU, memory, and render time statistics.",
+  "vulkanmod-extra.option.extra.fps_display_mode.tooltip": "Controls the amount of information shown in the FPS counter overlay. 'Basic' shows just FPS, 'Extended' adds min/max/average FPS plus actual GPU VRAM usage, 'Detailed' includes FPS percentiles and comprehensive GPU memory statistics with device information.",
   "vulkanmod-extra.option.extra.overlay_corner": "Overlay Corner",
   "vulkanmod-extra.option.extra.overlay_corner.top_left": "Top Left",
   "vulkanmod-extra.option.extra.overlay_corner.top_right": "Top Right",

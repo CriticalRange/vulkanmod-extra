@@ -1,39 +1,38 @@
 package com.criticalrange.mixin.sky;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.render.WorldRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Controls individual sky element rendering (sun, moon, stars)
+ * Controls sky element rendering (sky, sun, moon, stars)
+ * 
+ * CURRENT LIMITATION: This mixin currently disables the entire sky (gradient, sun, moon, stars)
+ * when the sky option is turned off. This is a temporary approach until more granular 
+ * injection points can be identified for targeting only the sky gradient.
+ * 
+ * The ideal behavior would be to disable only the sky gradient/background color
+ * while preserving celestial objects (sun, moon, stars).
  */
-@Mixin(LevelRenderer.class)
+@Mixin(WorldRenderer.class)
 public class MixinSkyElements {
 
-    @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;begin(Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", ordinal = 1), cancellable = true)
-    private void vulkanmodExtra$checkSunRendering(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sun) {
-            // Skip sun rendering by returning early
+    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
+    private void vulkanmodExtra$controlSkyRendering(CallbackInfo ci) {
+        // Disable entire sky when option is off
+        // TODO: Find more specific injection points to target only sky gradient
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
             ci.cancel();
+            return;
         }
     }
-
-    @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;begin(Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", ordinal = 2), cancellable = true)
-    private void vulkanmodExtra$checkMoonRendering(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.moon) {
-            // Skip moon rendering by returning early
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;begin(Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;Lcom/mojang/blaze3d/vertex/VertexFormat;)V", ordinal = 3), cancellable = true)
-    private void vulkanmodExtra$checkStarsRendering(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.stars) {
-            // Skip stars rendering by returning early
-            ci.cancel();
-        }
-    }
+    
+    // Future improvement ideas:
+    // 1. Target specific GL calls or buffer operations for sky gradient only
+    // 2. Use @ModifyArg to change sky colors to transparent instead of canceling
+    // 3. Find injection points after sky gradient but before celestial object rendering
+    // 4. Use @Slice to target specific portions of the renderSky method
 }

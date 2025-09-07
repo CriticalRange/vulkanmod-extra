@@ -1,6 +1,6 @@
 package com.criticalrange.client;
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,11 +38,11 @@ public class VulkanModExtraIntegration {
         }
         // Schedule a new reload with a 500ms delay
         pendingResourceReload = resourceReloadScheduler.schedule(() -> {
-            net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+            net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
             if (minecraft != null) {
                 minecraft.execute(() -> {
                     VulkanModExtra.LOGGER.info("Reloading resources due to animation setting changes");
-                    minecraft.reloadResourcePacks();
+                    minecraft.reloadResources();
                 });
             }
         }, 500, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -231,12 +231,12 @@ public class VulkanModExtraIntegration {
             // Create Animation page with separate blocks for master toggle and individual options
             VulkanModExtra.LOGGER.debug("Creating animation page...");
             Object[] animationOptionBlocks = createAnimationOptionBlocks(cachedSwitchOptionClass, cachedOptionBlockClass, optionArrayClass);
-            Object animationPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.animations").getString(), animationOptionBlocks);
+            Object animationPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.animations").getString(), animationOptionBlocks);
             pages.add(animationPage);
             // Create Particle page with separate blocks for master toggle and individual options
             VulkanModExtra.LOGGER.debug("Creating particle page...");
             Object[] particleOptionBlocks = createParticleOptionBlocks(cachedSwitchOptionClass, cachedOptionBlockClass, optionArrayClass);
-            Object particlePage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.particles").getString(), particleOptionBlocks);
+            Object particlePage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.particles").getString(), particleOptionBlocks);
             pages.add(particlePage);
             // Create Details page with comprehensive options
             VulkanModExtra.LOGGER.debug("Creating details page...");
@@ -245,7 +245,7 @@ public class VulkanModExtraIntegration {
             Object detailBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Detail Settings", detailArray);
             Object[] detailBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             detailBlocks[0] = detailBlock;
-            Object detailPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.details").getString(), detailBlocks);
+            Object detailPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.details").getString(), detailBlocks);
             pages.add(detailPage);
             // Create Render page with comprehensive options including fog
             VulkanModExtra.LOGGER.debug("Creating render page...");
@@ -254,12 +254,12 @@ public class VulkanModExtraIntegration {
             Object renderBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
             Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
             renderBlocks[0] = renderBlock;
-            Object renderPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
+            Object renderPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
             pages.add(renderPage);
             // Create Extra page with multiple option blocks for better organization
             VulkanModExtra.LOGGER.debug("Creating Extra page...");
             Object[] extraOptionBlocks = createExtraOptionBlocks(cachedSwitchOptionClass, cachedCyclingOptionClass, cachedOptionBlockClass, optionArrayClass, cachedOptionClass);
-            Object extraPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.extra").getString(), extraOptionBlocks);
+            Object extraPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.extra").getString(), extraOptionBlocks);
             pages.add(extraPage);
             VulkanModExtra.LOGGER.info("Successfully created {} VulkanMod Extra pages", pages.size());
         } catch (Exception e) {
@@ -284,12 +284,12 @@ public class VulkanModExtraIntegration {
             // Create Animation page with separate blocks for master toggle and individual options
             Object[] animationOptionBlocks = createAnimationOptionBlocks(switchOptionClass, optionBlockClass, optionArrayClass);
             net.vulkanmod.config.option.OptionPage animationPage = (net.vulkanmod.config.option.OptionPage) optionPageClass
-                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.animations").getString(), animationOptionBlocks);
+                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.animations").getString(), animationOptionBlocks);
             pages.add(animationPage);
             // Create Particle page with separate blocks for master toggle and individual options
             Object[] particleOptionBlocks = createParticleOptionBlocks(switchOptionClass, optionBlockClass, optionArrayClass);
             net.vulkanmod.config.option.OptionPage particlePage = (net.vulkanmod.config.option.OptionPage) optionPageClass
-                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.particles").getString(), particleOptionBlocks);
+                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.particles").getString(), particleOptionBlocks);
             pages.add(particlePage);
             // Create Details page with comprehensive options
             List<Object> detailOptions = createDetailOptions(switchOptionClass);
@@ -298,7 +298,7 @@ public class VulkanModExtraIntegration {
             Object[] detailBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
             detailBlocks[0] = detailBlock;
             net.vulkanmod.config.option.OptionPage detailPage = (net.vulkanmod.config.option.OptionPage) optionPageClass
-                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.details").getString(), detailBlocks);
+                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.details").getString(), detailBlocks);
             pages.add(detailPage);
             // Create Render page with comprehensive options including fog
             List<Object> renderOptions = createRenderOptions(switchOptionClass);
@@ -307,12 +307,12 @@ public class VulkanModExtraIntegration {
             Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
             renderBlocks[0] = renderBlock;
             net.vulkanmod.config.option.OptionPage renderPage = (net.vulkanmod.config.option.OptionPage) optionPageClass
-                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
+                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
             pages.add(renderPage);
             // Create Extra page with multiple option blocks for better organization
             Object[] extraOptionBlocks = createExtraOptionBlocks(switchOptionClass, cyclingOptionClass, optionBlockClass, optionArrayClass, optionClass);
             net.vulkanmod.config.option.OptionPage extraPage = (net.vulkanmod.config.option.OptionPage) optionPageClass
-                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Component.translatable("vulkanmod-extra.pages.extra").getString(), extraOptionBlocks);
+                    .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.extra").getString(), extraOptionBlocks);
             pages.add(extraPage);
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Failed to create VulkanMod Extra pages", e);
@@ -469,8 +469,8 @@ public class VulkanModExtraIntegration {
         // Helper for consistent option creation with master toggle awareness
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.animation." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.animation." + key),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
@@ -485,8 +485,8 @@ public class VulkanModExtraIntegration {
         // Master toggle for all animations - first option (works as override)
         Object masterOption;
         try {
-            masterOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(Component.translatable("vulkanmod-extra.option.animation.allAnimations"),
+            masterOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(Text.translatable("vulkanmod-extra.option.animation.allAnimations"),
                     (java.util.function.Consumer<Boolean>) value -> {
                         try {
                             VulkanModExtra.CONFIG.animationSettings.allAnimations = value;
@@ -504,8 +504,8 @@ public class VulkanModExtraIntegration {
         }
         if (masterOption != null) {
             try {
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(masterOption, Component.translatable("vulkanmod-extra.option.animation.allAnimations.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(masterOption, Text.translatable("vulkanmod-extra.option.animation.allAnimations.tooltip"));
             } catch (Exception e) {}
             options.add(masterOption);
             VulkanModExtra.LOGGER.info("Successfully added All Animations master toggle");
@@ -579,8 +579,8 @@ public class VulkanModExtraIntegration {
                 if (option != null) {
                     try {
                         // Set tooltip using reflection
-                        java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                        setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.animation." + type + ".tooltip"));
+                        java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                        setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.animation." + type + ".tooltip"));
                     } catch (Exception e) {
                         // Tooltip setting failed, continue without tooltip
                     }
@@ -595,8 +595,8 @@ public class VulkanModExtraIntegration {
         // Helper for creating particle options with individual control
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.particle." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.particle." + key),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
@@ -610,8 +610,8 @@ public class VulkanModExtraIntegration {
         // Master toggle for all particles - first option (works as override)
         Object masterOption;
         try {
-            masterOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(Component.translatable("vulkanmod-extra.option.particle.allParticles"),
+            masterOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(Text.translatable("vulkanmod-extra.option.particle.allParticles"),
                     (java.util.function.Consumer<Boolean>) value -> {
                         try {
                             VulkanModExtra.CONFIG.particleSettings.allParticles = value;
@@ -629,8 +629,8 @@ public class VulkanModExtraIntegration {
         }
         if (masterOption != null) {
             try {
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(masterOption, Component.translatable("vulkanmod-extra.option.particle.allParticles.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(masterOption, Text.translatable("vulkanmod-extra.option.particle.allParticles.tooltip"));
             } catch (Exception e) {}
             options.add(masterOption);
             VulkanModExtra.LOGGER.info("Successfully added All Particles master toggle");
@@ -676,8 +676,8 @@ public class VulkanModExtraIntegration {
             if (option != null) {
                 try {
                     // Set tooltip using reflection
-                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.particle." + particle + ".tooltip"));
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                    setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.particle." + particle + ".tooltip"));
                 } catch (Exception e) {
                     // Tooltip setting failed, continue without tooltip
                 }
@@ -689,39 +689,53 @@ public class VulkanModExtraIntegration {
     private static List<Object> createDetailOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
         // Helper for consistent option creation
-        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+        // Create a function that takes translation key and field name separately
+        interface TriFunction<T, U, V, R> {
+            R apply(T t, U u, V v);
+        }
+        
+        TriFunction<String, String, java.util.function.Function<Boolean, Void>, Object> createOption = (translationKey, fieldName, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.details." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.details." + translationKey),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
-                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(key);
+                                var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(fieldName);
                                 field.setAccessible(true);
                                 return field.getBoolean(VulkanModExtra.CONFIG.detailSettings);
                             } catch (Exception e) { return true; }
                         });
             } catch (Exception e) { return null; }
         };
-        // Detail options from sodium-extra
-        String[] detailTypes = {"sky", "sun", "moon", "stars", "rain_snow", "biome_colors", "sky_colors"};
-        for (String type : detailTypes) {
-            Object option = createOption.apply(type, value -> {
+        // Detail options mapping: translation key -> actual field name
+        // Note: sun, moon, stars controls are disabled until proper injection points are found
+        String[][] detailMapping = {
+            {"sky", "sky"},
+            {"rain_snow", "rainSnow"},
+            {"biome_colors", "biomeColors"},
+            {"sky_colors", "skyColors"}
+        };
+        
+        for (String[] mapping : detailMapping) {
+            String translationKey = mapping[0];
+            String fieldName = mapping[1];
+            Object option = createOption.apply(translationKey, fieldName, value -> {
                 try {
-                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(type);
+                    var field = VulkanModExtra.CONFIG.detailSettings.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
                     field.setBoolean(VulkanModExtra.CONFIG.detailSettings, value);
                     VulkanModExtra.CONFIG.writeChanges();
                 } catch (Exception e) {
-                    VulkanModExtra.LOGGER.error("Failed to set detail option: " + type, e);
+                    VulkanModExtra.LOGGER.error("Failed to set detail option: " + fieldName, e);
                 }
                 return null;
             });
             if (option != null) {
                 try {
                     // Set tooltip using reflection
-                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.details." + type + ".tooltip"));
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                    setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.details." + translationKey + ".tooltip"));
                 } catch (Exception e) {
                     // Tooltip setting failed, continue without tooltip
                 }
@@ -735,8 +749,8 @@ public class VulkanModExtraIntegration {
         // Helper for consistent option creation
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.render." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.render." + key),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
@@ -749,13 +763,13 @@ public class VulkanModExtraIntegration {
         };
         // Create range option function for sliders
         interface RangeOptionCreator2 {
-            Object apply(String key, int min, int max, int step, Component name, Consumer<Integer> setter, Supplier<Integer> getter);
+            Object apply(String key, int min, int max, int step, Text name, Consumer<Integer> setter, Supplier<Integer> getter);
         }
         RangeOptionCreator2 createRangeOption2 = (key, min, max, step, name, setter, getter) -> {
             try {
                 Class<?> rangeOptionClass = Class.forName("net.vulkanmod.config.option.RangeOption");
-                Function<Integer, Component> translator = value -> Component.literal(value + "%");
-                return rangeOptionClass.getConstructor(Component.class, int.class, int.class, int.class, 
+                Function<Integer, Text> translator = value -> Text.literal(value + "%");
+                return rangeOptionClass.getConstructor(Text.class, int.class, int.class, int.class, 
                         Function.class, Consumer.class, Supplier.class)
                         .newInstance(name, min, max, step, translator, setter, getter);
             } catch (Exception e) { 
@@ -781,8 +795,8 @@ public class VulkanModExtraIntegration {
             if (option != null) {
                 try {
                     // Set tooltip using reflection
-                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.render." + type + ".tooltip"));
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                    setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.render." + type + ".tooltip"));
                 } catch (Exception e) {
                     // Tooltip setting failed, continue without tooltip
                 }
@@ -798,8 +812,8 @@ public class VulkanModExtraIntegration {
         if (fogOption != null) {
             try {
                 // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(fogOption, Component.translatable("vulkanmod-extra.option.render.global_fog.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(fogOption, Text.translatable("vulkanmod-extra.option.render.global_fog.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -813,8 +827,8 @@ public class VulkanModExtraIntegration {
         if (multiDimFogOption != null) {
             try {
                 // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(multiDimFogOption, Component.translatable("vulkanmod-extra.option.render.multi_dimension_fog.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(multiDimFogOption, Text.translatable("vulkanmod-extra.option.render.multi_dimension_fog.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -829,8 +843,8 @@ public class VulkanModExtraIntegration {
         if (preventShadersOption != null) {
             try {
                 // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(preventShadersOption, Component.translatable("vulkanmod-extra.option.render.prevent_shaders.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(preventShadersOption, Text.translatable("vulkanmod-extra.option.render.prevent_shaders.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -845,8 +859,8 @@ public class VulkanModExtraIntegration {
         if (useFastRandomOption != null) {
             try {
                 // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(useFastRandomOption, Component.translatable("vulkanmod-extra.option.use_fast_random.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(useFastRandomOption, Text.translatable("vulkanmod-extra.option.use_fast_random.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -860,8 +874,8 @@ public class VulkanModExtraIntegration {
         if (linearFlatColorBlenderOption != null) {
             try {
                 // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(linearFlatColorBlenderOption, Component.translatable("vulkanmod-extra.option.linear_flat_color_blender.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(linearFlatColorBlenderOption, Text.translatable("vulkanmod-extra.option.linear_flat_color_blender.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -877,7 +891,7 @@ public class VulkanModExtraIntegration {
                     // Create cloud end multiplier slider for each fog type
                     Object cloudEndOption = createRangeOption2.apply(
                         "fog_type.cloud_end", 0, 300, 1, 
-                        Component.translatable("vulkanmod-extra.option.fog_type.cloud_end", fogTypeName),
+                        Text.translatable("vulkanmod-extra.option.fog_type.cloud_end", fogTypeName),
                         value -> {
                             try {
                                 var config = VulkanModExtra.CONFIG.renderSettings.fogTypeConfig.computeIfAbsent(
@@ -906,8 +920,8 @@ public class VulkanModExtraIntegration {
                     if (cloudEndOption != null) {
                         try {
                             // Set tooltip using reflection
-                            java.lang.reflect.Method setTooltipMethod = cloudEndOption.getClass().getMethod("setTooltip", Component.class);
-                            setTooltipMethod.invoke(cloudEndOption, Component.translatable("vulkanmod-extra.option.fog_type.cloud_end.tooltip", fogTypeName));
+                            java.lang.reflect.Method setTooltipMethod = cloudEndOption.getClass().getMethod("setTooltip", Text.class);
+                            setTooltipMethod.invoke(cloudEndOption, Text.translatable("vulkanmod-extra.option.fog_type.cloud_end.tooltip", fogTypeName));
                         } catch (Exception e) {
                             // Tooltip setting failed, continue without tooltip
                         }
@@ -923,9 +937,9 @@ public class VulkanModExtraIntegration {
     private static List<Object> createHUDOptions(Class<?> switchOptionClass, Class<?> cyclingOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
         // FPS display
-        Component fpsComponent = Component.translatable("vulkanmod-extra.option.extra.show_fps");
-        Object fpsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(fpsComponent,
+        Text fpsText = Text.translatable("vulkanmod-extra.option.extra.show_fps");
+        Object fpsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(fpsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.showFps = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -933,20 +947,20 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(fpsOption, Component.translatable("vulkanmod-extra.option.extra.show_fps.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(fpsOption, Text.translatable("vulkanmod-extra.option.extra.show_fps.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(fpsOption);
         // FPS Display Mode using CyclingOption pattern
         try {
-            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.extra.fps_display_mode");
+            Text fpsModeText = Text.translatable("vulkanmod-extra.option.extra.fps_display_mode");
             // Create CyclingOption with FPSDisplayMode enum values
             var fpsDisplayModeValues = com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.values();
             Object fpsModeOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(fpsModeComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeText,
                         fpsDisplayModeValues, // All enum values as options
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
@@ -957,21 +971,21 @@ public class VulkanModExtraIntegration {
             // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(fpsModeOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value ->
-                    Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Text>) value ->
+                    Text.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
             // Set tooltip using reflection
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(fpsModeOption, Component.translatable("vulkanmod-extra.option.extra.fps_display_mode.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(fpsModeOption, Text.translatable("vulkanmod-extra.option.extra.fps_display_mode.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
             options.add(fpsModeOption);
         } catch (Exception e) {
             // Fallback to switch option if CyclingOption is not available
-            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.extra.fps_display_mode");
-            Object fpsModeOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(fpsModeComponent,
+            Text fpsModeText = Text.translatable("vulkanmod-extra.option.extra.fps_display_mode");
+            Object fpsModeOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeText,
                         (java.util.function.Consumer<Boolean>) value -> {
                             // Cycle through FPS modes: BASIC -> EXTENDED -> DETAILED -> BASIC
                             var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
@@ -988,11 +1002,11 @@ public class VulkanModExtraIntegration {
         }
         // Overlay Corner using CyclingOption
         try {
-            Component overlayCornerComponent = Component.translatable("vulkanmod-extra.option.extra.overlay_corner");
+            Text overlayCornerText = Text.translatable("vulkanmod-extra.option.extra.overlay_corner");
             var overlayCornerValues = com.criticalrange.config.VulkanModExtraConfig.OverlayCorner.values();
             Object overlayCornerOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(overlayCornerComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(overlayCornerText,
                         overlayCornerValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
@@ -1003,12 +1017,12 @@ public class VulkanModExtraIntegration {
                         // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(overlayCornerOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value ->
-                    Component.translatable("vulkanmod-extra.option.extra.overlay_corner." + value.toString().toLowerCase()));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Text>) value ->
+                    Text.translatable("vulkanmod-extra.option.extra.overlay_corner." + value.toString().toLowerCase()));
             // Set tooltip using reflection
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(overlayCornerOption, Component.translatable("vulkanmod-extra.option.extra.overlay_corner.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(overlayCornerOption, Text.translatable("vulkanmod-extra.option.extra.overlay_corner.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -1018,11 +1032,11 @@ public class VulkanModExtraIntegration {
         }
         // Text Contrast using CyclingOption
         try {
-            Component textContrastComponent = Component.translatable("vulkanmod-extra.option.extra.text_contrast");
+            Text textContrastText = Text.translatable("vulkanmod-extra.option.extra.text_contrast");
             var textContrastValues = com.criticalrange.config.VulkanModExtraConfig.TextContrast.values();
             Object textContrastOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(textContrastComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(textContrastText,
                         textContrastValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.textContrast = value;
@@ -1033,12 +1047,12 @@ public class VulkanModExtraIntegration {
                         // Set translator for display names
             java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod2.invoke(textContrastOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value ->
-                    Component.translatable("vulkanmod-extra.option.extra.text_contrast." + value.toString().toLowerCase()));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Text>) value ->
+                    Text.translatable("vulkanmod-extra.option.extra.text_contrast." + value.toString().toLowerCase()));
             // Set tooltip using reflection
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(textContrastOption, Component.translatable("vulkanmod-extra.option.extra.text_contrast.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(textContrastOption, Text.translatable("vulkanmod-extra.option.extra.text_contrast.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
@@ -1047,9 +1061,9 @@ public class VulkanModExtraIntegration {
             VulkanModExtra.LOGGER.warn("Failed to create Text Contrast cycling option", e);
         }
         // Coordinates display
-        Component coordsComponent = Component.translatable("vulkanmod-extra.option.extra.show_coords");
-        Object coordsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(coordsComponent,
+        Text coordsText = Text.translatable("vulkanmod-extra.option.extra.show_coords");
+        Object coordsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(coordsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.showCoords = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1057,16 +1071,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showCoords);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(coordsOption, Component.translatable("vulkanmod-extra.option.extra.show_coords.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(coordsOption, Text.translatable("vulkanmod-extra.option.extra.show_coords.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(coordsOption);
         // Toasts
-        Component toastsComponent = Component.translatable("vulkanmod-extra.option.extra.toasts");
-        Object toastsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(toastsComponent,
+        Text toastsText = Text.translatable("vulkanmod-extra.option.extra.toasts");
+        Object toastsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(toastsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.toasts = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1074,16 +1088,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.toasts);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(toastsOption, Component.translatable("vulkanmod-extra.option.extra.toasts.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(toastsOption, Text.translatable("vulkanmod-extra.option.extra.toasts.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(toastsOption);
         // Advancement toasts
-        Component advancementToastComponent = Component.translatable("vulkanmod-extra.option.extra.advancement_toast");
-        Object advancementToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(advancementToastComponent,
+        Text advancementToastText = Text.translatable("vulkanmod-extra.option.extra.advancement_toast");
+        Object advancementToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(advancementToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1091,16 +1105,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.advancementToast);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(advancementToastOption, Component.translatable("vulkanmod-extra.option.extra.advancement_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(advancementToastOption, Text.translatable("vulkanmod-extra.option.extra.advancement_toast.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(advancementToastOption);
         // Recipe toasts
-        Component recipeToastComponent = Component.translatable("vulkanmod-extra.option.extra.recipe_toast");
-        Object recipeToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(recipeToastComponent,
+        Text recipeToastText = Text.translatable("vulkanmod-extra.option.extra.recipe_toast");
+        Object recipeToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(recipeToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1108,16 +1122,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.recipeToast);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(recipeToastOption, Component.translatable("vulkanmod-extra.option.extra.recipe_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(recipeToastOption, Text.translatable("vulkanmod-extra.option.extra.recipe_toast.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(recipeToastOption);
         // System toasts
-        Component systemToastComponent = Component.translatable("vulkanmod-extra.option.extra.system_toast");
-        Object systemToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(systemToastComponent,
+        Text systemToastText = Text.translatable("vulkanmod-extra.option.extra.system_toast");
+        Object systemToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(systemToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.systemToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1125,16 +1139,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.systemToast);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(systemToastOption, Component.translatable("vulkanmod-extra.option.extra.system_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(systemToastOption, Text.translatable("vulkanmod-extra.option.extra.system_toast.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(systemToastOption);
         // Tutorial toasts
-        Component tutorialToastComponent = Component.translatable("vulkanmod-extra.option.extra.tutorial_toast");
-        Object tutorialToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(tutorialToastComponent,
+        Text tutorialToastText = Text.translatable("vulkanmod-extra.option.extra.tutorial_toast");
+        Object tutorialToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(tutorialToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1142,16 +1156,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(tutorialToastOption, Component.translatable("vulkanmod-extra.option.extra.tutorial_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(tutorialToastOption, Text.translatable("vulkanmod-extra.option.extra.tutorial_toast.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(tutorialToastOption);
         // Instant sneak
-        Component instantSneakComponent = Component.translatable("vulkanmod-extra.option.extra.instant_sneak");
-        Object instantSneakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(instantSneakComponent,
+        Text instantSneakText = Text.translatable("vulkanmod-extra.option.extra.instant_sneak");
+        Object instantSneakOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(instantSneakText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1159,16 +1173,16 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.instantSneak);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(instantSneakOption, Component.translatable("vulkanmod-extra.option.extra.instant_sneak.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(instantSneakOption, Text.translatable("vulkanmod-extra.option.extra.instant_sneak.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(instantSneakOption);
         // Steady debug Extra
-        Component steadyDebugHudComponent = Component.translatable("vulkanmod-extra.option.extra.steady_debug_hud");
-        Object steadyDebugHudOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(steadyDebugHudComponent,
+        Text steadyDebugHudText = Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud");
+        Object steadyDebugHudOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(steadyDebugHudText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1176,8 +1190,8 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
         try {
             // Set tooltip using reflection
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(steadyDebugHudOption, Component.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(steadyDebugHudOption, Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
         } catch (Exception e) {
             // Tooltip setting failed, continue without tooltip
         }
@@ -1190,8 +1204,8 @@ public class VulkanModExtraIntegration {
      */
     private static Object[] createAnimationOptionBlocks(Class<?> switchOptionClass, Class<?> optionBlockClass, Class<?> optionArrayClass) throws Exception {
         // Create master toggle option
-        Object masterOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-            .newInstance(Component.translatable("vulkanmod-extra.option.animation.allAnimations"),
+        Object masterOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+            .newInstance(Text.translatable("vulkanmod-extra.option.animation.allAnimations"),
                 (java.util.function.Consumer<Boolean>) value -> {
                     try {
                         VulkanModExtra.CONFIG.animationSettings.allAnimations = value;
@@ -1206,8 +1220,8 @@ public class VulkanModExtraIntegration {
 
         // Set tooltip for master toggle
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(masterOption, Component.translatable("vulkanmod-extra.option.animation.allAnimations.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(masterOption, Text.translatable("vulkanmod-extra.option.animation.allAnimations.tooltip"));
         } catch (Exception e) {}
 
         // Create master toggle block
@@ -1235,8 +1249,8 @@ public class VulkanModExtraIntegration {
      */
     private static Object[] createParticleOptionBlocks(Class<?> switchOptionClass, Class<?> optionBlockClass, Class<?> optionArrayClass) throws Exception {
         // Create master toggle option
-        Object masterOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-            .newInstance(Component.translatable("vulkanmod-extra.option.particle.allParticles"),
+        Object masterOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+            .newInstance(Text.translatable("vulkanmod-extra.option.particle.allParticles"),
                 (java.util.function.Consumer<Boolean>) value -> {
                     try {
                         VulkanModExtra.CONFIG.particleSettings.allParticles = value;
@@ -1251,8 +1265,8 @@ public class VulkanModExtraIntegration {
 
         // Set tooltip for master toggle
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(masterOption, Component.translatable("vulkanmod-extra.option.particle.allParticles.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(masterOption, Text.translatable("vulkanmod-extra.option.particle.allParticles.tooltip"));
         } catch (Exception e) {}
 
         // Create master toggle block
@@ -1282,8 +1296,8 @@ public class VulkanModExtraIntegration {
         // Helper for consistent option creation
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.animation." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.animation." + key),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
@@ -1325,8 +1339,8 @@ public class VulkanModExtraIntegration {
                 });
                 if (option != null) {
                     try {
-                        java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                        setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.animation." + type + ".tooltip"));
+                        java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                        setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.animation." + type + ".tooltip"));
                     } catch (Exception e) {}
                     options.add(option);
                 }
@@ -1341,8 +1355,8 @@ public class VulkanModExtraIntegration {
         // Helper for creating particle options
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
             try {
-                return switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(Component.translatable("vulkanmod-extra.option.particle." + key),
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.particle." + key),
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
@@ -1371,8 +1385,8 @@ public class VulkanModExtraIntegration {
             });
             if (option != null) {
                 try {
-                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-                    setTooltipMethod.invoke(option, Component.translatable("vulkanmod-extra.option.particle." + particle + ".tooltip"));
+                    java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                    setTooltipMethod.invoke(option, Text.translatable("vulkanmod-extra.option.particle." + particle + ".tooltip"));
                 } catch (Exception e) {}
                 options.add(option);
             }
@@ -1430,9 +1444,9 @@ public class VulkanModExtraIntegration {
      */
     private static void createDisplayOptions(Class<?> switchOptionClass, Class<?> cyclingOptionClass, List<Object> options) throws Exception {
         // FPS display
-        Component fpsComponent = Component.translatable("vulkanmod-extra.option.extra.show_fps");
-        Object fpsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(fpsComponent,
+        Text fpsText = Text.translatable("vulkanmod-extra.option.extra.show_fps");
+        Object fpsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(fpsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.showFps = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1440,18 +1454,18 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showFps);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(fpsOption, Component.translatable("vulkanmod-extra.option.extra.show_fps.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(fpsOption, Text.translatable("vulkanmod-extra.option.extra.show_fps.tooltip"));
         } catch (Exception e) {}
         options.add(fpsOption);
 
         // FPS Display Mode using CyclingOption pattern
         try {
-            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.extra.fps_display_mode");
+            Text fpsModeText = Text.translatable("vulkanmod-extra.option.extra.fps_display_mode");
             var fpsDisplayModeValues = com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.values();
             Object fpsModeOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(fpsModeComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeText,
                         fpsDisplayModeValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode = value;
@@ -1462,19 +1476,19 @@ public class VulkanModExtraIntegration {
 
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(fpsModeOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Component>) value ->
-                    Component.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode, Text>) value ->
+                    Text.translatable(com.criticalrange.config.VulkanModExtraConfig.FPSDisplayMode.getComponentName(value)));
 
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(fpsModeOption, Component.translatable("vulkanmod-extra.option.extra.fps_display_mode.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(fpsModeOption, Text.translatable("vulkanmod-extra.option.extra.fps_display_mode.tooltip"));
             } catch (Exception e) {}
             options.add(fpsModeOption);
         } catch (Exception e) {
             // Fallback to switch option if CyclingOption is not available
-            Component fpsModeComponent = Component.translatable("vulkanmod-extra.option.extra.fps_display_mode");
-            Object fpsModeOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(fpsModeComponent,
+            Text fpsModeText = Text.translatable("vulkanmod-extra.option.extra.fps_display_mode");
+            Object fpsModeOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(fpsModeText,
                         (java.util.function.Consumer<Boolean>) value -> {
                             var currentMode = VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode;
                             var nextMode = switch (currentMode) {
@@ -1491,11 +1505,11 @@ public class VulkanModExtraIntegration {
 
         // Overlay Corner using CyclingOption
         try {
-            Component overlayCornerComponent = Component.translatable("vulkanmod-extra.option.extra.overlay_corner");
+            Text overlayCornerText = Text.translatable("vulkanmod-extra.option.extra.overlay_corner");
             var overlayCornerValues = com.criticalrange.config.VulkanModExtraConfig.OverlayCorner.values();
             Object overlayCornerOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(overlayCornerComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(overlayCornerText,
                         overlayCornerValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.overlayCorner = value;
@@ -1506,12 +1520,12 @@ public class VulkanModExtraIntegration {
 
             java.lang.reflect.Method setTranslatorMethod = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod.invoke(overlayCornerOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Component>) value ->
-                    Component.translatable("vulkanmod-extra.option.extra.overlay_corner." + value.toString().toLowerCase()));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.OverlayCorner, Text>) value ->
+                    Text.translatable("vulkanmod-extra.option.extra.overlay_corner." + value.toString().toLowerCase()));
 
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(overlayCornerOption, Component.translatable("vulkanmod-extra.option.extra.overlay_corner.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(overlayCornerOption, Text.translatable("vulkanmod-extra.option.extra.overlay_corner.tooltip"));
             } catch (Exception e) {}
             options.add(overlayCornerOption);
         } catch (Exception e) {
@@ -1520,11 +1534,11 @@ public class VulkanModExtraIntegration {
 
         // Text Contrast using CyclingOption
         try {
-            Component textContrastComponent = Component.translatable("vulkanmod-extra.option.extra.text_contrast");
+            Text textContrastText = Text.translatable("vulkanmod-extra.option.extra.text_contrast");
             var textContrastValues = com.criticalrange.config.VulkanModExtraConfig.TextContrast.values();
             Object textContrastOption = cyclingOptionClass
-                    .getConstructor(Component.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                    .newInstance(textContrastComponent,
+                    .getConstructor(Text.class, Object[].class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(textContrastText,
                         textContrastValues,
                         (java.util.function.Consumer<com.criticalrange.config.VulkanModExtraConfig.TextContrast>) value -> {
                             VulkanModExtra.CONFIG.extraSettings.textContrast = value;
@@ -1535,12 +1549,12 @@ public class VulkanModExtraIntegration {
 
             java.lang.reflect.Method setTranslatorMethod2 = cyclingOptionClass.getMethod("setTranslator", java.util.function.Function.class);
             setTranslatorMethod2.invoke(textContrastOption,
-                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Component>) value ->
-                    Component.translatable("vulkanmod-extra.option.extra.text_contrast." + value.toString().toLowerCase()));
+                (java.util.function.Function<com.criticalrange.config.VulkanModExtraConfig.TextContrast, Text>) value ->
+                    Text.translatable("vulkanmod-extra.option.extra.text_contrast." + value.toString().toLowerCase()));
 
             try {
-                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Component.class);
-                setTooltipMethod.invoke(textContrastOption, Component.translatable("vulkanmod-extra.option.extra.text_contrast.tooltip"));
+                java.lang.reflect.Method setTooltipMethod = cyclingOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(textContrastOption, Text.translatable("vulkanmod-extra.option.extra.text_contrast.tooltip"));
             } catch (Exception e) {}
             options.add(textContrastOption);
         } catch (Exception e) {
@@ -1553,9 +1567,9 @@ public class VulkanModExtraIntegration {
      */
     private static void createCoordinateOptions(Class<?> switchOptionClass, List<Object> options) throws Exception {
         // Coordinates display
-        Component coordsComponent = Component.translatable("vulkanmod-extra.option.extra.show_coords");
-        Object coordsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(coordsComponent,
+        Text coordsText = Text.translatable("vulkanmod-extra.option.extra.show_coords");
+        Object coordsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(coordsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.showCoords = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1563,8 +1577,8 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.showCoords);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(coordsOption, Component.translatable("vulkanmod-extra.option.extra.show_coords.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(coordsOption, Text.translatable("vulkanmod-extra.option.extra.show_coords.tooltip"));
         } catch (Exception e) {}
         options.add(coordsOption);
     }
@@ -1574,9 +1588,9 @@ public class VulkanModExtraIntegration {
      */
     private static void createToastOptions(Class<?> switchOptionClass, List<Object> options) throws Exception {
         // Toasts
-        Component toastsComponent = Component.translatable("vulkanmod-extra.option.extra.toasts");
-        Object toastsOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(toastsComponent,
+        Text toastsText = Text.translatable("vulkanmod-extra.option.extra.toasts");
+        Object toastsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(toastsText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.toasts = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1584,15 +1598,15 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.toasts);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(toastsOption, Component.translatable("vulkanmod-extra.option.extra.toasts.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(toastsOption, Text.translatable("vulkanmod-extra.option.extra.toasts.tooltip"));
         } catch (Exception e) {}
         options.add(toastsOption);
 
         // Advancement toasts
-        Component advancementToastComponent = Component.translatable("vulkanmod-extra.option.extra.advancement_toast");
-        Object advancementToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(advancementToastComponent,
+        Text advancementToastText = Text.translatable("vulkanmod-extra.option.extra.advancement_toast");
+        Object advancementToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(advancementToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1600,15 +1614,15 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.advancementToast);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(advancementToastOption, Component.translatable("vulkanmod-extra.option.extra.advancement_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(advancementToastOption, Text.translatable("vulkanmod-extra.option.extra.advancement_toast.tooltip"));
         } catch (Exception e) {}
         options.add(advancementToastOption);
 
         // Recipe toasts
-        Component recipeToastComponent = Component.translatable("vulkanmod-extra.option.extra.recipe_toast");
-        Object recipeToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(recipeToastComponent,
+        Text recipeToastText = Text.translatable("vulkanmod-extra.option.extra.recipe_toast");
+        Object recipeToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(recipeToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1616,15 +1630,15 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.recipeToast);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(recipeToastOption, Component.translatable("vulkanmod-extra.option.extra.recipe_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(recipeToastOption, Text.translatable("vulkanmod-extra.option.extra.recipe_toast.tooltip"));
         } catch (Exception e) {}
         options.add(recipeToastOption);
 
         // System toasts
-        Component systemToastComponent = Component.translatable("vulkanmod-extra.option.extra.system_toast");
-        Object systemToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(systemToastComponent,
+        Text systemToastText = Text.translatable("vulkanmod-extra.option.extra.system_toast");
+        Object systemToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(systemToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.systemToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1632,15 +1646,15 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.systemToast);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(systemToastOption, Component.translatable("vulkanmod-extra.option.extra.system_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(systemToastOption, Text.translatable("vulkanmod-extra.option.extra.system_toast.tooltip"));
         } catch (Exception e) {}
         options.add(systemToastOption);
 
         // Tutorial toasts
-        Component tutorialToastComponent = Component.translatable("vulkanmod-extra.option.extra.tutorial_toast");
-        Object tutorialToastOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(tutorialToastComponent,
+        Text tutorialToastText = Text.translatable("vulkanmod-extra.option.extra.tutorial_toast");
+        Object tutorialToastOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(tutorialToastText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1648,8 +1662,8 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(tutorialToastOption, Component.translatable("vulkanmod-extra.option.extra.tutorial_toast.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(tutorialToastOption, Text.translatable("vulkanmod-extra.option.extra.tutorial_toast.tooltip"));
         } catch (Exception e) {}
         options.add(tutorialToastOption);
     }
@@ -1659,9 +1673,9 @@ public class VulkanModExtraIntegration {
      */
     private static void createOtherExtraOptions(Class<?> switchOptionClass, List<Object> options) throws Exception {
         // Instant sneak
-        Component instantSneakComponent = Component.translatable("vulkanmod-extra.option.extra.instant_sneak");
-        Object instantSneakOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(instantSneakComponent,
+        Text instantSneakText = Text.translatable("vulkanmod-extra.option.extra.instant_sneak");
+        Object instantSneakOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(instantSneakText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1669,15 +1683,15 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.instantSneak);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(instantSneakOption, Component.translatable("vulkanmod-extra.option.extra.instant_sneak.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(instantSneakOption, Text.translatable("vulkanmod-extra.option.extra.instant_sneak.tooltip"));
         } catch (Exception e) {}
         options.add(instantSneakOption);
 
         // Steady debug Extra
-        Component steadyDebugHudComponent = Component.translatable("vulkanmod-extra.option.extra.steady_debug_hud");
-        Object steadyDebugHudOption = switchOptionClass.getConstructor(Component.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
-                .newInstance(steadyDebugHudComponent,
+        Text steadyDebugHudText = Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud");
+        Object steadyDebugHudOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(steadyDebugHudText,
                     (java.util.function.Consumer<Boolean>) value -> {
                         VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
                         VulkanModExtra.CONFIG.writeChanges();
@@ -1685,8 +1699,8 @@ public class VulkanModExtraIntegration {
                     (java.util.function.Supplier<Boolean>) () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud);
 
         try {
-            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Component.class);
-            setTooltipMethod.invoke(steadyDebugHudOption, Component.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(steadyDebugHudOption, Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
         } catch (Exception e) {}
         options.add(steadyDebugHudOption);
     }

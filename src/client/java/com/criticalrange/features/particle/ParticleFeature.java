@@ -3,8 +3,8 @@ package com.criticalrange.features.particle;
 import com.criticalrange.core.BaseFeature;
 import com.criticalrange.core.FeatureCategory;
 import com.criticalrange.config.VulkanModExtraConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class ParticleFeature extends BaseFeature {
     }
 
     @Override
-    public void initialize(Minecraft minecraft) {
+    public void initialize(MinecraftClient minecraft) {
         getLogger().info("Particle feature initialized");
     }
 
@@ -179,9 +179,9 @@ public class ParticleFeature extends BaseFeature {
     }
 
     /**
-     * Check if a particle by ResourceLocation is enabled
+     * Check if a particle by Identifier is enabled
      */
-    public boolean isParticleEnabled(ResourceLocation particleId) {
+    public boolean isParticleEnabled(Identifier particleId) {
         return isParticleEnabled(particleId.getPath());
     }
 

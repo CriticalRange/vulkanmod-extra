@@ -1,7 +1,7 @@
 package com.criticalrange.mixin.cloud;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

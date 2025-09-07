@@ -2,13 +2,13 @@ package com.criticalrange.mixin.particle;
 
 import com.criticalrange.VulkanModExtra;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
+import net.minecraft.block.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,11 +20,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Particle control mixin based on Sodium Extra pattern
  * Controls particle rendering for better performance
  */
-@Mixin(ParticleEngine.class)
+@Mixin(ParticleManager.class)
 public class MixinParticleEngine {
 
 
-    @Inject(method = "destroy", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "addBlockBreakParticles", at = @At(value = "HEAD"), cancellable = true)
     public void vulkanmodExtra$controlBlockBreakParticles(BlockPos pos, BlockState state, CallbackInfo ci) {
         try {
             com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
@@ -39,7 +39,7 @@ public class MixinParticleEngine {
         }
     }
 
-    @Inject(method = "crack", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "addBlockBreakingParticles", at = @At(value = "HEAD"), cancellable = true)
     public void vulkanmodExtra$controlBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
         try {
             com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
@@ -55,14 +55,17 @@ public class MixinParticleEngine {
     }
 
     @Inject(method = "createParticle", at = @At(value = "HEAD"), cancellable = true)
-    public void vulkanmodExtra$controlParticleCreation(ParticleOptions particleOptions, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
+    public void vulkanmodExtra$controlParticleCreation(ParticleEffect particleOptions, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
         try {
             com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
             com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
             
             // Get particle type ID
-            ResourceLocation particleTypeId = BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType());
-            String particleName = particleTypeId.getPath();
+            var particleKey = Registries.PARTICLE_TYPE.getKey(particleOptions.getType());
+            if (particleKey.isEmpty()) {
+                return; // Skip if particle type not found in registry
+            }
+            String particleName = particleKey.get().getValue().getPath();
             
             // Check specific particle type settings
             boolean shouldRender = shouldRenderParticle(config, particleName);

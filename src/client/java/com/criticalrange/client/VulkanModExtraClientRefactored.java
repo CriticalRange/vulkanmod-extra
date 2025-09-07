@@ -6,7 +6,7 @@ import com.criticalrange.features.fps.FPSDisplayFeature;
 import com.criticalrange.features.particle.ParticleFeature;
 import com.criticalrange.config.ConfigurationManager;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class VulkanModExtraClientRefactored implements ClientModInitializer {
             registerFeatures();
 
             // Initialize features
-            Minecraft minecraft = Minecraft.getInstance();
+            MinecraftClient minecraft = MinecraftClient.getInstance();
             featureManager.initializeFeatures(minecraft);
 
             LOGGER.info("VulkanMod Extra Client initialized successfully!");
@@ -72,7 +72,7 @@ public class VulkanModExtraClientRefactored implements ClientModInitializer {
     /**
      * Called every client tick
      */
-    public static void onClientTick(Minecraft minecraft) {
+    public static void onClientTick(MinecraftClient minecraft) {
         if (instance != null && instance.featureManager != null) {
             instance.featureManager.tickFeatures(minecraft);
         }
@@ -81,9 +81,9 @@ public class VulkanModExtraClientRefactored implements ClientModInitializer {
     /**
      * Called when HUD is rendered
      */
-    public static void onHudRender(net.minecraft.client.gui.GuiGraphics guiGraphics, float partialTicks) {
+    public static void onHudRender(net.minecraft.client.gui.DrawContext drawContext, float partialTicks) {
         if (instance != null && instance.fpsDisplayFeature != null) {
-            instance.fpsDisplayFeature.render(guiGraphics, partialTicks);
+            instance.fpsDisplayFeature.render(drawContext, partialTicks);
         }
     }
 

@@ -3,8 +3,8 @@ package com.criticalrange.features.fps;
 import com.criticalrange.core.BaseFeature;
 import com.criticalrange.core.FeatureCategory;
 import com.criticalrange.config.VulkanModExtraConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 
 /**
  * FPS Display feature - shows FPS information on screen
@@ -20,7 +20,7 @@ public class FPSDisplayFeature extends BaseFeature {
     }
 
     @Override
-    public void initialize(Minecraft minecraft) {
+    public void initialize(MinecraftClient minecraft) {
         fpsCounter = new FPSCounter();
         getLogger().info("FPS Display feature initialized");
     }
@@ -40,7 +40,7 @@ public class FPSDisplayFeature extends BaseFeature {
     }
 
     @Override
-    public void onTick(Minecraft minecraft) {
+    public void onTick(MinecraftClient minecraft) {
         if (fpsCounter != null && isEnabled()) {
             fpsCounter.update();
         }
@@ -49,12 +49,12 @@ public class FPSDisplayFeature extends BaseFeature {
     /**
      * Render the FPS display
      */
-    public void render(GuiGraphics guiGraphics, float partialTicks) {
+    public void render(DrawContext drawContext, float partialTicks) {
         if (!isEnabled() || fpsCounter == null) {
             return;
         }
 
-        Minecraft minecraft = getMinecraft();
+        MinecraftClient minecraft = getMinecraft();
         if (minecraft == null) {
             return;
         }
@@ -68,12 +68,12 @@ public class FPSDisplayFeature extends BaseFeature {
         int color = getTextColor();
 
         // Position based on overlay corner setting
-        int screenWidth = minecraft.getWindow().getGuiScaledWidth();
-        int screenHeight = minecraft.getWindow().getGuiScaledHeight();
+        int screenWidth = minecraft.getWindow().getScaledWidth();
+        int screenHeight = minecraft.getWindow().getScaledHeight();
         int x = calculateXPosition(screenWidth);
         int y = calculateYPosition(screenHeight);
 
-        guiGraphics.drawString(minecraft.font, fpsText, x, y, color);
+        drawContext.drawText(minecraft.textRenderer, fpsText, x, y, color, false);
     }
 
     private String buildFPSText(VulkanModExtraConfig config) {

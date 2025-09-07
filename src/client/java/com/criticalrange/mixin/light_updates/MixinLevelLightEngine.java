@@ -1,8 +1,8 @@
 package com.criticalrange.mixin.light_updates;
 
 import com.criticalrange.VulkanModExtra;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.light.LightingProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,11 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Light updates control mixin - SAFE implementation
  * Provides light throttling when enabled, minimal interference when disabled
  */
-@Mixin(LevelLightEngine.class)
+@Mixin(LightingProvider.class)
 public class MixinLevelLightEngine {
     private static int throttleCounter = 0;
 
-    @Inject(at = @At("HEAD"), method = "runLightUpdates", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "doLightUpdates", cancellable = true)
     public void vulkanmodExtra$throttleLightUpdates(CallbackInfoReturnable<Integer> cir) {
         try {
             // Safety check - if config is null, let vanilla handle everything

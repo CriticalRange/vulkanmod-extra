@@ -1,6 +1,6 @@
 package com.criticalrange.core;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class FeatureManager {
     /**
      * Initialize all registered features
      */
-    public void initializeFeatures(Minecraft minecraft) {
+    public void initializeFeatures(MinecraftClient minecraft) {
         if (initialized) {
             LOGGER.warn("Features already initialized, skipping");
             return;
@@ -103,7 +103,7 @@ public class FeatureManager {
     /**
      * Tick all enabled features
      */
-    public void tickFeatures(Minecraft minecraft) {
+    public void tickFeatures(MinecraftClient minecraft) {
         if (!initialized) {
             return;
         }

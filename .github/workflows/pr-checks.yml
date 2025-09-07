@@ -33,9 +33,6 @@ jobs:
       - name: Run build and tests
         run: ./gradlew build
         
-      - name: Check code style
-        run: ./gradlew checkstyle
-        continue-on-error: true
         
       - name: Validate configuration changes
         run: |
