@@ -6,6 +6,8 @@
   "vulkanmod-extra.pages.extra": "Extra",
   "vulkanmod-extra.option.animation": "Animation Controls",
   "vulkanmod-extra.option.animation.tooltip": "Granular controls for individual game animations. Each animation type can be toggled independently for maximum customization. Perfect for performance optimization or aesthetic preferences.",
+  "vulkanmod-extra.option.animation.allAnimations": "All Animations",
+  "vulkanmod-extra.option.animation.allAnimations.tooltip": "Master toggle that disables ALL animations when off, or allows individual animation settings when on. Use this as a quick performance boost by disabling all texture animations at once.",
   "vulkanmod-extra.option.animation.water": "Water Animation",
   "vulkanmod-extra.option.animation.water.tooltip": "Controls the animated water flow and wave effects in oceans, rivers, and waterfalls. Disabling removes the flowing animation but water physics remain intact.",
   "vulkanmod-extra.option.animation.lava": "Lava Animation",
@@ -139,6 +141,8 @@
 
   "vulkanmod-extra.option.particle.particles": "Particles",
   "vulkanmod-extra.option.particle.particles.tooltip": "Master toggle for all particle effects including explosions, water splashes, and environmental effects. Disabling significantly improves performance but removes most visual effects from gameplay.",
+  "vulkanmod-extra.option.particle.allParticles": "All Particles",
+  "vulkanmod-extra.option.particle.allParticles.tooltip": "Master toggle that disables ALL particles when off, or allows individual particle settings when on. Use this for major performance improvements by blocking all particle rendering at once.",
   "vulkanmod-extra.option.particle.rain_splash": "Rain Splash",
   "vulkanmod-extra.option.particle.rain_splash.tooltip": "Controls rain splash particles",
   "vulkanmod-extra.option.particle.block_break": "Block Break",

@@ -30,7 +30,8 @@ public class MixinParticleEngine {
             com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
             com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
             
-            if (!config.particleSettings.blockBreak) {
+            // Check master toggle first, then individual setting
+            if (!config.particleSettings.allParticles || !config.particleSettings.blockBreak) {
                 ci.cancel();
             }
         } catch (Exception ex) {
@@ -44,7 +45,8 @@ public class MixinParticleEngine {
             com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
             com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
             
-            if (!config.particleSettings.blockBreaking) {
+            // Check master toggle first, then individual setting
+            if (!config.particleSettings.allParticles || !config.particleSettings.blockBreaking) {
                 ci.cancel();
             }
         } catch (Exception ex) {
@@ -74,9 +76,14 @@ public class MixinParticleEngine {
 
     @Unique
     private boolean shouldRenderParticle(com.criticalrange.config.VulkanModExtraConfig config, String particleName) {
-        // Direct mapping of particle names to config settings - much more reliable than reflection
         var settings = config.particleSettings;
         
+        // Check master toggle first - if disabled, block all particles
+        if (!settings.allParticles) {
+            return false;
+        }
+        
+        // If master toggle is enabled, check individual settings
         return switch (particleName.toLowerCase()) {
             case "ambient_entity_effect" -> settings.ambientEntityEffect;
             case "angry_villager" -> settings.angryVillager;

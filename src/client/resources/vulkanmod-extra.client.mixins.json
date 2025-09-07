@@ -17,12 +17,12 @@
 		"reduce_resolution_on_mac.MixinWindow",
 		"toasts.MixinToastManager",
 		"sky.MixinSkyRenderer",
-		"biome.MixinBiomeColors",
 		"steady_debug_hud.MixinDebugScreenOverlay",
 		"block_rendering.MixinPistonRenderer",
 		"weather.MixinLevelRenderer",
 		"client.MixinGui",
-		"client.gui.MixinVOptionScreen"
+		"client.gui.MixinVOptionScreen",
+		"vulkanmod.MixinVulkanModOptions"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -46,6 +46,9 @@ public class VulkanModExtraConfig {
     }
 
     public static class AnimationSettings {
+        // Master toggle for all animations
+        public boolean allAnimations = true;
+        
         // Individual animation controls
         
         // Fluid animations
@@ -135,6 +138,9 @@ public class VulkanModExtraConfig {
     }
 
     public static class ParticleSettings {
+        // Master toggle for all particles
+        public boolean allParticles = true;
+        
         public boolean rainSplash = true;
         public boolean blockBreak = true;
         public boolean blockBreaking = true;
@@ -305,7 +311,6 @@ public class VulkanModExtraConfig {
         public boolean showFPSExtended = true;
         public boolean showCoords = false;
         public boolean reduceResolutionOnMac = false;
-        public boolean useAdaptiveSync = false;
         public int cloudHeight = 192;
         public int cloudDistance = 100;
         public boolean toasts = true;

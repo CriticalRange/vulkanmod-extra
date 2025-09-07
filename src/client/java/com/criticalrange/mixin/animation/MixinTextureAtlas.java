@@ -52,7 +52,12 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
             String idString = identifier.toString().toLowerCase();
             var settings = config.animationSettings;
             
-            // Comprehensive animation checking based on texture path
+            // Check master toggle first - if disabled, block all animations
+            if (!settings.allAnimations) {
+                return false;
+            }
+            
+            // If master toggle is enabled, check individual settings
             
             // Fluid animations - each controls only its own behavior
             if (idString.contains("water_still")) return settings.waterStill;
