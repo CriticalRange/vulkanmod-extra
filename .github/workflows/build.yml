@@ -36,7 +36,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-home-cache-cleanup: true
+          gradle-home-cache-cleanup: false
           
       - name: Build VulkanMod Extra
         run: ./gradlew build
