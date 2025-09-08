@@ -14,12 +14,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Weather effect control mixin based on Sodium Extra pattern
  * Controls weather rendering (rain and snow) for better performance
- * Updated for Minecraft 1.21.2+ with new FrameGraphBuilder signature and LightmapTextureManager
+ * Updated for Minecraft 1.21.4+ with LightmapTextureManager parameter removed
  */
 @Mixin(WorldRenderer.class)
 public class MixinLevelRenderer {
     @Inject(method = "renderWeather", at = @At(value = "HEAD"), cancellable = true)
-    private void vulkanmodExtra$renderSnowAndRain(FrameGraphBuilder frameGraphBuilder, LightmapTextureManager lightmapTextureManager, Vec3d cameraPos, float tickProgress, Fog fog, CallbackInfo ci) {
+    private void vulkanmodExtra$renderSnowAndRain(FrameGraphBuilder frameGraphBuilder, Vec3d cameraPos, float tickProgress, Fog fog, CallbackInfo ci) {
         if (!VulkanModExtra.CONFIG.detailSettings.rainSnow) {
             ci.cancel();
         }

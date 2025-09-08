@@ -145,6 +145,13 @@ jar {
 	}
 }
 
+// Configure sourcesJar to exclude override directories to prevent duplicates
+tasks.withType(Jar) {
+	// Exclude override directories from source jars to prevent duplicates
+	exclude "src/overrides/**"
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 // configure the maven publication
 publishing {
 	publications {
@@ -314,7 +321,7 @@ task restoreOverrides {
 				clientTempDir.eachFileRecurse { tempFile ->
 					if (!tempFile.isDirectory()) {
 						def relativePath = tempFile.absolutePath - clientTempDir.absolutePath
-						def originalFile = file("src/client${relativePath}")
+						def originalFile = file("src/client/java${relativePath}")
 						
 						// Restore original file
 						logger.lifecycle("Restoring: ${relativePath}")
@@ -357,6 +364,10 @@ tasks.withType(ProcessResources) {
 	dependsOn setupOverrides
 	finalizedBy restoreOverrides
 }
+
+// Make setupOverrides run before sourcesJar and restore afterwards
+sourcesJar.dependsOn setupOverrides
+sourcesJar.finalizedBy restoreOverrides
 
 // Clean all releases
 task cleanAllReleases {
