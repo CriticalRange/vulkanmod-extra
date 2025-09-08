@@ -35,7 +35,7 @@ public abstract class MixinVOptionScreen {
         LOGGER.debug("VOptionScreen addPages completed, attempting injection...");
 
         try {
-            // Create VulkanMod Extra pages and add them directly
+            // Create and add VulkanMod Extra option pages
             List<OptionPage> extraPages = VulkanModExtraIntegration.createVulkanModExtraOptionPages();
             if (extraPages != null && !extraPages.isEmpty()) {
                 LOGGER.info("Adding {} VulkanMod Extra pages", extraPages.size());

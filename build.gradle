@@ -6,12 +6,39 @@ plugins {
 	id 'eclipse'
 }
 
-version = project.mod_version
 group = project.maven_group
 
 base {
 	archivesName = project.archives_base_name
 }
+
+// Override system configuration
+def versionKey = project.hasProperty('minecraft_version') ? project.minecraft_version : project.minecraft_version
+def overrideVersion = versionKey.replace('.', '_')
+def overrideDir = file("src/overrides/v${overrideVersion}")
+
+// Version profile loading
+def loadVersionProfile(String version) {
+	def profileFile = file("gradle/versions/${version}.properties")
+	if (profileFile.exists()) {
+		logger.info("Loading version profile for ${version}")
+		def properties = new Properties()
+		profileFile.withInputStream { stream ->
+			properties.load(stream)
+		}
+		properties.each { key, value ->
+			project.ext[key] = value
+		}
+	} else {
+		logger.info("No version profile found for ${version}, using defaults")
+	}
+}
+
+// Load version profile for current Minecraft version
+loadVersionProfile(versionKey)
+
+// Set project version after profile is loaded
+version = project.mod_version
 
 repositories {
 	// Add repositories to retrieve artifacts from in here.
@@ -38,24 +65,43 @@ loom {
 
 	mods {
 		"vulkanmod-extra" {
-			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
 	}
 
 }
 
+// Configure source sets to include version-specific overrides
+// Add version-specific Java overrides if they exist
+if (overrideDir.exists()) {
+	def javaOverrideDir = new File(overrideDir, 'java')
+	if (javaOverrideDir.exists()) {
+		sourceSets.client.java.srcDirs += javaOverrideDir
+	}
+}
+
+// Add version-specific resource overrides if they exist
+if (overrideDir.exists()) {
+	def resourcesOverrideDir = new File(overrideDir, 'resources')
+	if (resourcesOverrideDir.exists()) {
+		sourceSets.client.resources.srcDirs += resourcesOverrideDir
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	mappings "net.fabricmc:yarn:${project.hasProperty('yarn_mappings') ? project.yarn_mappings : project.minecraft_version + '+build.1'}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.hasProperty('loader_version') ? project.loader_version : '0.17.2'}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.hasProperty('fabric_api_version') ? project.fabric_api_version : project.hasProperty('fabric_version') ? project.fabric_version : '0.116.5+' + project.minecraft_version}"
 
 	// VulkanMod dependency - required for integration
-	modImplementation "maven.modrinth:vulkanmod:${project.vulkanmod_version}"
+	modImplementation "maven.modrinth:vulkanmod:${project.hasProperty('vulkanmod_version') ? project.vulkanmod_version : '0.5.5'}"
+
+	// Suppress ErrorProne annotation warnings from GSON
+	compileOnly 'com.google.errorprone:error_prone_annotations:2.23.0'
 
 	// Note: VulkanMod requires Vulkan drivers and may not work in dev environment
 	// For testing without graphics, consider using production builds
@@ -116,3 +162,216 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+// Version switching tasks
+task switchTo1_21_1 {
+	doLast {
+		exec { commandLine 'cmd', '/c', 'scripts/switch-version.bat', '1.21.1' }
+	}
+}
+
+task switchTo1_21_2 {
+	doLast {
+		exec { commandLine 'cmd', '/c', 'scripts/switch-version.bat', '1.21.2' }
+	}
+}
+
+task switchTo1_21_3 {
+	doLast {
+		exec { commandLine 'cmd', '/c', 'scripts/switch-version.bat', '1.21.3' }
+	}
+}
+
+task switchTo1_21_4 {
+	doLast {
+		exec { commandLine 'cmd', '/c', 'scripts/switch-version.bat', '1.21.4' }
+	}
+}
+
+task switchTo1_21_5 {
+	doLast {
+		exec { commandLine 'cmd', '/c', 'scripts/switch-version.bat', '1.21.5' }
+	}
+}
+
+// Run client for specific versions
+task runClient1_21_1 {
+	dependsOn switchTo1_21_1, runClient
+}
+
+task runClient1_21_2 {
+	dependsOn switchTo1_21_2, runClient
+}
+
+task runClient1_21_3 {
+	dependsOn switchTo1_21_3, runClient
+}
+
+task runClient1_21_4 {
+	dependsOn switchTo1_21_4, runClient
+}
+
+task runClient1_21_5 {
+	dependsOn switchTo1_21_5, runClient
+}
+
+// Build all versions task
+task buildAllVersions {
+	doLast {
+		['1.21.1', '1.21.2', '1.21.3', '1.21.4', '1.21.5'].each { version ->
+			println("Building for Minecraft ${version}...")
+			exec {
+				commandLine './gradlew', 'clean', 'build', "-Pminecraft_version=${version}"
+			}
+			
+			// Copy and rename artifacts
+			copy {
+				from 'build/libs'
+				include '*-mc*-*.jar'
+				into 'build/releases'
+				rename { fileName ->
+					def matcher = fileName =~ /vulkanmod-extra-.*-mc${version}.*\.jar/
+					if (matcher.matches()) {
+						fileName.replace('.jar', "-mc${version}.jar")
+					} else {
+						fileName.replace('.jar', "-mc${version}.jar")
+					}
+				}
+			}
+		}
+	}
+}
+
+// Override handling task - manages file overrides to prevent duplicate classes
+task setupOverrides {
+	doLast {
+		// Use variables already defined at the top of the file
+		
+		if (overrideDir.exists()) {
+			logger.lifecycle("Setting up overrides for Minecraft version ${versionKey}")
+			
+			// Create temp directory for storing overridden files
+			def tempDir = file("build/tmp/overrides")
+			tempDir.mkdirs()
+			
+			// Process Java overrides
+			def javaOverrideDir = new File(overrideDir, 'java')
+			if (javaOverrideDir.exists()) {
+				javaOverrideDir.eachFileRecurse { overrideFile ->
+					if (overrideFile.name.endsWith('.java')) {
+						// Calculate relative path from override directory
+						def relativePath = overrideFile.absolutePath - javaOverrideDir.absolutePath
+						def originalFile = file("src/client/java${relativePath}")
+						
+						if (originalFile.exists()) {
+							// Create temp directory structure
+							def tempFileDir = new File(tempDir, "client${relativePath}")
+							tempFileDir.getParentFile().mkdirs()
+							
+							// Move original file to temp location
+							logger.lifecycle("Overriding: ${relativePath}")
+							ant.move(file: originalFile, tofile: tempFileDir)
+						}
+					}
+				}
+			}
+			
+			// Process resource overrides
+			def resourcesOverrideDir = new File(overrideDir, 'resources')
+			if (resourcesOverrideDir.exists()) {
+				resourcesOverrideDir.eachFileRecurse { overrideFile ->
+					// Calculate relative path from override directory
+					def relativePath = overrideFile.absolutePath - resourcesOverrideDir.absolutePath
+					def originalFile = file("src/client/resources${relativePath}")
+					
+					if (originalFile.exists()) {
+						// Create temp directory structure
+						def tempFileDir = new File(tempDir, "client${relativePath}")
+						tempFileDir.getParentFile().mkdirs()
+						
+						// Move original file to temp location
+						logger.lifecycle("Overriding resource: ${relativePath}")
+						ant.move(file: originalFile, tofile: tempFileDir)
+					}
+				}
+			}
+		} else {
+			logger.lifecycle("No overrides found for Minecraft version ${versionKey}")
+		}
+	}
+}
+
+// Restore original files after compilation
+task restoreOverrides {
+	doLast {
+		def tempDir = file("build/tmp/overrides")
+		if (tempDir.exists()) {
+			logger.lifecycle("Restoring overridden files")
+			
+			// Restore client files
+			def clientTempDir = new File(tempDir, "client")
+			if (clientTempDir.exists()) {
+				clientTempDir.eachFileRecurse { tempFile ->
+					if (!tempFile.isDirectory()) {
+						def relativePath = tempFile.absolutePath - clientTempDir.absolutePath
+						def originalFile = file("src/client${relativePath}")
+						
+						// Restore original file
+						logger.lifecycle("Restoring: ${relativePath}")
+						ant.move(file: tempFile, tofile: originalFile)
+					}
+				}
+			}
+			
+			// Clean up temp directory
+			tempDir.deleteDir()
+		}
+	}
+}
+
+// Configure source sets to include version-specific overrides
+// Add version-specific Java overrides if they exist
+if (overrideDir.exists()) {
+	def javaOverrideDir = new File(overrideDir, 'java')
+	if (javaOverrideDir.exists()) {
+		sourceSets.client.java.srcDirs += javaOverrideDir
+	}
+}
+
+// Add version-specific resource overrides if they exist
+if (overrideDir.exists()) {
+	def resourcesOverrideDir = new File(overrideDir, 'resources')
+	if (resourcesOverrideDir.exists()) {
+		sourceSets.client.resources.srcDirs += resourcesOverrideDir
+	}
+}
+
+// Make setupOverrides run before any compilation task
+tasks.withType(JavaCompile) {
+	dependsOn setupOverrides
+	finalizedBy restoreOverrides
+}
+
+// Make setupOverrides run before resource processing
+tasks.withType(ProcessResources) {
+	dependsOn setupOverrides
+	finalizedBy restoreOverrides
+}
+
+// Clean all releases
+task cleanAllReleases {
+	doLast {
+		delete 'build/releases'
+	}
+}
+
+// Clean override temp files
+task cleanOverrides {
+	doLast {
+		delete 'build/tmp/overrides'
+		restoreOverrides
+	}
+}
+
+// Add cleanOverrides to clean task
+clean.dependsOn cleanOverrides

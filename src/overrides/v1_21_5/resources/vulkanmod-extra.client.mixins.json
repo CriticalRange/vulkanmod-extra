@@ -1,0 +1,33 @@
+{
+	"required": true,
+	"package": "com.criticalrange.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"animation.MixinTextureAtlas",
+		"particle.MixinParticleEngine",
+		"biome_colors.MixinBiomeColors",
+		"fog.MixinFogRenderer",
+		"light_updates.MixinLevelLightEngine",
+		"instant_sneak.MixinCamera",
+		"cloud.MixinDimensionType",
+		"fps.MixinGameRenderer",
+		"core.MixinMinecraftClient",
+		"optimizations.beacon_beam_rendering.MixinBeaconRenderer",
+		"prevent_shaders.MixinGameRenderer",
+		"reduce_resolution_on_mac.MixinWindow",
+		"toasts.MixinToastManager",
+		"sky.MixinSkyRenderer",
+		"steady_debug_hud.MixinDebugScreenOverlay",
+		"block_rendering.MixinPistonRenderer",
+		"weather.MixinLevelRenderer",
+		"client.MixinGui",
+		"client.gui.MixinVOptionScreen"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8",
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
