@@ -77,7 +77,7 @@ update_gradle_properties() {
     echo minecraft_version=%version% > "%gradle_props%"
     
     REM Update mod version to include the MC version
-    set "mod_version=0.2.0-beta5+%version%"
+    set "mod_version=0.2.0-beta6+%version%"
     echo mod_version=%mod_version% >> "%gradle_props%"
     
     REM Copy the rest of the file

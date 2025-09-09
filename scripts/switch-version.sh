@@ -79,7 +79,7 @@ update_gradle_properties() {
     sed -i.tmp "s/^minecraft_version=.*/minecraft_version=$version/" "$gradle_props"
     
     # Update mod version to include the MC version
-    local mod_version="0.2.0-beta5+$version"
+    local mod_version="0.2.0-beta6+$version"
     sed -i.tmp "s/^mod_version=.*/mod_version=$mod_version/" "$gradle_props"
     
     # Clean up temporary files
