@@ -308,7 +308,7 @@ public class VulkanModExtraConfig {
         public TextContrast textContrast = TextContrast.NONE;
         public boolean showFps = false;
         public FPSDisplayMode fpsDisplayMode = FPSDisplayMode.BASIC;
-        public boolean showFPSExtended = true;
+        public boolean showFPSDetails = true;
         public boolean showCoords = false;
         public boolean reduceResolutionOnMac = false;
         public int cloudHeight = 192;
@@ -325,7 +325,7 @@ public class VulkanModExtraConfig {
         public boolean enableVulkanModGuiIntegration = true;
         public boolean optimizeConfigWrites = true;
         public boolean advancedItemTooltips = false;
-        public boolean useFastRandom = false;
+        public boolean useRandomOptimization = false;
         public boolean linearFlatColorBlender = false;
         
         // Monitor settings

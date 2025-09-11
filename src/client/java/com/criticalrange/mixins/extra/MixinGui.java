@@ -1,6 +1,6 @@
 package com.criticalrange.mixins.extra;
 
-import com.criticalrange.client.VulkanModExtraClientMod;
+import com.criticalrange.client.VulkanModExtraClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -20,6 +20,6 @@ public class MixinGui {
     private void vulkanmodExtra$onRender(DrawContext drawContext, net.minecraft.client.render.RenderTickCounter tickCounter, CallbackInfo ci) {
         // Use the render tick counter
         float tickDelta = tickCounter.getTickDelta(true);
-        VulkanModExtraClientMod.onHudRender(drawContext, tickDelta);
+        VulkanModExtraClient.onHudRender(drawContext, tickDelta);
     }
 }

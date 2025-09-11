@@ -5,21 +5,16 @@ import java.util.Map;
 import net.minecraft.util.Identifier;
 
 /**
- * Optimized ParticleSettings - replaces 100+ individual boolean fields with efficient map storage
- *
- * OPTIMIZATION BENEFITS:
- * - Reduces memory usage from ~110 bytes to ~16 bytes per instance
- * - Improves cache locality and lookup performance
- * - Eliminates code duplication in configuration handling
- * - Provides centralized particle state management
+ * Particle configuration settings with efficient map-based storage
+ * Replaces 100+ individual boolean fields with optimized storage
  */
-public class OptimizedParticleSettings {
+public class ParticleSettings {
     public boolean particles = true;
     public boolean rainSplash = true;
     public boolean blockBreak = true;
     public boolean blockBreaking = true;
 
-    // Highly optimized particle state storage - replaces 100+ boolean fields
+    // Particle state storage - replaces 100+ boolean fields
     private final Map<String, Boolean> particleStates = new HashMap<>();
 
     // Essential particles that should always be available
@@ -56,7 +51,7 @@ public class OptimizedParticleSettings {
         "sculk_shrieker", "white_smoke"
     };
 
-    public OptimizedParticleSettings() {
+    public ParticleSettings() {
         // Initialize all essential particles to enabled by default
         for (String particle : ESSENTIAL_PARTICLES) {
             particleStates.put(particle, true);
@@ -64,22 +59,21 @@ public class OptimizedParticleSettings {
     }
 
     /**
-     * Highly efficient particle state lookup - O(1) average case
-     * This replaces individual boolean field access
+     * Particle state lookup - O(1) average case
      */
     public boolean getParticleState(String particleType) {
         return particleStates.getOrDefault(particleType, true);
     }
 
     /**
-     * Efficient particle state setting
+     * Set particle state
      */
     public void setParticleState(String particleType, boolean enabled) {
         particleStates.put(particleType, enabled);
     }
 
     /**
-     * Check if a particle type is enabled - optimized for performance
+     * Check if a particle type is enabled
      * Combines global particle toggle with individual particle state
      */
     public boolean isParticleEnabled(String particleType) {
@@ -93,8 +87,7 @@ public class OptimizedParticleSettings {
         return isParticleEnabled(particleId.getPath());
     }
 
-    // ===== LEGACY COMPATIBILITY METHODS =====
-    // These delegate to the efficient map lookup system
+    // Legacy compatibility methods - delegate to map lookup
 
     public boolean isAmbientEntityEffect() { return getParticleState("ambient_entity_effect"); }
     public boolean isAngryVillager() { return getParticleState("angry_villager"); }
@@ -223,6 +216,6 @@ public class OptimizedParticleSettings {
      */
     public int estimateMemoryUsage() {
         // Rough estimate: HashMap overhead + entries
-        return 56 + (particleStates.size() * 32); // HashMap base + entry overhead
+        return 56 + (particleStates.size() * 32);
     }
 }

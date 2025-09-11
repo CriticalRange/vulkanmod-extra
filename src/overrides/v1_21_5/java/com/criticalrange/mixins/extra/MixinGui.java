@@ -1,6 +1,6 @@
 package com.criticalrange.mixins.extra;
 
-import com.criticalrange.client.VulkanModExtraClientMod;
+import com.criticalrange.client.VulkanModExtraClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
@@ -19,6 +19,6 @@ public class MixinGui {
     private void vulkanmodExtra$onRender(DrawContext drawContext, RenderTickCounter tickCounter, CallbackInfo ci) {
         // Use a reasonable tickDelta value
         float tickDelta = 1.0f; // Fallback value that works for HUD rendering
-        VulkanModExtraClientMod.onHudRender(drawContext, tickDelta);
+        VulkanModExtraClient.onHudRender(drawContext, tickDelta);
     }
 }

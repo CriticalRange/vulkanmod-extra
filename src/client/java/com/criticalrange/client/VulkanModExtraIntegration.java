@@ -1012,7 +1012,7 @@ public class VulkanModExtraIntegration {
         }
         return options;
     }
-      private static List<Object> createBasicRenderOptions(Class<?> switchOptionClass) throws Exception {
+      private static List<Object> createRenderOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
         // Helper for consistent option creation
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
@@ -1230,11 +1230,11 @@ public class VulkanModExtraIntegration {
         List<Object> blocks = new ArrayList<>();
         
         // Basic Render Options Block
-        List<Object> basicRenderOptions = createBasicRenderOptions(switchOptionClass);
-        if (!basicRenderOptions.isEmpty()) {
-            Object[] basicArray = basicRenderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, basicRenderOptions.size()));
-            Object basicBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Basic Rendering", basicArray);
-            blocks.add(basicBlock);
+        List<Object> renderOptions = createRenderOptions(switchOptionClass);
+        if (!renderOptions.isEmpty()) {
+            Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, renderOptions.size()));
+            Object renderBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Rendering", renderArray);
+            blocks.add(renderBlock);
         }
         
         // Fog Options Block (creates visual space)
@@ -2057,6 +2057,46 @@ public class VulkanModExtraIntegration {
             setTooltipMethod.invoke(steadyDebugHudOption, Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
         } catch (Exception e) {}
         options.add(steadyDebugHudOption);
+
+        // Advanced Item Tooltips - binds to Minecraft's vanilla F3+H functionality
+        Text advancedItemTooltipsText = Text.translatable("vulkanmod-extra.option.advanced_item_tooltips");
+        Object advancedItemTooltipsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                .newInstance(advancedItemTooltipsText,
+                    (java.util.function.Consumer<Boolean>) value -> {
+                        try {
+                            // Get Minecraft client instance and options
+                            net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
+                            if (minecraft != null && minecraft.options != null) {
+                                // Set the vanilla advancedItemTooltips option (same as F3+H)
+                                minecraft.options.advancedItemTooltips = value;
+                                // Also update our config for persistence
+                                VulkanModExtra.CONFIG.extraSettings.advancedItemTooltips = value;
+                                VulkanModExtra.CONFIG.writeChanges();
+                                VulkanModExtra.LOGGER.info("Set advanced item tooltips to: " + value);
+                            }
+                        } catch (Exception e) {
+                            VulkanModExtra.LOGGER.error("Failed to set advanced item tooltips", e);
+                        }
+                    },
+                    (java.util.function.Supplier<Boolean>) () -> {
+                        try {
+                            // Get the value from Minecraft's vanilla options if available
+                            net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
+                            if (minecraft != null && minecraft.options != null) {
+                                return minecraft.options.advancedItemTooltips;
+                            }
+                        } catch (Exception e) {
+                            VulkanModExtra.LOGGER.debug("Could not get vanilla advanced item tooltips option", e);
+                        }
+                        // Fall back to our config value
+                        return VulkanModExtra.CONFIG.extraSettings.advancedItemTooltips;
+                    });
+
+        try {
+            java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+            setTooltipMethod.invoke(advancedItemTooltipsOption, Text.translatable("vulkanmod-extra.option.advanced_item_tooltips.tooltip"));
+        } catch (Exception e) {}
+        options.add(advancedItemTooltipsOption);
     }
 
     

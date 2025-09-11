@@ -12,7 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 public class FPSDisplayFeature extends BaseFeature {
 
     private FPSCounter fpsCounter;
-    private boolean showExtended = true;
+    private boolean showDetails = true;
 
     public FPSDisplayFeature() {
         super("fps_display", "FPS Display", FeatureCategory.FPS,
@@ -80,7 +80,7 @@ public class FPSDisplayFeature extends BaseFeature {
         StringBuilder text = new StringBuilder();
         text.append("FPS: ").append(fpsCounter.getCurrentFPS());
 
-        if (config.extraSettings.showFPSExtended && showExtended) {
+        if (config.extraSettings.showFPSDetails && showDetails) {
             text.append(" (")
                 .append("avg: ").append(fpsCounter.getAverageFPS())
                 .append(", min: ").append(fpsCounter.getMinFPS())
@@ -131,8 +131,8 @@ public class FPSDisplayFeature extends BaseFeature {
     /**
      * Set whether to show extended FPS information
      */
-    public void setShowExtended(boolean showExtended) {
-        this.showExtended = showExtended;
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
     }
 
     /**

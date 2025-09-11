@@ -23,7 +23,6 @@ public class MixinSkyElements {
     @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
     private void vulkanmodExtra$controlSkyRendering(CallbackInfo ci) {
         // Disable entire sky when option is off
-        // TODO: Find more specific injection points to target only sky gradient
         if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
             ci.cancel();
             return;
