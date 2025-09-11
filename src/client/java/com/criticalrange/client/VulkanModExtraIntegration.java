@@ -120,6 +120,8 @@ public class VulkanModExtraIntegration {
                 integrationSuccessful = true;
                 VulkanModExtra.LOGGER.info("Successfully injected VulkanMod Extra pages into active screen!");
             }
+            
+            // Optimization options are now directly integrated into VulkanMod's Optimizations page
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Could not inject pages into current screen: {}", e.getMessage());
             e.printStackTrace();
@@ -167,6 +169,279 @@ public class VulkanModExtraIntegration {
             VulkanModExtra.LOGGER.error("Could not add pages to screen: {}", e.getMessage());
         }
     }
+    
+    /**
+     * Add VulkanMod Extra optimization options to the existing VulkanMod Optimizations page
+     */
+    private static void addOptimizationOptionsToScreen(Object screen) {
+        try {
+            if (!loadVulkanModClasses()) {
+                VulkanModExtra.LOGGER.warn("Cannot add optimization options - VulkanMod classes not available");
+                return;
+            }
+            
+            // Get the optionPages field from the screen
+            java.lang.reflect.Field optionPagesField = screen.getClass().getDeclaredField("optionPages");
+            optionPagesField.setAccessible(true);
+            Object optionPagesObj = optionPagesField.get(screen);
+            
+            if (!(optionPagesObj instanceof List)) {
+                VulkanModExtra.LOGGER.warn("optionPages field is not a List");
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            List<Object> optionPages = (List<Object>) optionPagesObj;
+            
+            // Find the Optimizations page (check all pages to find the correct one)
+            Object optimizationsPage = null;
+            int optimizationsIndex = -1;
+            
+            // Debug: Log all available pages
+            VulkanModExtra.LOGGER.debug("Available pages count: {}", optionPages.size());
+            for (int i = 0; i < optionPages.size(); i++) {
+                Object page = optionPages.get(i);
+                try {
+                    // Try to get the page name/title using different possible field names
+                    String pageName = "Unknown";
+                    try {
+                        java.lang.reflect.Field nameField = page.getClass().getDeclaredField("name");
+                        nameField.setAccessible(true);
+                        pageName = (String) nameField.get(page);
+                    } catch (NoSuchFieldException e1) {
+                        try {
+                            java.lang.reflect.Field titleField = page.getClass().getDeclaredField("title");
+                            titleField.setAccessible(true);
+                            pageName = titleField.get(page).toString();
+                        } catch (NoSuchFieldException e2) {
+                            try {
+                                java.lang.reflect.Field displayNameField = page.getClass().getDeclaredField("displayName");
+                                displayNameField.setAccessible(true);
+                                pageName = displayNameField.get(page).toString();
+                            } catch (NoSuchFieldException e3) {
+                                pageName = page.getClass().getSimpleName();
+                            }
+                        }
+                    }
+                    
+                    VulkanModExtra.LOGGER.debug("Page {}: {}", i, pageName);
+                    
+                    // Check if this is the Optimizations page
+                    if (pageName.contains("Optimization") || pageName.contains("optimization") || 
+                        (i == 2 && optionPages.size() > 2)) { // Fallback to index 2 if name doesn't match
+                        optimizationsPage = page;
+                        optimizationsIndex = i;
+                    }
+                } catch (Exception e) {
+                    VulkanModExtra.LOGGER.debug("Page {}: (could not get name)", i);
+                }
+            }
+            
+            if (optimizationsPage != null) {
+                VulkanModExtra.LOGGER.debug("Found Optimizations page at index {}: {}", optimizationsIndex, optimizationsPage);
+                
+                // Get the optionBlocks field from the page (it's an array, not a List)
+                java.lang.reflect.Field optionBlocksField = optimizationsPage.getClass().getDeclaredField("optionBlocks");
+                optionBlocksField.setAccessible(true);
+                Object optionBlocksObj = optionBlocksField.get(optimizationsPage);
+                
+                if (!optionBlocksObj.getClass().isArray()) {
+                    VulkanModExtra.LOGGER.warn("optionBlocks field is not an array");
+                    return;
+                }
+                
+                // Get the current option blocks array
+                Object[] currentOptionBlocks = (Object[]) optionBlocksObj;
+                VulkanModExtra.LOGGER.debug("Current option blocks count: {}", currentOptionBlocks.length);
+                
+                // Create optimization options to add
+                VulkanModExtra.LOGGER.info("Creating optimization options...");
+                List<Object> extraOptimizationOptions = createExtraOptimizationOptions(cachedSwitchOptionClass);
+                VulkanModExtra.LOGGER.info("Created {} optimization options", extraOptimizationOptions.size());
+                
+                if (!extraOptimizationOptions.isEmpty()) {
+                    try {
+                        // Create a new option block for our extra options
+                        Class<?> optionArrayClass = java.lang.reflect.Array.newInstance(cachedOptionClass, 0).getClass();
+                        Object[] extraOptionsArray = extraOptimizationOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, extraOptimizationOptions.size()));
+                        VulkanModExtra.LOGGER.info("Created option array with {} elements", extraOptionsArray.length);
+                        
+                        Object extraOptionBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("VulkanMod Extra Optimizations", extraOptionsArray);
+                        VulkanModExtra.LOGGER.info("Created option block successfully");
+                        
+                        // Create a new larger array to hold both existing and new option blocks
+                        Object[] newOptionBlocks = (Object[]) java.lang.reflect.Array.newInstance(currentOptionBlocks.getClass().getComponentType(), currentOptionBlocks.length + 1);
+                        
+                        // Copy existing option blocks
+                        System.arraycopy(currentOptionBlocks, 0, newOptionBlocks, 0, currentOptionBlocks.length);
+                        
+                        // Add our new option block at the end
+                        newOptionBlocks[currentOptionBlocks.length] = extraOptionBlock;
+                        
+                        // Replace the optionBlocks field with our new array
+                        optionBlocksField.set(optimizationsPage, newOptionBlocks);
+                        
+                        VulkanModExtra.LOGGER.info("Successfully added VulkanMod Extra optimization options to Optimizations page. New total: {} option blocks", newOptionBlocks.length);
+                        
+                        // Also try to update the option list if it exists
+                        try {
+                            java.lang.reflect.Field optionListField = optimizationsPage.getClass().getDeclaredField("optionList");
+                            optionListField.setAccessible(true);
+                            Object optionList = optionListField.get(optimizationsPage);
+                            if (optionList != null) {
+                                // Try to call addAll method on the option list
+                                java.lang.reflect.Method addAllMethod = optionList.getClass().getMethod("addAll", Object[].class);
+                                addAllMethod.invoke(optionList, (Object) new Object[]{extraOptionBlock});
+                                VulkanModExtra.LOGGER.debug("Updated option list with new option block");
+                            }
+                        } catch (Exception e) {
+                            VulkanModExtra.LOGGER.debug("Could not update option list: {}", e.getMessage());
+                        }
+                        
+                    } catch (Exception e) {
+                        VulkanModExtra.LOGGER.error("Failed to create and add optimization option block: {}", e.getMessage(), e);
+                    }
+                } else {
+                    VulkanModExtra.LOGGER.warn("No optimization options were created");
+                }
+            } else {
+                VulkanModExtra.LOGGER.warn("Optimizations page not found (page count: {})", optionPages.size());
+            }
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.error("Could not add optimization options to screen: {}", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Create extra optimization options for the VulkanMod Optimizations page
+     */
+    private static List<Object> createExtraOptimizationOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+        VulkanModExtra.LOGGER.debug("Starting to create optimization options...");
+        
+        // Create option factory function
+        java.util.function.BiFunction<String, java.util.function.Consumer<Boolean>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.render." + key),
+                        setter,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.renderSettings);
+                            } catch (Exception e) { return false; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+        
+        // Create option factory for extra settings
+        java.util.function.BiFunction<String, java.util.function.Consumer<Boolean>, Object> createExtraOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.render." + key),
+                        setter,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.extraSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.extraSettings);
+                            } catch (Exception e) { return false; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+        
+        // Add render optimization options
+        VulkanModExtra.LOGGER.debug("Creating render optimization options...");
+        
+        // Light updates
+        Object lightUpdatesOption = createOption.apply("lightUpdates", value -> {
+            VulkanModExtra.CONFIG.renderSettings.lightUpdates = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (lightUpdatesOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(lightUpdatesOption, Text.translatable("vulkanmod-extra.option.lightUpdates.tooltip"));
+            } catch (Exception e) {}
+            options.add(lightUpdatesOption);
+            VulkanModExtra.LOGGER.debug("Successfully added lightUpdates option");
+        }
+        
+        // Item frame rendering
+        Object itemFrameOption = createOption.apply("itemFrame", value -> {
+            VulkanModExtra.CONFIG.renderSettings.itemFrame = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (itemFrameOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(itemFrameOption, Text.translatable("vulkanmod-extra.option.itemFrame.tooltip"));
+            } catch (Exception e) {}
+            options.add(itemFrameOption);
+            VulkanModExtra.LOGGER.debug("Successfully added itemFrame option");
+        }
+        
+        // Armor stand rendering
+        Object armorStandOption = createOption.apply("armorStand", value -> {
+            VulkanModExtra.CONFIG.renderSettings.armorStand = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (armorStandOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(armorStandOption, Text.translatable("vulkanmod-extra.option.armorStand.tooltip"));
+            } catch (Exception e) {}
+            options.add(armorStandOption);
+            VulkanModExtra.LOGGER.debug("Successfully added armorStand option");
+        }
+        
+        // Painting rendering
+        Object paintingOption = createOption.apply("painting", value -> {
+            VulkanModExtra.CONFIG.renderSettings.painting = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (paintingOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(paintingOption, Text.translatable("vulkanmod-extra.option.painting.tooltip"));
+            } catch (Exception e) {}
+            options.add(paintingOption);
+            VulkanModExtra.LOGGER.debug("Successfully added painting option");
+        }
+        
+        // Piston rendering
+        Object pistonOption = createOption.apply("piston", value -> {
+            VulkanModExtra.CONFIG.renderSettings.piston = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (pistonOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(pistonOption, Text.translatable("vulkanmod-extra.option.piston.tooltip"));
+            } catch (Exception e) {}
+            options.add(pistonOption);
+            VulkanModExtra.LOGGER.debug("Successfully added piston option");
+        }
+        
+        // Beacon beam rendering
+        Object beaconBeamOption = createOption.apply("beaconBeam", value -> {
+            VulkanModExtra.CONFIG.renderSettings.beaconBeam = value;
+            VulkanModExtra.CONFIG.writeChanges();
+        });
+        if (beaconBeamOption != null) {
+            try {
+                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
+                setTooltipMethod.invoke(beaconBeamOption, Text.translatable("vulkanmod-extra.option.beaconBeam.tooltip"));
+            } catch (Exception e) {}
+            options.add(beaconBeamOption);
+            VulkanModExtra.LOGGER.debug("Successfully added beaconBeam option");
+        }
+        
+        return options;
+    }
+
     /**
      * Try to add pages using method calls
      */
@@ -249,11 +524,7 @@ public class VulkanModExtraIntegration {
             pages.add(detailPage);
             // Create Render page with comprehensive options including fog
             VulkanModExtra.LOGGER.debug("Creating render page...");
-            List<Object> renderOptions = createRenderOptions(cachedSwitchOptionClass);
-            Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionClass, renderOptions.size()));
-            Object renderBlock = cachedOptionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
-            Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, 1);
-            renderBlocks[0] = renderBlock;
+            Object[] renderBlocks = createRenderOptionBlocks(cachedSwitchOptionClass, cachedOptionBlockClass, optionArrayClass, cachedOptionClass);
             Object renderPage = cachedOptionPageClass.getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
             pages.add(renderPage);
             // Create Extra page with multiple option blocks for better organization
@@ -301,11 +572,8 @@ public class VulkanModExtraIntegration {
                     .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.details").getString(), detailBlocks);
             pages.add(detailPage);
             // Create Render page with comprehensive options including fog
-            List<Object> renderOptions = createRenderOptions(switchOptionClass);
-            Object[] renderArray = renderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, renderOptions.size()));
-            Object renderBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Render Settings", renderArray);
-            Object[] renderBlocks = (Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, 1);
-            renderBlocks[0] = renderBlock;
+            VulkanModExtra.LOGGER.debug("Creating render page...");
+            Object[] renderBlocks = createRenderOptionBlocks(switchOptionClass, optionBlockClass, optionArrayClass, optionClass);
             net.vulkanmod.config.option.OptionPage renderPage = (net.vulkanmod.config.option.OptionPage) optionPageClass
                     .getConstructor(String.class, optionBlockArrayClass).newInstance(Text.translatable("vulkanmod-extra.pages.render").getString(), renderBlocks);
             pages.add(renderPage);
@@ -553,7 +821,7 @@ public class VulkanModExtraIntegration {
         };
         // Additional animations
         String[] additionalAnimations = {
-            "additional_animations", "beacon", "dragon_egg", "brewing_stand_base", "cauldron_water"
+            "additional_animations", "beacon", "dragon_egg", "brewing_stand_base", "cauldron_water", "enchanting_table_book"
         };
         // Combine all animation types (each controls only its own behavior)
         String[][] allAnimationCategories = {
@@ -744,7 +1012,7 @@ public class VulkanModExtraIntegration {
         }
         return options;
     }
-    private static List<Object> createRenderOptions(Class<?> switchOptionClass) throws Exception {
+      private static List<Object> createBasicRenderOptions(Class<?> switchOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
         // Helper for consistent option creation
         java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
@@ -765,25 +1033,10 @@ public class VulkanModExtraIntegration {
                         });
             } catch (Exception e) { return null; }
         };
-        // Create range option function for sliders
-        interface RangeOptionCreator2 {
-            Object apply(String key, int min, int max, int step, Text name, Consumer<Integer> setter, Supplier<Integer> getter);
-        }
-        RangeOptionCreator2 createRangeOption2 = (key, min, max, step, name, setter, getter) -> {
-            try {
-                Class<?> rangeOptionClass = Class.forName("net.vulkanmod.config.option.RangeOption");
-                Function<Integer, Text> translator = value -> Text.literal(value + "%");
-                return rangeOptionClass.getConstructor(Text.class, int.class, int.class, int.class, 
-                        Function.class, Consumer.class, Supplier.class)
-                        .newInstance(name, min, max, step, translator, setter, getter);
-            } catch (Exception e) { 
-                VulkanModExtra.LOGGER.error("Failed to create range option: " + key, e);
-                return null; 
-            }
-        };
+        
         // Basic render options - map snake_case to camelCase field names
         String[] renderTypes = {"light_updates", "item_frame", "armor_stand", "painting", "piston",
-                               "beacon_beam", "limit_beacon_beam_height", "enchanting_table_book", "item_frame_name_tag", "player_name_tag"};
+                               "beacon_beam", "limit_beacon_beam_height", "item_frame_name_tag", "player_name_tag"};
         for (String type : renderTypes) {
             Object option = createOption.apply(type, value -> {
                 try {
@@ -815,37 +1068,7 @@ public class VulkanModExtraIntegration {
                 options.add(option);
             }
         }
-        // Add fog options
-        Object fogOption = createOption.apply("global_fog", value -> {
-            VulkanModExtra.CONFIG.renderSettings.globalFog = value;
-            VulkanModExtra.CONFIG.writeChanges();
-            return null;
-        });
-        if (fogOption != null) {
-            try {
-                // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
-                setTooltipMethod.invoke(fogOption, Text.translatable("vulkanmod-extra.option.render.global_fog.tooltip"));
-            } catch (Exception e) {
-                // Tooltip setting failed, continue without tooltip
-            }
-            options.add(fogOption);
-        }
-        Object multiDimFogOption = createOption.apply("multi_dimension_fog", value -> {
-            VulkanModExtra.CONFIG.renderSettings.multiDimensionFog = value;
-            VulkanModExtra.CONFIG.writeChanges();
-            return null;
-        });
-        if (multiDimFogOption != null) {
-            try {
-                // Set tooltip using reflection
-                java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
-                setTooltipMethod.invoke(multiDimFogOption, Text.translatable("vulkanmod-extra.option.render.multi_dimension_fog.tooltip"));
-            } catch (Exception e) {
-                // Tooltip setting failed, continue without tooltip
-            }
-            options.add(multiDimFogOption);
-        }
+        
         // Add prevent shaders from extra settings
         Object preventShadersOption = createOption.apply("prevent_shaders", value -> {
             VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
@@ -862,37 +1085,87 @@ public class VulkanModExtraIntegration {
             }
             options.add(preventShadersOption);
         }
-        // Add performance optimization options
-        Object useFastRandomOption = createOption.apply("use_fast_random", value -> {
-            VulkanModExtra.CONFIG.extraSettings.useFastRandom = value;
+        
+        return options;
+    }
+    
+    private static List<Object> createFogRenderOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+        // Helper for consistent option creation
+        java.util.function.BiFunction<String, java.util.function.Function<Boolean, Void>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.render." + key),
+                        (java.util.function.Consumer<Boolean>) setter::apply,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                // Convert snake_case to camelCase for field lookup
+                                String fieldName = convertSnakeToCamelCase(key);
+                                var configManager = com.criticalrange.config.ConfigurationManager.getInstance();
+                                var config = configManager.getConfig();
+                                var field = config.renderSettings.getClass().getDeclaredField(fieldName);
+                                field.setAccessible(true);
+                                return field.getBoolean(config.renderSettings);
+                            } catch (Exception e) { return true; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+        
+        // Add fog options
+        Object fogOption = createOption.apply("global_fog", value -> {
+            VulkanModExtra.CONFIG.renderSettings.globalFog = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
-        if (useFastRandomOption != null) {
+        if (fogOption != null) {
             try {
                 // Set tooltip using reflection
                 java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
-                setTooltipMethod.invoke(useFastRandomOption, Text.translatable("vulkanmod-extra.option.use_fast_random.tooltip"));
+                setTooltipMethod.invoke(fogOption, Text.translatable("vulkanmod-extra.option.render.global_fog.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
-            options.add(useFastRandomOption);
+            options.add(fogOption);
         }
-        Object linearFlatColorBlenderOption = createOption.apply("linear_flat_color_blender", value -> {
-            VulkanModExtra.CONFIG.extraSettings.linearFlatColorBlender = value;
+        
+        Object multiDimFogOption = createOption.apply("multi_dimension_fog", value -> {
+            VulkanModExtra.CONFIG.renderSettings.multiDimensionFog = value;
             VulkanModExtra.CONFIG.writeChanges();
             return null;
         });
-        if (linearFlatColorBlenderOption != null) {
+        if (multiDimFogOption != null) {
             try {
                 // Set tooltip using reflection
                 java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
-                setTooltipMethod.invoke(linearFlatColorBlenderOption, Text.translatable("vulkanmod-extra.option.linear_flat_color_blender.tooltip"));
+                setTooltipMethod.invoke(multiDimFogOption, Text.translatable("vulkanmod-extra.option.render.multi_dimension_fog.tooltip"));
             } catch (Exception e) {
                 // Tooltip setting failed, continue without tooltip
             }
-            options.add(linearFlatColorBlenderOption);
+            options.add(multiDimFogOption);
         }
+        
+        return options;
+    }
+    
+    private static List<Object> createFogTypeRenderOptions(Class<?> switchOptionClass) throws Exception {
+        List<Object> options = new ArrayList<>();
+        // Create range option function for sliders
+        interface RangeOptionCreator2 {
+            Object apply(String key, int min, int max, int step, Text name, Consumer<Integer> setter, Supplier<Integer> getter);
+        }
+        RangeOptionCreator2 createRangeOption2 = (key, min, max, step, name, setter, getter) -> {
+            try {
+                Class<?> rangeOptionClass = Class.forName("net.vulkanmod.config.option.RangeOption");
+                Function<Integer, Text> translator = value -> Text.literal(value + "%");
+                return rangeOptionClass.getConstructor(Text.class, int.class, int.class, int.class, 
+                        Function.class, Consumer.class, Supplier.class)
+                        .newInstance(name, min, max, step, translator, setter, getter);
+            } catch (Exception e) { 
+                VulkanModExtra.LOGGER.error("Failed to create range option: " + key, e);
+                return null; 
+            }
+        };
+        
         // Add fog configuration options with proper sliders (comprehensive)
         try {
             // Use our custom FogType enum values
@@ -900,7 +1173,10 @@ public class VulkanModExtraIntegration {
             for (com.criticalrange.config.FogType fogType : fogTypes) {
                 String fogTypeName = fogType.toString().toLowerCase();
                 if (!fogTypeName.equals("none")) {
-                    // Create cloud end multiplier slider for each fog type
+                    // Create cloud end multiplier slider for each fog type, but exclude water, lava, and powder snow
+                    if (fogType != com.criticalrange.config.FogType.WATER && 
+                        fogType != com.criticalrange.config.FogType.LAVA && 
+                        fogType != com.criticalrange.config.FogType.POWDER_SNOW) {
                     Object cloudEndOption = createRangeOption2.apply(
                         "fog_type.cloud_end", 0, 300, 1, 
                         Text.translatable("vulkanmod-extra.option.fog_type.cloud_end", fogTypeName),
@@ -939,12 +1215,45 @@ public class VulkanModExtraIntegration {
                         }
                         options.add(cloudEndOption);
                     }
+                    }
                 }
             }
         } catch (Exception e) {
             VulkanModExtra.LOGGER.warn("Could not create fog type configurations", e);
         }
+        
         return options;
+    }
+    
+    private static Object[] createRenderOptionBlocks(Class<?> switchOptionClass, Class<?> optionBlockClass, Class<?> optionArrayClass, Class<?> optionClass) throws Exception {
+        // Create separate option blocks for better organization with visual spacing
+        List<Object> blocks = new ArrayList<>();
+        
+        // Basic Render Options Block
+        List<Object> basicRenderOptions = createBasicRenderOptions(switchOptionClass);
+        if (!basicRenderOptions.isEmpty()) {
+            Object[] basicArray = basicRenderOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, basicRenderOptions.size()));
+            Object basicBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Basic Rendering", basicArray);
+            blocks.add(basicBlock);
+        }
+        
+        // Fog Options Block (creates visual space)
+        List<Object> fogOptions = createFogRenderOptions(switchOptionClass);
+        if (!fogOptions.isEmpty()) {
+            Object[] fogArray = fogOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, fogOptions.size()));
+            Object fogBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Fog Settings", fogArray);
+            blocks.add(fogBlock);
+        }
+        
+        // Fog Type Configuration Block (creates additional visual space)
+        List<Object> fogTypeOptions = createFogTypeRenderOptions(switchOptionClass);
+        if (!fogTypeOptions.isEmpty()) {
+            Object[] fogTypeArray = fogTypeOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(optionClass, fogTypeOptions.size()));
+            Object fogTypeBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("Fog Distance Multipliers", fogTypeArray);
+            blocks.add(fogTypeBlock);
+        }
+        
+        return blocks.toArray((Object[]) java.lang.reflect.Array.newInstance(optionBlockClass, blocks.size()));
     }
     private static List<Object> createHUDOptions(Class<?> switchOptionClass, Class<?> cyclingOptionClass) throws Exception {
         List<Object> options = new ArrayList<>();
@@ -1208,6 +1517,7 @@ public class VulkanModExtraIntegration {
             // Tooltip setting failed, continue without tooltip
         }
         options.add(steadyDebugHudOption);
+        
         return options;
     }
 
@@ -1331,7 +1641,7 @@ public class VulkanModExtraIntegration {
         String[] stemAnimations = {"stem_animations", "warped_stem", "crimson_stem", "warped_hyphae", "crimson_hyphae"};
         String[] sculkAnimations = {"sculk_animations", "sculk", "sculk_vein", "sculk_sensor", "sculk_sensor_side", "sculk_sensor_top", "sculk_shrieker", "sculk_shrieker_side", "sculk_shrieker_top", "calibrated_sculk_sensor", "calibrated_sculk_sensor_side", "calibrated_sculk_sensor_top"};
         String[] commandBlockAnimations = {"command_block_animations", "command_block_front", "chain_command_block_front", "repeating_command_block_front"};
-        String[] additionalAnimations = {"additional_animations", "beacon", "dragon_egg", "brewing_stand_base", "cauldron_water"};
+        String[] additionalAnimations = {"additional_animations", "beacon", "dragon_egg", "brewing_stand_base", "cauldron_water", "enchanting_table_book"};
 
         String[][] allAnimationCategories = {fluidAnimations, fireAnimations, portalAnimations, blockAnimations, machineAnimations, plantAnimations, stemAnimations, sculkAnimations, commandBlockAnimations, additionalAnimations};
 
@@ -1430,7 +1740,16 @@ public class VulkanModExtraIntegration {
             blockList.add(coordinateBlock);
         }
 
-        // Block 3: Toast Options (Toasts, Advancement, Recipe, System, Tutorial)
+        // Block 3: Optimization Options (Fast Random, Linear Flat Color Blender)
+        List<Object> optimizationOptions = new ArrayList<>();
+        createOptimizationOptionsForExtra(switchOptionClass, optimizationOptions);
+        if (!optimizationOptions.isEmpty()) {
+            Object[] optimizationArray = optimizationOptions.toArray((Object[]) java.lang.reflect.Array.newInstance(baseOptionClass, optimizationOptions.size()));
+            Object optimizationBlock = optionBlockClass.getConstructor(String.class, optionArrayClass).newInstance("", optimizationArray);
+            blockList.add(optimizationBlock);
+        }
+
+        // Block 4: Toast Options (Toasts, Advancement, Recipe, System, Tutorial)
         List<Object> toastOptions = new ArrayList<>();
         createToastOptions(switchOptionClass, toastOptions);
         if (!toastOptions.isEmpty()) {
@@ -1681,6 +2000,29 @@ public class VulkanModExtraIntegration {
     }
 
     /**
+     * Create optimization options for the Extra page
+     * These options were originally intended for VulkanMod's Optimizations page
+     * but are now placed in the Extra page for better visibility
+     */
+    private static void createOptimizationOptionsForExtra(Class<?> switchOptionClass, List<Object> options) throws Exception {
+        // Create option factory function
+        java.util.function.BiFunction<String, java.util.function.Consumer<Boolean>, Object> createOption = (key, setter) -> {
+            try {
+                return switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
+                    .newInstance(Text.translatable("vulkanmod-extra.option.extra." + key),
+                        setter,
+                        (java.util.function.Supplier<Boolean>) () -> {
+                            try {
+                                var field = VulkanModExtra.CONFIG.extraSettings.getClass().getDeclaredField(key);
+                                field.setAccessible(true);
+                                return field.getBoolean(VulkanModExtra.CONFIG.extraSettings);
+                            } catch (Exception e) { return false; }
+                        });
+            } catch (Exception e) { return null; }
+        };
+    }
+
+    /**
      * Create other Extra-related options (Instant Sneak, Steady Debug Extra)
      */
     private static void createOtherExtraOptions(Class<?> switchOptionClass, List<Object> options) throws Exception {
@@ -1717,6 +2059,7 @@ public class VulkanModExtraIntegration {
         options.add(steadyDebugHudOption);
     }
 
+    
     /**
      * Convert snake_case to camelCase for field name lookup
      */

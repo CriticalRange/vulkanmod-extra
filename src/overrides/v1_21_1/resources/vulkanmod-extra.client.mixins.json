@@ -13,6 +13,7 @@
 		"extra.MixinFPSGameRenderer",
 		"extra.MixinPreventShadersGameRenderer",
 		"extra.MixinMinecraftClient",
+		"render.MixinBeaconRenderer",
 		"extra.MixinWindow",
 		"extra.MixinToastManager",
 		"details.MixinSkyRenderer",
@@ -24,6 +25,8 @@
 		"details.MixinSkyElements",
 		"render.MixinItemFrameRenderer",
 		"render.MixinPaintingRenderer",
+		"vulkanmod.MixinVulkanModMonitorSelection",
+		"vulkanmod.MixinVulkanModOptimizationOptions",
 		"render.MixinArmorStandRenderer"
 	],
 	"injectors": {

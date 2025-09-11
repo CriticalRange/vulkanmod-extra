@@ -25,6 +25,8 @@
 		"details.MixinSkyElements",
 		"render.MixinItemFrameRenderer",
 		"render.MixinPaintingRenderer",
+		"vulkanmod.MixinVulkanModMonitorSelection",
+		"vulkanmod.MixinVulkanModOptimizationOptions",
 		"render.MixinArmorStandRenderer"
 			],
 	"injectors": {

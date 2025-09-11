@@ -135,6 +135,7 @@ public class VulkanModExtraConfig {
         public boolean dragonEgg = true;
         public boolean brewingStandBase = true;
         public boolean cauldronWater = true;
+        public boolean enchantingTableBook = true;
     }
 
     public static class ParticleSettings {
@@ -272,7 +273,6 @@ public class VulkanModExtraConfig {
         public boolean piston = true;
         public boolean beaconBeam = true;
         public boolean limitBeaconBeamHeight = false;
-        public boolean enchantingTableBook = true;
         public boolean itemFrameNameTag = true;
         public boolean playerNameTag = true;
         public boolean globalFog = true;
@@ -327,6 +327,9 @@ public class VulkanModExtraConfig {
         public boolean advancedItemTooltips = false;
         public boolean useFastRandom = false;
         public boolean linearFlatColorBlender = false;
+        
+        // Monitor settings
+        public int fullscreenMonitor = 0;
     }
 
     // ===== ENUMS =====

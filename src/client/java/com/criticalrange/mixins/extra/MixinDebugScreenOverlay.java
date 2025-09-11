@@ -1,6 +1,7 @@
 package com.criticalrange.mixins.extra;
 
 import com.criticalrange.VulkanModExtra;
+import com.criticalrange.util.MonitorInfoUtil;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -65,4 +66,4 @@ public abstract class MixinDebugScreenOverlay {
         }
         this.drawText(guiGraphics, this.rightTextCache, left);
     }
-}
+  }
