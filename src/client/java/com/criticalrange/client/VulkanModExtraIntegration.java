@@ -754,9 +754,13 @@ public class VulkanModExtraIntegration {
                         (java.util.function.Consumer<Boolean>) setter::apply,
                         (java.util.function.Supplier<Boolean>) () -> {
                             try {
-                                var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(key);
+                                // Convert snake_case to camelCase for field lookup
+                                String fieldName = convertSnakeToCamelCase(key);
+                                var configManager = com.criticalrange.config.ConfigurationManager.getInstance();
+                                var config = configManager.getConfig();
+                                var field = config.renderSettings.getClass().getDeclaredField(fieldName);
                                 field.setAccessible(true);
-                                return field.getBoolean(VulkanModExtra.CONFIG.renderSettings);
+                                return field.getBoolean(config.renderSettings);
                             } catch (Exception e) { return true; }
                         });
             } catch (Exception e) { return null; }
@@ -777,16 +781,24 @@ public class VulkanModExtraIntegration {
                 return null; 
             }
         };
-        // Basic render options
+        // Basic render options - map snake_case to camelCase field names
         String[] renderTypes = {"light_updates", "item_frame", "armor_stand", "painting", "piston",
                                "beacon_beam", "limit_beacon_beam_height", "enchanting_table_book", "item_frame_name_tag", "player_name_tag"};
         for (String type : renderTypes) {
             Object option = createOption.apply(type, value -> {
                 try {
-                    var field = VulkanModExtra.CONFIG.renderSettings.getClass().getDeclaredField(type);
+                    // Convert snake_case to camelCase for field lookup
+                    String fieldName = convertSnakeToCamelCase(type);
+                    
+                    // Get the current config from ConfigurationManager and modify it
+                    var configManager = com.criticalrange.config.ConfigurationManager.getInstance();
+                    var config = configManager.getConfig();
+                    var field = config.renderSettings.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
-                    field.setBoolean(VulkanModExtra.CONFIG.renderSettings, value);
-                    VulkanModExtra.CONFIG.writeChanges();
+                    field.setBoolean(config.renderSettings, value);
+                    
+                    // Save through ConfigurationManager
+                    configManager.saveConfig();
                 } catch (Exception e) {
                     VulkanModExtra.LOGGER.error("Failed to set render option: " + type, e);
                 }
@@ -1703,5 +1715,28 @@ public class VulkanModExtraIntegration {
             setTooltipMethod.invoke(steadyDebugHudOption, Text.translatable("vulkanmod-extra.option.extra.steady_debug_hud.tooltip"));
         } catch (Exception e) {}
         options.add(steadyDebugHudOption);
+    }
+
+    /**
+     * Convert snake_case to camelCase for field name lookup
+     */
+    private static String convertSnakeToCamelCase(String snakeCase) {
+        if (!snakeCase.contains("_")) {
+            return snakeCase;
+        }
+        
+        String[] parts = snakeCase.split("_");
+        StringBuilder camelCase = new StringBuilder(parts[0]);
+        
+        for (int i = 1; i < parts.length; i++) {
+            if (parts[i].length() > 0) {
+                camelCase.append(Character.toUpperCase(parts[i].charAt(0)));
+                if (parts[i].length() > 1) {
+                    camelCase.append(parts[i].substring(1));
+                }
+            }
+        }
+        
+        return camelCase.toString();
     }
 }

@@ -24,7 +24,8 @@
 		"extra.MixinVOptionScreen",
 		"details.MixinSkyElements",
 		"render.MixinItemFrameRenderer",
-		"render.MixinPaintingRenderer"
+		"render.MixinPaintingRenderer",
+		"render.MixinArmorStandRenderer"
 	],
 	"injectors": {
 		"defaultRequire": 1

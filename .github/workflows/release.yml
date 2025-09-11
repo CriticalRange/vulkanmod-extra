@@ -30,8 +30,8 @@ jobs:
         with:
           gradle-home-cache-cleanup: false
           
-      - name: Build release
-        run: ./gradlew build
+      - name: Build all versions
+        run: ./gradlew buildAllVersions
         
       - name: Get version from tag
         id: get_version
@@ -68,10 +68,10 @@ jobs:
           $COMMITS
           
           ### Compatibility:
-          • **Minecraft**: 1.21.1
+          • **Minecraft**: 1.21.1, 1.21.2, 1.21.3, 1.21.4, 1.21.5
           • **Fabric Loader**: 0.17.2+
-          • **Fabric API**: 0.116.5+1.21.1
-          • **VulkanMod**: 0.5.5
+          • **Fabric API**: Version-specific for each Minecraft version
+          • **VulkanMod**: 0.5.5+
           EOF
           fi
           
@@ -84,7 +84,7 @@ jobs:
           name: VulkanMod Extra ${{ steps.get_version.outputs.VERSION }}
           body_path: ${{ steps.changelog.outputs.CHANGELOG_PATH }}
           files: |
-            build/libs/*.jar
+            build/releases/*.jar
           draft: true  # Creates as draft - you manually publish later
           prerelease: ${{ contains(steps.get_version.outputs.VERSION, 'alpha') || contains(steps.get_version.outputs.VERSION, 'beta') || contains(steps.get_version.outputs.VERSION, 'rc') }}
         env:
