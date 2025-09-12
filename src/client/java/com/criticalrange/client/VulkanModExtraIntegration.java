@@ -66,9 +66,7 @@ public class VulkanModExtraIntegration {
             }
             // Try to set up the mixin integration
             // Note: The actual mixin will handle the GUI integration
-            VulkanModExtra.LOGGER.info("VulkanMod found, GUI mixin will handle integration");
             integrationSuccessful = true;
-            VulkanModExtra.LOGGER.info("Successfully integrated VulkanMod Extra with VulkanMod GUI!");
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Failed to integrate with VulkanMod GUI", e);
             // Don't rethrow - let the mod continue without GUI integration
@@ -2059,7 +2057,7 @@ public class VulkanModExtraIntegration {
         options.add(steadyDebugHudOption);
 
         // Advanced Item Tooltips - binds to Minecraft's vanilla F3+H functionality
-        Text advancedItemTooltipsText = Text.translatable("vulkanmod-extra.option.advanced_item_tooltips");
+        Text advancedItemTooltipsText = Text.translatable("vulkanmod-extra.option.extra.advanced_item_tooltips");
         Object advancedItemTooltipsOption = switchOptionClass.getConstructor(Text.class, java.util.function.Consumer.class, java.util.function.Supplier.class)
                 .newInstance(advancedItemTooltipsText,
                     (java.util.function.Consumer<Boolean>) value -> {
@@ -2094,7 +2092,7 @@ public class VulkanModExtraIntegration {
 
         try {
             java.lang.reflect.Method setTooltipMethod = switchOptionClass.getMethod("setTooltip", Text.class);
-            setTooltipMethod.invoke(advancedItemTooltipsOption, Text.translatable("vulkanmod-extra.option.advanced_item_tooltips.tooltip"));
+            setTooltipMethod.invoke(advancedItemTooltipsOption, Text.translatable("vulkanmod-extra.option.extra.advanced_item_tooltips.tooltip"));
         } catch (Exception e) {}
         options.add(advancedItemTooltipsOption);
     }

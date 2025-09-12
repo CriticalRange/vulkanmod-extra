@@ -30,8 +30,7 @@ public class VulkanModExtraClient implements ClientModInitializer {
         LOGGER.info("Initializing VulkanMod Extra Client...");
 
         try {
-            // Initialize configuration
-            ConfigurationManager.getInstance().loadConfig();
+            // Configuration is already loaded by main mod initializer
             LOGGER.info("Configuration loaded successfully");
 
             // Initialize feature manager

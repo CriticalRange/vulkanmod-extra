@@ -55,7 +55,6 @@ public class ConfigurationManager {
             for (Path possibleFile : possibleConfigFiles) {
                 if (Files.exists(possibleFile)) {
                     configFile = possibleFile;
-                    LOGGER.info("Found existing config file: {}", possibleFile);
                     break;
                 }
             }
@@ -104,7 +103,6 @@ public class ConfigurationManager {
             Path configFile = configDirectory.getParent().resolve("vulkanmod-extra-options.json");
             String json = GSON.toJson(config);
             Files.writeString(configFile, json);
-            LOGGER.info("Configuration saved successfully to: {}", configFile);
 
             // Update the static CONFIG reference to ensure all code sees the latest values
             updateStaticConfigReference();

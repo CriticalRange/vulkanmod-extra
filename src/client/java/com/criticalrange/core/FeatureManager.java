@@ -42,7 +42,6 @@ public class FeatureManager {
         features.put(feature.getId(), feature);
         featuresByCategory.get(feature.getCategory()).add(feature);
 
-        LOGGER.info("Registered feature: {} ({})", feature.getName(), feature.getId());
     }
 
     /**
@@ -85,7 +84,6 @@ public class FeatureManager {
             return;
         }
 
-        LOGGER.info("Initializing {} features...", features.size());
 
         for (Feature feature : features.values()) {
             try {
@@ -97,7 +95,6 @@ public class FeatureManager {
         }
 
         initialized = true;
-        LOGGER.info("Feature initialization complete");
     }
 
     /**

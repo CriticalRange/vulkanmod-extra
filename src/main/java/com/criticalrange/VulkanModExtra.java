@@ -26,9 +26,6 @@ public class VulkanModExtra implements ModInitializer {
 		configManager = ConfigurationManager.getInstance();
 		CONFIG = configManager.loadConfig();
 		
-		LOGGER.info("VulkanMod Extra mod initialized (client-side only)");
-		LOGGER.info("Configuration system initialized with {} settings", countSettings(CONFIG));
-		LOGGER.info("Client functionality will be initialized when Minecraft client starts");
 	}
 	
 	private int countSettings(VulkanModExtraConfig config) {

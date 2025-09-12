@@ -21,9 +21,6 @@ import java.util.List;
 public abstract class MixinVOptionScreen {
     private static final Logger LOGGER = LoggerFactory.getLogger("VulkanMod Extra VOptionScreen Mixin");
 
-    static {
-        LOGGER.info("VOptionScreen mixin loaded successfully!");
-    }
 
     // Shadow the optionPages field with correct type
     @Shadow
@@ -32,17 +29,12 @@ public abstract class MixinVOptionScreen {
     // Inject into the addPages method after pages are added
     @Inject(method = "addPages", at = @At("TAIL"))
     private void onAddPages(CallbackInfo ci) {
-        LOGGER.debug("VOptionScreen addPages completed, attempting injection...");
 
         try {
             // Create and add VulkanMod Extra option pages
             List<OptionPage> extraPages = VulkanModExtraIntegration.createVulkanModExtraOptionPages();
             if (extraPages != null && !extraPages.isEmpty()) {
-                LOGGER.info("Adding {} VulkanMod Extra pages", extraPages.size());
                 this.optionPages.addAll(extraPages);
-                LOGGER.info("Successfully added VulkanMod Extra pages! Total pages: {}", this.optionPages.size());
-            } else {
-                LOGGER.debug("No extra pages to add");
             }
 
         } catch (Exception e) {

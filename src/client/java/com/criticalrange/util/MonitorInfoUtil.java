@@ -151,18 +151,11 @@ public class MonitorInfoUtil {
             
             initialized = true;
             
-            VulkanModExtra.LOGGER.info("Monitor info initialized: {} monitors detected", monitorInfos.size());
-            for (MonitorInfo monitor : monitorInfos) {
-                VulkanModExtra.LOGGER.debug("Monitor: {}", monitor);
-            }
-            if (gpuInfo != null) {
-                VulkanModExtra.LOGGER.debug("GPU: {}", gpuInfo);
-            }
             if (systemInfoData != null) {
                 VulkanModExtra.LOGGER.debug("System: {}", systemInfoData);
             }
         } catch (Exception e) {
-            VulkanModExtra.LOGGER.error("Failed to initialize monitor info: {}", e.getMessage());
+            VulkanModExtra.LOGGER.error("Failed to initialize monitor info: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
             initialized = false;
         }
     }
@@ -174,6 +167,11 @@ public class MonitorInfoUtil {
         List<MonitorInfo> infos = new ArrayList<>();
         
         try {
+            // Check if we're in a headless environment
+            if (GraphicsEnvironment.isHeadless()) {
+                return infos; // Return empty list silently
+            }
+            
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice[] screens = ge.getScreenDevices();
             
@@ -183,11 +181,14 @@ public class MonitorInfoUtil {
                     MonitorInfo info = new MonitorInfo(screen, gc);
                     infos.add(info);
                 } catch (Exception e) {
-                    VulkanModExtra.LOGGER.warn("Failed to get info for screen {}: {}", screen.getIDstring(), e.getMessage());
+                    VulkanModExtra.LOGGER.warn("Failed to get info for screen {}: {}", screen.getIDstring(), e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
                 }
             }
+        } catch (java.awt.HeadlessException e) {
+            // Silently handle headless environment
+            return infos;
         } catch (Exception e) {
-            VulkanModExtra.LOGGER.error("Failed to get monitor information: {}", e.getMessage());
+            VulkanModExtra.LOGGER.warn("Could not get monitor information: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         }
         
         return infos;
@@ -232,14 +233,14 @@ public class MonitorInfoUtil {
                         }
                     }
                 } catch (Exception e) {
-                    VulkanModExtra.LOGGER.warn("Could not get VRAM info: {}", e.getMessage());
+                    VulkanModExtra.LOGGER.warn("Could not get VRAM info: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
                 }
                 
                 return new GPUInfo(vendor, name, driverVersion, vulkanVersion, 
                                  vramTotal, vramAvailable, vendorId);
             }
         } catch (Exception e) {
-            VulkanModExtra.LOGGER.warn("Could not get GPU info from VulkanMod: {}", e.getMessage());
+            VulkanModExtra.LOGGER.warn("Could not get GPU info from VulkanMod: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
         }
         
         return null;
@@ -266,7 +267,7 @@ public class MonitorInfoUtil {
             return new SystemInfoData(osName, osVersion, cpuName, cpuCores,
                                     totalMemory, availableMemory, javaVersion, javaVM);
         } catch (Exception e) {
-            VulkanModExtra.LOGGER.error("Failed to get system info: {}", e.getMessage());
+            VulkanModExtra.LOGGER.error("Failed to get system info: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
             return null;
         }
     }

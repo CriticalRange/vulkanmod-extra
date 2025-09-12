@@ -22,7 +22,6 @@ public class FPSDisplayFeature extends BaseFeature {
     @Override
     public void initialize(MinecraftClient minecraft) {
         fpsCounter = new FPSCounter();
-        getLogger().info("FPS Display feature initialized");
     }
 
     @Override

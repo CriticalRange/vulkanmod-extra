@@ -20,7 +20,6 @@ public class ParticleFeature extends BaseFeature {
 
     @Override
     public void initialize(MinecraftClient minecraft) {
-        getLogger().info("Particle feature initialized");
     }
 
     @Override

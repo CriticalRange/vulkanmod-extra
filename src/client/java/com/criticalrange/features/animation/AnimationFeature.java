@@ -18,7 +18,6 @@ public class AnimationFeature extends BaseFeature {
 
     @Override
     public void initialize(MinecraftClient minecraft) {
-        getLogger().info("Animation feature initialized");
     }
 
     @Override
