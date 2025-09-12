@@ -2,8 +2,6 @@
 
 .gradle/
 build/
-out/
-classes/
 
 # AI
 CLAUDE.md
@@ -45,5 +43,5 @@ replay_*.log
 *.jfr
 
 # projects
-sodium-extra/
-VulkanMod/
+/sodium-extra/
+/VulkanMod/
