@@ -3,7 +3,7 @@
 [![Modrinth Version](https://img.shields.io/modrinth/v/vulkanmod-extra?logo=modrinth&label=modrinth&color=00AF5C)](https://modrinth.com/mod/vulkanmod-extra)
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/vulkanmod-extra?logo=modrinth&label=downloads&color=00AF5C)](https://modrinth.com/mod/vulkanmod-extra)
 [![CurseForge Downloads](https://img.shields.io/curseforge/dt/1342527?logo=curseforge&label=curseforge&color=F16436)](https://www.curseforge.com/minecraft/mc-mods/vulkanmod-extra)
-[![GitHub Release](https://img.shields.io/github/v/release/CriticalRange/vulkanmod-extra?logo=github)](https://github.com/CriticalRange/vulkanmod-extra/releases)
+![GitHub Release](https://img.shields.io/github/v/release/CriticalRange/vulkanmod-extra?include_prereleases)
 [![License](https://img.shields.io/github/license/CriticalRange/vulkanmod-extra?color=blue)](https://github.com/CriticalRange/vulkanmod-extra/blob/main/LICENSE)
 
 **The ultimate performance control suite for VulkanMod.** Turn off what you don't need, keep what you love, and squeeze every last frame out of your Minecraft experience.
