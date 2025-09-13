@@ -32,7 +32,7 @@ public class MixinVulkanModMonitorSelection {
     private static volatile int selectedMonitorIndex = 0;
 
     /**
-     * Initialize monitor detection using GLFW (VulkanMod's approach)
+     * Initialize monitor detection using OSHI for real monitor model names
      */
     @Unique
     private static void initializeMonitors() {
@@ -40,48 +40,92 @@ public class MixinVulkanModMonitorSelection {
             availableMonitors = new ArrayList<>();
             monitorHandles = new ArrayList<>();
             try {
-                // Use GLFW directly like VulkanMod does
-                org.lwjgl.PointerBuffer monitors = org.lwjgl.glfw.GLFW.glfwGetMonitors();
-                if (monitors != null && monitors.limit() > 0) {
-                    for (int i = 0; i < monitors.limit(); i++) {
-                        long monitorHandle = monitors.get(i);
-                        String monitorName = org.lwjgl.glfw.GLFW.glfwGetMonitorName(monitorHandle);
+                // Use OSHI to get real monitor information
+                List<MonitorInfoUtil.MonitorInfo> monitors = MonitorInfoUtil.getMonitors();
+                
+                if (monitors != null && !monitors.isEmpty()) {
+                    for (int i = 0; i < monitors.size(); i++) {
+                        MonitorInfoUtil.MonitorInfo monitor = monitors.get(i);
                         
-                        // Get monitor video mode like VulkanMod does
-                        org.lwjgl.glfw.GLFWVidMode vidMode = org.lwjgl.glfw.GLFW.glfwGetVideoMode(monitorHandle);
-                        if (vidMode != null) {
-                            // Use actual monitor name if available, otherwise fall back to generic naming
-                            String displayName;
-                            if (monitorName != null && !monitorName.trim().isEmpty()) {
-                                displayName = i == 0 ? monitorName + " (Primary)" : monitorName;
+                        // Use OSHI's real model name instead of GLFW generic name
+                        String displayName;
+                        if (monitor.realModelName != null && !monitor.realModelName.equals("Unknown Model")) {
+                            displayName = monitor.primary ? 
+                                monitor.realModelName + " (Primary)" : 
+                                monitor.realModelName;
+                        } else {
+                            // Fallback to manufacturer + model combination
+                            displayName = monitor.primary ? 
+                                monitor.manufacturer + " " + monitor.realModelName + " (Primary)" : 
+                                monitor.manufacturer + " " + monitor.realModelName;
+                        }
+                        
+                        availableMonitors.add(displayName);
+                        
+                        // For monitor handles, we still need GLFW handles for VulkanMod compatibility
+                        // Get GLFW monitor as fallback
+                        try {
+                            org.lwjgl.PointerBuffer glfwMonitors = org.lwjgl.glfw.GLFW.glfwGetMonitors();
+                            if (glfwMonitors != null && i < glfwMonitors.limit()) {
+                                monitorHandles.add(glfwMonitors.get(i));
                             } else {
-                                displayName = i == 0 ? "Primary Monitor" : "Monitor " + (i + 1);
+                                monitorHandles.add(0L); // Fallback to primary
                             }
-                            availableMonitors.add(displayName);
-                            monitorHandles.add(monitorHandle);
+                        } catch (Exception e) {
+                            monitorHandles.add(0L); // Fallback to primary
                         }
                     }
+                } else {
+                    // Fallback to GLFW if OSHI fails
+                    initializeMonitorsWithGLFW();
                 }
                 
                 // If we found monitors, set default to primary (index 0)
                 if (!availableMonitors.isEmpty()) {
                     selectedMonitorIndex = 0;
                 } else {
-                    // Fallback: create a dummy monitor
+                    // Final fallback
                     availableMonitors.add("Primary");
-                    monitorHandles.add(0L); // 0 means primary monitor
+                    monitorHandles.add(0L);
                     selectedMonitorIndex = 0;
-                    
                 }
                 
             } catch (Exception e) {
-                // Final fallback
-                availableMonitors.add("Primary");
-                monitorHandles.add(0L);
-                selectedMonitorIndex = 0;
-                
+                // Fallback to GLFW if OSHI fails
+                initializeMonitorsWithGLFW();
             }
         }
+    }
+    
+    /**
+     * Fallback monitor initialization using GLFW
+     */
+    @Unique
+    private static void initializeMonitorsWithGLFW() {
+        availableMonitors.clear();
+        monitorHandles.clear();
+        
+        try {
+            org.lwjgl.PointerBuffer monitors = org.lwjgl.glfw.GLFW.glfwGetMonitors();
+            if (monitors != null && monitors.limit() > 0) {
+                for (int i = 0; i < monitors.limit(); i++) {
+                    long monitorHandle = monitors.get(i);
+                    String monitorName = org.lwjgl.glfw.GLFW.glfwGetMonitorName(monitorHandle);
+                    
+                    if (monitorName != null && !monitorName.trim().isEmpty()) {
+                        String displayName = i == 0 ? monitorName + " (Primary)" : monitorName;
+                        availableMonitors.add(displayName);
+                        monitorHandles.add(monitorHandle);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Final fallback
+            availableMonitors.add("Primary");
+            monitorHandles.add(0L);
+        }
+        
+        selectedMonitorIndex = 0;
     }
 
     /**
@@ -416,7 +460,8 @@ public class MixinVulkanModMonitorSelection {
         availableMonitors = null;
         monitorHandles = null;
         selectedMonitorIndex = 0;
-        // Note: We're using GLFW directly now, so no need to reset MonitorInfoUtil
+        // Also reset OSHI cache to get fresh monitor information
+        MonitorInfoUtil.reset();
     }
 
     /**

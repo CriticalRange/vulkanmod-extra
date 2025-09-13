@@ -6,7 +6,6 @@ import oshi.SystemInfo;
 import oshi.hardware.*;
 import oshi.software.os.OperatingSystem;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +26,9 @@ public class MonitorInfoUtil {
      */
     public static class MonitorInfo {
         public final String name;
+        public final String realModelName;
+        public final String manufacturer;
+        public final String serialNumber;
         public final int width;
         public final int height;
         public final int refreshRate;
@@ -35,35 +37,29 @@ public class MonitorInfoUtil {
         public final boolean primary;
         public final String bounds;
         
-        public MonitorInfo(GraphicsDevice device, GraphicsConfiguration config) {
-            this.name = device.getIDstring();
-            DisplayMode mode = device.getDisplayMode();
-            this.width = mode.getWidth();
-            this.height = mode.getHeight();
-            this.refreshRate = mode.getRefreshRate();
-            this.colorDepth = mode.getBitDepth();
-            this.dpi = getDPI(config);
-            this.primary = device == GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-            this.bounds = getBounds(config);
+        
+        // Constructor for OSHI-based monitor info (when AWT is not available)
+        public MonitorInfo(String name, String realModelName, String manufacturer, String serialNumber,
+                         int width, int height, int refreshRate, int colorDepth, double dpi, 
+                         boolean primary, String bounds) {
+            this.name = name;
+            this.realModelName = realModelName != null ? realModelName : "Unknown Model";
+            this.manufacturer = manufacturer != null ? manufacturer : "Unknown";
+            this.serialNumber = serialNumber != null ? serialNumber : "";
+            this.width = width;
+            this.height = height;
+            this.refreshRate = refreshRate;
+            this.colorDepth = colorDepth;
+            this.dpi = dpi;
+            this.primary = primary;
+            this.bounds = bounds;
         }
         
-        private double getDPI(GraphicsConfiguration config) {
-            try {
-                return config.getDefaultTransform().getScaleX() * 96.0;
-            } catch (Exception e) {
-                return 96.0; // Default DPI
-            }
-        }
-        
-        private String getBounds(GraphicsConfiguration config) {
-            Rectangle bounds = config.getBounds();
-            return String.format("%dx%d @ %d,%d", bounds.width, bounds.height, bounds.x, bounds.y);
-        }
         
         @Override
         public String toString() {
             return String.format("%s (%s) - %dx%d@%dHz, %d-bit, %.1f DPI", 
-                name, primary ? "Primary" : "Secondary", 
+                realModelName, primary ? "Primary" : "Secondary", 
                 width, height, refreshRate, colorDepth, dpi);
         }
     }
@@ -161,37 +157,161 @@ public class MonitorInfoUtil {
     }
     
     /**
-     * Get monitor information from AWT
+     * Get monitor information using OSHI with real model names from EDID
      */
     private static List<MonitorInfo> getMonitorInfo() {
+        return getMonitorsFromOSHI();
+    }
+    
+    /**
+     * Get monitor information from OSHI with EDID parsing for real model names
+     */
+    private static List<MonitorInfo> getMonitorsFromOSHI() {
         List<MonitorInfo> infos = new ArrayList<>();
         
         try {
-            // Check if we're in a headless environment
-            if (GraphicsEnvironment.isHeadless()) {
-                return infos; // Return empty list silently
-            }
+            // Use fresh SystemInfo instance to avoid initialization conflicts
+            SystemInfo freshSystemInfo = new SystemInfo();
+            List<oshi.hardware.Display> displays = freshSystemInfo.getHardware().getDisplays();
             
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            GraphicsDevice[] screens = ge.getScreenDevices();
-            
-            for (GraphicsDevice screen : screens) {
+            for (int i = 0; i < displays.size(); i++) {
                 try {
-                    GraphicsConfiguration gc = screen.getDefaultConfiguration();
-                    MonitorInfo info = new MonitorInfo(screen, gc);
+                    oshi.hardware.Display display = displays.get(i);
+                    
+                    // Get display properties
+                    byte[] edid = display.getEdid();
+                    String modelName = extractModelNameFromEDID(edid);
+                    String manufacturer = extractManufacturerFromEDID(edid);
+                    String serialNumber = extractSerialFromEDID(edid);
+                    
+                    // Create monitor info from OSHI data
+                    MonitorInfo info = createMonitorInfoFromOSHI(i, modelName, manufacturer, serialNumber);
                     infos.add(info);
+                    
                 } catch (Exception e) {
-                    VulkanModExtra.LOGGER.warn("Failed to get info for screen {}: {}", screen.getIDstring(), e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
+                    VulkanModExtra.LOGGER.warn("Failed to process display {}: {}", i, e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
                 }
             }
-        } catch (java.awt.HeadlessException e) {
-            // Silently handle headless environment
-            return infos;
+            
         } catch (Exception e) {
-            VulkanModExtra.LOGGER.warn("Could not get monitor information: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
+            System.out.println("OSHI: Error - " + e.getMessage());
+            e.printStackTrace();
         }
         
         return infos;
+    }
+    
+    /**
+     * Extract real model name from EDID data
+     */
+    private static String extractModelNameFromEDID(byte[] edid) {
+        if (edid == null || edid.length < 128) {
+            return null;
+        }
+        
+        // EDID parsing for monitor name (Descriptor Block 1: 0x36-0x47)
+        // Look for Display Name descriptor (0xFC)
+        for (int i = 54; i <= 108; i += 18) {
+            if (i + 3 < edid.length && 
+                edid[i] == 0 && edid[i + 1] == 0 && edid[i + 2] == 0 && 
+                edid[i + 3] == (byte) 0xFC) {
+                
+                // Found monitor name descriptor
+                StringBuilder name = new StringBuilder();
+                for (int j = 5; j < 18; j++) {
+                    if (i + j < edid.length) {
+                        char c = (char) edid[i + j];
+                        if (c == '\n' || c == '\r' || c == 0) {
+                            break;
+                        }
+                        name.append(c);
+                    }
+                }
+                
+                String result = name.toString().trim();
+                if (!result.isEmpty() && !result.contains("Generic")) {
+                    return result;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Extract manufacturer from EDID data
+     */
+    private static String extractManufacturerFromEDID(byte[] edid) {
+        if (edid == null || edid.length < 8) {
+            return null;
+        }
+        
+        try {
+            // Manufacturer ID is in bytes 8-9 (big endian)
+            int manufacturerId = ((edid[8] & 0x7F) << 8) | (edid[9] & 0xFF);
+            
+            // Convert to 3-character manufacturer code
+            char[] manufacturerCode = new char[3];
+            manufacturerCode[0] = (char) (((manufacturerId >> 10) & 0x1F) + 0x40);
+            manufacturerCode[1] = (char) (((manufacturerId >> 5) & 0x1F) + 0x40);
+            manufacturerCode[2] = (char) ((manufacturerId & 0x1F) + 0x40);
+            
+            return new String(manufacturerCode);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Extract serial number from EDID data
+     */
+    private static String extractSerialFromEDID(byte[] edid) {
+        if (edid == null || edid.length < 16) {
+            return null;
+        }
+        
+        try {
+            // Serial number is in bytes 12-15 (little endian)
+            int serial = ((edid[15] & 0xFF) << 24) | 
+                        ((edid[14] & 0xFF) << 16) | 
+                        ((edid[13] & 0xFF) << 8) | 
+                        (edid[12] & 0xFF);
+            
+            if (serial != 0) {
+                return String.valueOf(serial);
+            }
+        } catch (Exception e) {
+            // Ignore and return null
+        }
+        
+        return null;
+    }
+    
+    
+    /**
+     * Create monitor info from OSHI data
+     */
+    private static MonitorInfo createMonitorInfoFromOSHI(int displayIndex, 
+                                                         String modelName, String manufacturer, String serialNumber) {
+        // Use default values since OSHI Display doesn't provide dimensions
+        int width = 1920; // Default fallback
+        int height = 1080; // Default fallback
+        int refreshRate = 60;
+        int colorDepth = 24;
+        
+        return new MonitorInfo(
+            "Display " + displayIndex, // name
+            modelName != null ? modelName : "Unknown Model", // realModelName
+            manufacturer != null ? manufacturer : "Unknown", // manufacturer
+            serialNumber, // serialNumber
+            width, // width
+            height, // height
+            refreshRate, // refreshRate
+            colorDepth, // colorDepth
+            96.0, // dpi
+            displayIndex == 0, // primary
+            String.format("%dx%d @ 0,0", width, height) // bounds
+        );
     }
     
     /**

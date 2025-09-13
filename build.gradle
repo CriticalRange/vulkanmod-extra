@@ -103,6 +103,9 @@ dependencies {
 	// Suppress ErrorProne annotation warnings from GSON
 	compileOnly 'com.google.errorprone:error_prone_annotations:2.23.0'
 
+	// OSHI library for enhanced monitor information detection
+	implementation 'com.github.oshi:oshi-core:6.8.3'
+
 	// Note: VulkanMod requires Vulkan drivers and may not work in dev environment
 	// For testing without graphics, consider using production builds
 
