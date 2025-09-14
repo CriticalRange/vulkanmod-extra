@@ -79,7 +79,10 @@ public class FPSDisplayFeature extends BaseFeature {
         StringBuilder text = new StringBuilder();
         text.append("FPS: ").append(fpsCounter.getCurrentFPS());
 
-        if (config.extraSettings.showFPSDetails && showDetails) {
+        // Only show extended stats in full or detailed modes
+        var mode = config.extraSettings.fpsDisplayMode;
+        boolean showExtended = (mode == VulkanModExtraConfig.FPSDisplayMode.EXTENDED || mode == VulkanModExtraConfig.FPSDisplayMode.DETAILED);
+        if (showExtended && config.extraSettings.showFPSDetails && showDetails) {
             text.append(" (")
                 .append("avg: ").append(fpsCounter.getAverageFPS())
                 .append(", min: ").append(fpsCounter.getMinFPS())

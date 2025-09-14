@@ -71,6 +71,11 @@ public class VulkanModExtraHud {
     private void renderOverlay(DrawContext drawContext) {
         var config = VulkanModExtra.CONFIG.extraSettings;
 
+        // if none is true: nothing to render
+        if (!config.showFps && !config.showCoords) {
+            return;
+        }
+
         int screenWidth = minecraft.getWindow().getScaledWidth();
         int screenHeight = minecraft.getWindow().getScaledHeight();
 
