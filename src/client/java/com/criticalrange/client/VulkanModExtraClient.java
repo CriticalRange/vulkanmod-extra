@@ -106,12 +106,7 @@ public class VulkanModExtraClient implements ClientModInitializer {
      */
     public static void onHudRender(DrawContext drawContext, float partialTicks) {
         if (instance != null) {
-            // Render features HUD
-            if (instance.fpsDisplayFeature != null) {
-                instance.fpsDisplayFeature.render(drawContext, partialTicks);
-            }
-            
-            // Render legacy HUD
+            // Render overlay via HUD only to avoid duplicate FPS text
             if (instance.hud != null) {
                 instance.hud.onHudRender(drawContext, partialTicks);
             }
