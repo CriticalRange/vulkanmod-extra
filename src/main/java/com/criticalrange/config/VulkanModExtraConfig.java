@@ -20,6 +20,7 @@ public class VulkanModExtraConfig {
     public final RenderSettings renderSettings = new RenderSettings();
     public final DetailSettings detailSettings = new DetailSettings();
     public final ExtraSettings extraSettings = new ExtraSettings();
+    public final OptimizationSettings optimizationSettings = new OptimizationSettings();
 
 
     /**
@@ -328,6 +329,24 @@ public class VulkanModExtraConfig {
           
         // Monitor settings
         public int fullscreenMonitor = 0;
+    }
+
+    public static class OptimizationSettings {
+        // Chunk rendering optimizations
+        public boolean chunkUpdateBatching = true;
+        public int chunkUpdateBatchSize = 5;
+
+        // Memory & buffer optimizations
+        public boolean vertexBufferOptimization = true;
+        public boolean textureAtlasOptimization = true;
+        public boolean bufferPooling = true;
+        public int bufferPoolSize = 64;
+
+        // Entity optimization
+        public int entityUpdateLimit = 50;
+
+        // Rendering pipeline optimizations
+        public boolean renderCallBatching = true;
     }
 
     // ===== ENUMS =====

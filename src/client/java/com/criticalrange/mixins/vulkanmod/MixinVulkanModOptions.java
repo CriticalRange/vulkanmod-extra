@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Mixin to add monitor information to VulkanMod's Video options page
@@ -144,6 +146,92 @@ public class MixinVulkanModOptions {
     }
 
     /**
+     * Create the optimization options block
+     */
+    @Unique
+    private static OptionBlock createOptimizationBlock() {
+        try {
+            List<Option<?>> options = new ArrayList<>();
+
+            // Get configuration instance
+            com.criticalrange.config.VulkanModExtraConfig.OptimizationSettings optSettings =
+                com.criticalrange.VulkanModExtra.CONFIG.optimizationSettings;
+
+            // Chunk rendering optimizations
+            options.add(createSwitchOption(
+                "Chunk Update Batching",
+                "Batch chunk updates to reduce rebuild frequency",
+                () -> optSettings.chunkUpdateBatching,
+                (value) -> optSettings.chunkUpdateBatching = value
+            ));
+
+            options.add(createRangeOption(
+                "Chunk Update Batch Size",
+                "Number of chunks to process in each batch",
+                1, 20, 1,
+                () -> optSettings.chunkUpdateBatchSize,
+                (value) -> optSettings.chunkUpdateBatchSize = value
+            ));
+
+            // Memory & buffer optimizations
+            options.add(createSwitchOption(
+                "Vertex Buffer Optimization",
+                "Custom vertex formats for better memory usage",
+                () -> optSettings.vertexBufferOptimization,
+                (value) -> optSettings.vertexBufferOptimization = value
+            ));
+
+            options.add(createSwitchOption(
+                "Texture Atlas Optimization",
+                "Reduce texture binding calls for better performance",
+                () -> optSettings.textureAtlasOptimization,
+                (value) -> optSettings.textureAtlasOptimization = value
+            ));
+
+            options.add(createSwitchOption(
+                "Buffer Pooling",
+                "Reuse GPU buffers instead of recreating them",
+                () -> optSettings.bufferPooling,
+                (value) -> optSettings.bufferPooling = value
+            ));
+
+            options.add(createRangeOption(
+                "Buffer Pool Size",
+                "Number of buffers to keep in the pool",
+                16, 128, 1,
+                () -> optSettings.bufferPoolSize,
+                (value) -> optSettings.bufferPoolSize = value
+            ));
+
+            // Entity optimization
+            options.add(createCustomRangeOption(
+                "Entity Update Limit",
+                "Maximum number of entities to update per frame (0 = unlimited)",
+                0, 200, 10,
+                () -> optSettings.entityUpdateLimit,
+                (value) -> optSettings.entityUpdateLimit = value
+            ));
+
+            // Rendering pipeline optimizations
+            options.add(createSwitchOption(
+                "Render Call Batching",
+                "Group similar draw calls to reduce overhead",
+                () -> optSettings.renderCallBatching,
+                (value) -> optSettings.renderCallBatching = value
+            ));
+
+            return new OptionBlock("Optimization Settings", options.toArray(new Option<?>[0]));
+
+        } catch (Exception e) {
+            if (com.criticalrange.VulkanModExtra.LOGGER != null) {
+                com.criticalrange.VulkanModExtra.LOGGER.error("Failed to create optimization block: {}", e.getMessage());
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Create an info option that displays static text
      */
     @Unique
@@ -201,17 +289,33 @@ public class MixinVulkanModOptions {
     }
 
     /**
-     * Inject tooltips into Other page options
+     * Inject optimization options into Optimization page
      */
     @Inject(
-        method = "getOtherOpts", 
+        method = "getOptimizationOpts",
         at = @At("RETURN"),
-        remap = false
+        remap = false,
+        cancellable = true
     )
-    private static void vulkanmodExtra$injectOtherTooltips(CallbackInfoReturnable<OptionBlock[]> cir) {
+    private static void vulkanmodExtra$injectOptimizationOptions(CallbackInfoReturnable<OptionBlock[]> cir) {
         try {
-            OptionBlock[] blocks = cir.getReturnValue();
-            injectOtherTooltips(blocks);
+            OptionBlock[] originalBlocks = cir.getReturnValue();
+            List<OptionBlock> newBlocks = new ArrayList<>();
+
+            // Add original blocks first
+            for (OptionBlock block : originalBlocks) {
+                newBlocks.add(block);
+            }
+
+            // Add optimization options block after original options
+            OptionBlock optimizationBlock = createOptimizationBlock();
+            if (optimizationBlock != null) {
+                newBlocks.add(optimizationBlock);
+            }
+
+            // Set the modified return value
+            OptionBlock[] finalBlocks = newBlocks.toArray(new OptionBlock[0]);
+            cir.setReturnValue(finalBlocks);
         } catch (Exception e) {
             // Silently continue on failure
         }
@@ -465,5 +569,66 @@ public class MixinVulkanModOptions {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    /**
+     * Create a switch option with proper tooltip
+     */
+    @Unique
+    private static Option<?> createSwitchOption(String name, String description, Supplier<Boolean> getter, Consumer<Boolean> setter) {
+        return new SwitchOption(
+            Text.literal(name),
+            value -> {
+                setter.accept(value);
+                // Save configuration when options change
+                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+            },
+            getter
+        ).setTooltip(Text.literal(description));
+    }
+
+    /**
+     * Create a range option with proper tooltip
+     */
+    @Unique
+    private static Option<?> createRangeOption(String name, String description, int min, int max, int step,
+                                               Supplier<Integer> getter, Consumer<Integer> setter) {
+        return new net.vulkanmod.config.option.RangeOption(
+            Text.literal(name),
+            min, max, step,
+            value -> {
+                setter.accept(value);
+                // Save configuration when options change
+                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+            },
+            getter
+        ).setTooltip(Text.literal(description));
+    }
+
+    /**
+     * Create a custom range option with special handling for unlimited (0) value
+     */
+    @Unique
+    private static Option<?> createCustomRangeOption(String name, String description, int min, int max, int step,
+                                                     Supplier<Integer> getter, Consumer<Integer> setter) {
+        return new net.vulkanmod.config.option.RangeOption(
+            Text.literal(name),
+            min, max, step,
+            value -> {
+                setter.accept(value);
+                // Save configuration when options change
+                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+            },
+            getter
+        ) {
+            @Override
+            public Text getName() {
+                int value = getter.get();
+                if (value == 0) {
+                    return Text.literal(name + ": None");
+                }
+                return Text.literal(name + ": " + value);
+            }
+        }.setTooltip(Text.literal(description));
     }
 }

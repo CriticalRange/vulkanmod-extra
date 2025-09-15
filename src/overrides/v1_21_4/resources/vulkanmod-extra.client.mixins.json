@@ -27,7 +27,6 @@
 		"render.MixinPaintingRenderer",
 		"vulkanmod.MixinVulkanModMonitorSelection",
 		"vulkanmod.MixinVulkanModOptions",
-		"vulkanmod.MixinVulkanModOptimizationOptions",
 		"render.MixinArmorStandRenderer"
 	],
 	"injectors": {

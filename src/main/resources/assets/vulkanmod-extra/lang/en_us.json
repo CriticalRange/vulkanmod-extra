@@ -527,5 +527,32 @@
   
   "vulkanmod.options.other.frameQueue.tooltip": "Higher values might help stabilize frametime but will increase input lag.\n\n§7Performance Impact: §eLow",
   "vulkanmod.options.other.deviceSelector.tooltip": "Current device: %s",
-  "vulkanmod.options.other.chunkBuilderThreads.tooltip": "Number of threads used for chunk building. More threads improve chunk loading speed on multi-core CPUs.\n\n§7Performance Impact: §6Medium"
+  "vulkanmod.options.other.chunkBuilderThreads.tooltip": "Number of threads used for chunk building. More threads improve chunk loading speed on multi-core CPUs.\n\n§7Performance Impact: §6Medium",
+
+  "__comment": "Optimization Settings",
+  "vulkanmod-extra.pages.optimization": "Optimization",
+
+  "__comment": "Chunk Rendering Optimizations",
+  "vulkanmod-extra.option.optimization.chunk_update_batching": "Chunk Update Batching",
+  "vulkanmod-extra.option.optimization.chunk_update_batching.tooltip": "Groups chunk updates together to reduce rebuild frequency and improve performance by processing multiple chunks in a single batch rather than individually.\n\n§7Performance Impact: §aMedium (Positive)",
+  "vulkanmod-extra.option.optimization.chunk_update_batch_size": "Chunk Update Batch Size",
+  "vulkanmod-extra.option.optimization.chunk_update_batch_size.tooltip": "Number of chunks to process in each batch. Higher values may improve performance but increase memory usage. Adjust based on your system's capabilities.\n\n§7Performance Impact: §aMedium (Positive)",
+
+  "__comment": "Memory & Buffer Optimizations",
+  "vulkanmod-extra.option.optimization.vertex_buffer_optimization": "Vertex Buffer Optimization",
+  "vulkanmod-extra.option.optimization.vertex_buffer_optimization.tooltip": "Uses custom vertex formats and buffer management inspired by Sodium for better memory usage and improved rendering performance.\n\n§7Performance Impact: §aMedium (Positive)",
+  "vulkanmod-extra.option.optimization.texture_atlas_optimization": "Texture Atlas Optimization",
+  "vulkanmod-extra.option.optimization.texture_atlas_optimization.tooltip": "Reduces texture binding calls and optimizes texture atlas management for better GPU performance and lower CPU overhead.\n\n§7Performance Impact: §aMedium (Positive)",
+  "vulkanmod-extra.option.optimization.buffer_pooling": "Buffer Pooling",
+  "vulkanmod-extra.option.optimization.buffer_pooling.tooltip": "Reuses GPU buffers instead of recreating them each frame, significantly reducing memory allocation overhead and improving performance.\n\n§7Performance Impact: §aHigh (Positive)",
+  "vulkanmod-extra.option.optimization.buffer_pool_size": "Buffer Pool Size",
+  "vulkanmod-extra.option.optimization.buffer_pool_size.tooltip": "Number of buffers to keep in the pool. Larger pools reduce memory allocation frequency but consume more VRAM. Adjust based on available graphics memory.\n\n§7Performance Impact: §aMedium (Positive)",
+
+  "__comment": "Entity Optimization",
+  "vulkanmod-extra.option.optimization.entity_update_limit": "Entity Update Limit",
+  "vulkanmod-extra.option.optimization.entity_update_limit.tooltip": "Maximum number of entities to update per frame (0 = unlimited). Higher values maintain smoother entity movement but may impact performance in crowded areas.\n\n§7Performance Impact: §aHigh (Positive)",
+
+  "__comment": "Rendering Pipeline Optimizations",
+  "vulkanmod-extra.option.optimization.render_call_batching": "Render Call Batching",
+  "vulkanmod-extra.option.optimization.render_call_batching.tooltip": "Groups similar draw calls together to reduce CPU-GPU communication overhead and improve overall rendering performance.\n\n§7Performance Impact: §aMedium (Positive)"
 }
