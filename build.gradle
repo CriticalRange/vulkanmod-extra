@@ -369,23 +369,6 @@ task restoreOverrides {
 	}
 }
 
-// Configure source sets to include version-specific overrides
-// Add version-specific Java overrides if they exist
-if (overrideDir.exists()) {
-	def javaOverrideDir = new File(overrideDir, 'java')
-	if (javaOverrideDir.exists()) {
-		sourceSets.client.java.srcDirs += javaOverrideDir
-	}
-}
-
-// Add version-specific resource overrides if they exist
-if (overrideDir.exists()) {
-	def resourcesOverrideDir = new File(overrideDir, 'resources')
-	if (resourcesOverrideDir.exists()) {
-		sourceSets.client.resources.srcDirs += resourcesOverrideDir
-	}
-}
-
 // Make setupOverrides run before any compilation task
 tasks.withType(JavaCompile) {
 	dependsOn setupOverrides

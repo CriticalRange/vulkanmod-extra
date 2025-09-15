@@ -10,11 +10,11 @@ import java.util.regex.Matcher;
 /**
  * Runtime version detection helper for VulkanMod Extra
  * Provides easy access to Minecraft version information and boolean flags
- * 
+ *
  * This class uses FabricLoader to detect the current Minecraft version at runtime
  * and provides convenient boolean flags for version-specific code.
- * 
- * Supported versions: 1.21.1, 1.21.2, 1.21.3, 1.21.4
+ *
+ * Supported versions: 1.21.1, 1.21.2, 1.21.3, 1.21.4, 1.21.5
  */
 public final class VersionHelper {
     // Supported versions
@@ -22,9 +22,10 @@ public final class VersionHelper {
     private static final String MINECRAFT_1_21_2 = "1.21.2";
     private static final String MINECRAFT_1_21_3 = "1.21.3";
     private static final String MINECRAFT_1_21_4 = "1.21.4";
-    
+    private static final String MINECRAFT_1_21_5 = "1.21.5";
+
     private static final List<String> SUPPORTED_VERSIONS = Arrays.asList(
-        MINECRAFT_1_21_1, MINECRAFT_1_21_2, MINECRAFT_1_21_3, MINECRAFT_1_21_4
+        MINECRAFT_1_21_1, MINECRAFT_1_21_2, MINECRAFT_1_21_3, MINECRAFT_1_21_4, MINECRAFT_1_21_5
     );
     
     private static final String CURRENT_VERSION;
@@ -35,15 +36,18 @@ public final class VersionHelper {
     public static final boolean IS_1_21_2;
     public static final boolean IS_1_21_3;
     public static final boolean IS_1_21_4;
+    public static final boolean IS_1_21_5;
     public static final boolean IS_1_21_X;
-    
+
     // Version range checks
     public static final boolean IS_PRE_1_21_2;
     public static final boolean IS_PRE_1_21_3;
     public static final boolean IS_PRE_1_21_4;
+    public static final boolean IS_PRE_1_21_5;
     public static final boolean IS_POST_1_21_1;
     public static final boolean IS_POST_1_21_2;
     public static final boolean IS_POST_1_21_3;
+    public static final boolean IS_POST_1_21_4;
     
     // Initialize version information
     static {
@@ -55,15 +59,18 @@ public final class VersionHelper {
         IS_1_21_2 = CURRENT_VERSION.equals("1.21.2");
         IS_1_21_3 = CURRENT_VERSION.equals("1.21.3");
         IS_1_21_4 = CURRENT_VERSION.equals("1.21.4");
+        IS_1_21_5 = CURRENT_VERSION.equals("1.21.5");
         IS_1_21_X = VERSION_PARTS[0] == 1 && VERSION_PARTS[1] == 21;
-        
+
         // Set range flags
         IS_PRE_1_21_2 = compareVersions(CURRENT_VERSION, "1.21.2") < 0;
         IS_PRE_1_21_3 = compareVersions(CURRENT_VERSION, "1.21.3") < 0;
         IS_PRE_1_21_4 = compareVersions(CURRENT_VERSION, "1.21.4") < 0;
+        IS_PRE_1_21_5 = compareVersions(CURRENT_VERSION, "1.21.5") < 0;
         IS_POST_1_21_1 = compareVersions(CURRENT_VERSION, "1.21.1") > 0;
         IS_POST_1_21_2 = compareVersions(CURRENT_VERSION, "1.21.2") > 0;
         IS_POST_1_21_3 = compareVersions(CURRENT_VERSION, "1.21.3") > 0;
+        IS_POST_1_21_4 = compareVersions(CURRENT_VERSION, "1.21.4") > 0;
     }
     
     /**
@@ -196,6 +203,7 @@ public final class VersionHelper {
         System.out.println("  IS_1_21_2: " + IS_1_21_2);
         System.out.println("  IS_1_21_3: " + IS_1_21_3);
         System.out.println("  IS_1_21_4: " + IS_1_21_4);
+        System.out.println("  IS_1_21_5: " + IS_1_21_5);
         System.out.println("  IS_1_21_X: " + IS_1_21_X);
     }
     
@@ -250,6 +258,8 @@ public final class VersionHelper {
                 return "Minecraft 1.21.3";
             case MINECRAFT_1_21_4:
                 return "Minecraft 1.21.4";
+            case MINECRAFT_1_21_5:
+                return "Minecraft 1.21.5";
             default:
                 return "Minecraft " + CURRENT_VERSION;
         }

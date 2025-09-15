@@ -4,14 +4,15 @@ This document describes the comprehensive version management system implemented 
 
 ## Overview
 
-VulkanMod Extra uses a shared codebase with version-specific overrides to maintain compatibility across Minecraft 1.21.1, 1.21.2, 1.21.3, and 1.21.4. This approach minimizes code duplication while allowing precise version-specific modifications when needed.
+VulkanMod Extra uses a shared codebase with version-specific overrides to maintain compatibility across Minecraft 1.21.1, 1.21.2, 1.21.3, 1.21.4, and 1.21.5. This approach minimizes code duplication while allowing precise version-specific modifications when needed.
 
 ## Supported Versions
 
 - **Minecraft 1.21.1** - Stable baseline version
 - **Minecraft 1.21.2** - Minor updates and fixes
 - **Minecraft 1.21.3** - Additional compatibility updates
-- **Minecraft 1.21.4** - Latest supported version
+- **Minecraft 1.21.4** - Enhanced compatibility
+- **Minecraft 1.21.5** - Latest supported version
 
 ## Architecture
 
@@ -36,7 +37,8 @@ src/
     │   └── resources/
     ├── v1_21_2/
     ├── v1_21_3/
-    └── v1_21_4/
+    ├── v1_21_4/
+    └── v1_21_5/
 ```
 
 ### Override Priority
@@ -200,7 +202,8 @@ gradle/versions/
 ├── 1.21.1.properties
 ├── 1.21.2.properties
 ├── 1.21.3.properties
-└── 1.21.4.properties
+├── 1.21.4.properties
+└── 1.21.5.properties
 ```
 
 Example (`1.21.3.properties`):
@@ -237,8 +240,13 @@ The `build.gradle` automatically:
 - Potential class relocations
 
 ### 1.21.4
-- Latest version, most likely to have breaking changes
+- Enhanced compatibility with newer mods
 - Requires careful testing and validation
+- Stable for development use
+
+### 1.21.5
+- Latest supported version
+- May include breaking changes from previous versions
 - Recommended as development baseline for future versions
 
 ## Best Practices

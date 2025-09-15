@@ -7,7 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SUPPORTED_VERSIONS=("1.21.1" "1.21.2" "1.21.3" "1.21.4")
+SUPPORTED_VERSIONS=("1.21.1" "1.21.2" "1.21.3" "1.21.4" "1.21.5")
 
 # Colors for output
 RED='\033[0;31m'

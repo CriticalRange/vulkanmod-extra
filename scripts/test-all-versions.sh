@@ -7,7 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SUPPORTED_VERSIONS=("1.21.1" "1.21.2" "1.21.3" "1.21.4")
+SUPPORTED_VERSIONS=("1.21.1" "1.21.2" "1.21.3" "1.21.4" "1.21.5")
 RESULTS_DIR="$PROJECT_DIR/test-results"
 SUMMARY_FILE="$RESULTS_DIR/compatibility-report.md"
 
