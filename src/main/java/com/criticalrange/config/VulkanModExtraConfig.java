@@ -325,9 +325,7 @@ public class VulkanModExtraConfig {
         public boolean enableVulkanModGuiIntegration = true;
         public boolean optimizeConfigWrites = true;
         public boolean advancedItemTooltips = false;
-        public boolean useRandomOptimization = false;
-        public boolean linearFlatColorBlender = false;
-        
+          
         // Monitor settings
         public int fullscreenMonitor = 0;
     }

@@ -419,10 +419,6 @@
   "vulkanmod-extra.option.render.multi_dimension_fog.tooltip": "Use per-dimension fog settings instead of single fog for all dimensions\n\n§7Performance Impact: §eLow",
   "vulkanmod-extra.option.render.prevent_shaders": "Prevent Shaders",
   "vulkanmod-extra.option.render.prevent_shaders.tooltip": "Prevents shader loading for better performance\n\n§7Performance Impact: §aHigh (Positive)",
-  "vulkanmod-extra.option.extra.use_fast_random": "Use Fast Random",
-  "vulkanmod-extra.option.extra.use_fast_random.tooltip": "Uses optimized random function for block rendering. Improves performance with minimal visual impact.\n\n§7Performance Impact: §aLow (Positive)",
-  "vulkanmod-extra.option.extra.linear_flat_color_blender": "Linear Flat Color Blender",
-  "vulkanmod-extra.option.extra.linear_flat_color_blender.tooltip": "Applies linear color biome blending without affecting block faces. Improves biome color transitions.\n\n§7Performance Impact: §eLow",
 
   "vulkanmod-extra.option.extra.show_fps": "Show FPS",
   "vulkanmod-extra.option.extra.show_fps.tooltip": "Displays real-time frames per second (FPS) counter overlay on screen. Useful for monitoring performance and troubleshooting lag issues.\n\n§7Performance Impact: §eLow",
