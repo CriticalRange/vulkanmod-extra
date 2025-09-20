@@ -15,6 +15,12 @@ public class BufferPool {
 
     // Singleton instance
     private static volatile BufferPool instance;
+    private static volatile boolean isShuttingDown = false;
+
+    // Static initializer to register shutdown hook
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(BufferPool::shutdown, "BufferPool-Shutdown"));
+    }
 
     // Buffer type categories for pooling
     public enum BufferType {
@@ -527,5 +533,30 @@ public class BufferPool {
         public double getMemoryUtilization() {
             return maxMemoryBytes > 0 ? (double) totalMemoryBytes / maxMemoryBytes : 0.0;
         }
+    }
+
+    /**
+     * Shutdown method to clean up all buffers and prevent memory leaks
+     */
+    public static void shutdown() {
+        isShuttingDown = true;
+        try {
+            BufferPool pool = instance;
+            if (pool != null) {
+                pool.cleanup();
+                instance = null;
+            }
+            VulkanModExtra.LOGGER.info("BufferPool shutdown completed");
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.error("Error during BufferPool shutdown", e);
+        }
+    }
+
+    /**
+     * Check if the buffer pool is shutting down
+     * @return true if shutting down
+     */
+    public static boolean isShuttingDown() {
+        return isShuttingDown;
     }
 }

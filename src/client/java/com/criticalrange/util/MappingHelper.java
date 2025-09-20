@@ -26,9 +26,14 @@ public class MappingHelper {
     private static final Map<String, String> FIELD_ALIASES = new HashMap<>();
     private static final Map<String, String> CLASS_ALIASES = new HashMap<>();
     
+    // Shutdown flag to prevent operations during shutdown
+    private static volatile boolean isShuttingDown = false;
+
     static {
         // Initialize version-specific mappings
         initMappings();
+        // Register shutdown hook for cleanup
+        Runtime.getRuntime().addShutdownHook(new Thread(MappingHelper::shutdown, "MappingHelper-Shutdown"));
     }
     
     private static void initMappings() {
@@ -343,5 +348,31 @@ public class MappingHelper {
     public static String getCacheStats() {
         return String.format("Method Cache: %d entries, Field Cache: %d entries, Class Cache: %d entries",
             methodCache.size(), fieldCache.size(), classCache.size());
+    }
+
+    /**
+     * Shutdown method to clear all caches and prevent memory leaks
+     */
+    public static void shutdown() {
+        isShuttingDown = true;
+        try {
+            methodCache.clear();
+            fieldCache.clear();
+            classCache.clear();
+            METHOD_ALIASES.clear();
+            FIELD_ALIASES.clear();
+            CLASS_ALIASES.clear();
+        } catch (Exception e) {
+            // Log but don't throw during shutdown
+            System.err.println("Error during MappingHelper shutdown: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Check if the helper is shutting down
+     * @return true if shutting down
+     */
+    public static boolean isShuttingDown() {
+        return isShuttingDown;
     }
 }

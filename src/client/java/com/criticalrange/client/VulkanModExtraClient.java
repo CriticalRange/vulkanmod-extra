@@ -20,12 +20,18 @@ import org.slf4j.LoggerFactory;
 public class VulkanModExtraClient implements ClientModInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger("VulkanMod Extra Client");
     private static VulkanModExtraClient instance;
+    private static volatile boolean isShuttingDown = false;
 
     private FeatureManager featureManager;
     private FPSDisplayFeature fpsDisplayFeature;
     private VulkanModExtraHud hud;
     private BufferPool bufferPool;
     private long frameCount = 0;
+
+    // Static initializer to register shutdown hook
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(VulkanModExtraClient::shutdown, "VulkanModExtraClient-Shutdown"));
+    }
 
     @Override
     public void onInitializeClient() {
@@ -255,5 +261,44 @@ public class VulkanModExtraClient implements ClientModInitializer {
      */
     public static boolean isInitialized() {
         return instance != null && instance.featureManager != null;
+    }
+
+    /**
+     * Coordinated shutdown of all mod components to prevent memory leaks
+     */
+    public static void shutdown() {
+        isShuttingDown = true;
+        LOGGER.info("Shutting down VulkanMod Extra Client...");
+
+        try {
+            // Shutdown features first
+            if (instance != null && instance.featureManager != null) {
+                instance.featureManager.shutdownFeatures();
+            }
+
+            // Shutdown utilities in order
+            com.criticalrange.client.VulkanModExtraIntegration.shutdown();
+            com.criticalrange.util.MappingHelper.shutdown();
+            com.criticalrange.util.MonitorInfoUtil.shutdown();
+            com.criticalrange.optimization.BufferPool.shutdown();
+
+            // Cleanup configuration manager
+            ConfigurationManager configManager = ConfigurationManager.getInstance();
+            if (configManager != null) {
+                configManager.saveConfig();
+            }
+
+            LOGGER.info("VulkanMod Extra Client shutdown completed");
+        } catch (Exception e) {
+            LOGGER.error("Error during VulkanMod Extra Client shutdown", e);
+        }
+    }
+
+    /**
+     * Check if the client is shutting down
+     * @return true if shutting down
+     */
+    public static boolean isShuttingDown() {
+        return isShuttingDown;
     }
 }

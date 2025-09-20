@@ -22,30 +22,59 @@ public class VulkanModExtraIntegration {
     private static final Map<Object, Boolean> injectedInstances = new WeakHashMap<>();
     // Debounced resource reload to prevent multiple reloads when changing multiple settings
     private static java.util.concurrent.ScheduledFuture<?> pendingResourceReload;
-    private static final java.util.concurrent.ScheduledExecutorService resourceReloadScheduler = 
+    private static final java.util.concurrent.ScheduledExecutorService resourceReloadScheduler =
         java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "VulkanModExtra-ResourceReload");
             t.setDaemon(true);
             return t;
         });
+
+    // Shutdown flag to prevent new operations during shutdown
+    private static volatile boolean isShuttingDown = false;
+
+    // Static initializer to register shutdown hook
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(VulkanModExtraIntegration::shutdown, "VulkanModExtra-Shutdown"));
+    }
     /**
      * Schedule a debounced resource reload to avoid multiple reloads when changing multiple settings
      */
     private static void scheduleResourceReload() {
+        // Don't schedule new operations if shutting down
+        if (isShuttingDown) {
+            return;
+        }
+
         // Cancel any pending reload
         if (pendingResourceReload != null && !pendingResourceReload.isDone()) {
             pendingResourceReload.cancel(false);
         }
+
+        // Don't schedule if executor is shut down
+        if (resourceReloadScheduler.isShutdown()) {
+            return;
+        }
+
         // Schedule a new reload with a 500ms delay
-        pendingResourceReload = resourceReloadScheduler.schedule(() -> {
-            net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
-            if (minecraft != null) {
-                minecraft.execute(() -> {
-                    VulkanModExtra.LOGGER.info("Reloading resources due to animation setting changes");
-                    minecraft.reloadResources();
-                });
-            }
-        }, 500, java.util.concurrent.TimeUnit.MILLISECONDS);
+        try {
+            pendingResourceReload = resourceReloadScheduler.schedule(() -> {
+                // Double-check shutdown status
+                if (isShuttingDown) {
+                    return;
+                }
+
+                net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
+                if (minecraft != null) {
+                    minecraft.execute(() -> {
+                        VulkanModExtra.LOGGER.info("Reloading resources due to animation setting changes");
+                        minecraft.reloadResources();
+                    });
+                }
+            }, 500, java.util.concurrent.TimeUnit.MILLISECONDS);
+        } catch (java.util.concurrent.RejectedExecutionException e) {
+            // Executor is shutting down, ignore
+            VulkanModExtra.LOGGER.debug("Resource reload rejected due to executor shutdown");
+        }
     }
     /**
      * Attempt to integrate with VulkanMod's GUI system at runtime
@@ -2117,5 +2146,72 @@ public class VulkanModExtraIntegration {
         }
         
         return camelCase.toString();
+    }
+
+    /**
+     * Cleanup method called during shutdown to prevent memory leaks
+     */
+    public static void shutdown() {
+        isShuttingDown = true;
+        VulkanModExtra.LOGGER.info("Shutting down VulkanMod integration resources...");
+
+        try {
+            // Cancel any pending resource reload
+            if (pendingResourceReload != null && !pendingResourceReload.isDone()) {
+                pendingResourceReload.cancel(true);
+                pendingResourceReload = null;
+            }
+
+            // Shutdown the resource reload scheduler
+            if (resourceReloadScheduler != null && !resourceReloadScheduler.isShutdown()) {
+                resourceReloadScheduler.shutdown();
+                try {
+                    if (!resourceReloadScheduler.awaitTermination(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                        resourceReloadScheduler.shutdownNow();
+                        if (!resourceReloadScheduler.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS)) {
+                            VulkanModExtra.LOGGER.warn("Resource reload scheduler did not terminate cleanly");
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    resourceReloadScheduler.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            // Clear cached instances
+            synchronized (injectedInstances) {
+                injectedInstances.clear();
+            }
+
+            // Clear cached classes
+            clearCachedClasses();
+
+            VulkanModExtra.LOGGER.info("VulkanMod integration resources cleaned up successfully");
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.error("Error during VulkanMod integration shutdown", e);
+        }
+    }
+
+    /**
+     * Clear all cached reflection classes to prevent memory leaks
+     */
+    private static void clearCachedClasses() {
+        try {
+            cachedOptionPageClass = null;
+            cachedOptionBlockClass = null;
+            cachedSwitchOptionClass = null;
+            cachedCyclingOptionClass = null;
+            cachedOptionClass = null;
+            classesLoaded = false;
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.warn("Error clearing cached classes", e);
+        }
+    }
+
+    /**
+     * Check if the integration is shutting down
+     */
+    public static boolean isShuttingDown() {
+        return isShuttingDown;
     }
 }

@@ -20,6 +20,12 @@ public class MonitorInfoUtil {
     private static volatile List<MonitorInfo> monitorInfos = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static volatile GPUInfo gpuInfo = null;
     private static volatile SystemInfoData systemInfoData = null;
+    private static volatile boolean isShuttingDown = false;
+
+    // Static initializer to register shutdown hook
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(MonitorInfoUtil::shutdown, "MonitorInfoUtil-Shutdown"));
+    }
     
     /**
      * Monitor information structure
@@ -503,5 +509,26 @@ public class MonitorInfoUtil {
         gpuInfo = null;
         systemInfoData = null;
         systemInfo = null; // Release OSHI resources
+    }
+
+    /**
+     * Shutdown hook to ensure cleanup during JVM shutdown
+     */
+    public static void shutdown() {
+        isShuttingDown = true;
+        try {
+            cleanup();
+            VulkanModExtra.LOGGER.info("MonitorInfoUtil shutdown completed");
+        } catch (Exception e) {
+            VulkanModExtra.LOGGER.error("Error during MonitorInfoUtil shutdown", e);
+        }
+    }
+
+    /**
+     * Check if the utility is shutting down
+     * @return true if shutting down
+     */
+    public static boolean isShuttingDown() {
+        return isShuttingDown;
     }
 }
