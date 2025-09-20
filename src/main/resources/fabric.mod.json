@@ -30,10 +30,10 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.17.2",
-		"minecraft": "~1.21.1",
-		"java": ">=21",
+		"minecraft": ">=1.21.1 <=1.21.5",
+		"java": ">=17",
 		"fabric-api": "*",
-		"vulkanmod": "*"
+		"vulkanmod": ">=0.5.5"
 	},
 	"suggests": {
 		"modmenu": "*"

@@ -7,6 +7,7 @@ import com.criticalrange.features.particle.ParticleFeature;
 import com.criticalrange.features.monitor.MonitorInfoFeature;
 import com.criticalrange.config.ConfigurationManager;
 import com.criticalrange.optimization.BufferPool;
+import com.criticalrange.integration.HybridVulkanModIntegration;
 import com.criticalrange.VulkanModExtra;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
@@ -61,11 +62,13 @@ public class VulkanModExtraClient implements ClientModInitializer {
             // Sync vanilla options with our config
             syncVanillaOptions(minecraft);
 
-            // Try to integrate with VulkanMod's GUI system
+            // Initialize hybrid VulkanMod integration (events + reflection fallback)
             try {
-                VulkanModExtraIntegration.tryIntegrateWithVulkanMod();
+                HybridVulkanModIntegration.initialize();
+                LOGGER.info("VulkanMod integration system initialized: {}",
+                    HybridVulkanModIntegration.isEventBasedAvailable() ? "Event-based" : "Reflection fallback");
             } catch (Exception e) {
-                LOGGER.warn("Failed to integrate with VulkanMod GUI, but features will still work", e);
+                LOGGER.warn("Failed to initialize VulkanMod integration, but features will still work", e);
             }
 
             LOGGER.info("VulkanMod Extra Client initialized successfully!");
