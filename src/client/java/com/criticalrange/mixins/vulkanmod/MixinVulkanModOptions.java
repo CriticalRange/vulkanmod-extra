@@ -157,67 +157,20 @@ public class MixinVulkanModOptions {
             com.criticalrange.config.VulkanModExtraConfig.OptimizationSettings optSettings =
                 com.criticalrange.VulkanModExtra.CONFIG.optimizationSettings;
 
-            // Chunk rendering optimizations
-            options.add(createSwitchOption(
-                "Chunk Update Batching",
-                "Batch chunk updates to reduce rebuild frequency",
-                () -> optSettings.chunkUpdateBatching,
-                (value) -> optSettings.chunkUpdateBatching = value
-            ));
-
-            options.add(createRangeOption(
-                "Chunk Update Batch Size",
-                "Number of chunks to process in each batch",
-                1, 20, 1,
-                () -> optSettings.chunkUpdateBatchSize,
-                (value) -> optSettings.chunkUpdateBatchSize = value
-            ));
-
-            // Memory & buffer optimizations
-            options.add(createSwitchOption(
-                "Vertex Buffer Optimization",
-                "Custom vertex formats for better memory usage",
-                () -> optSettings.vertexBufferOptimization,
-                (value) -> optSettings.vertexBufferOptimization = value
-            ));
-
-            options.add(createSwitchOption(
-                "Texture Atlas Optimization",
-                "Reduce texture binding calls for better performance",
-                () -> optSettings.textureAtlasOptimization,
-                (value) -> optSettings.textureAtlasOptimization = value
-            ));
-
+            // Buffer pool optimization
             options.add(createSwitchOption(
                 "Buffer Pooling",
-                "Reuse GPU buffers instead of recreating them",
+                "Reuse GPU buffers instead of recreating them to reduce allocation overhead",
                 () -> optSettings.bufferPooling,
                 (value) -> optSettings.bufferPooling = value
             ));
 
             options.add(createRangeOption(
                 "Buffer Pool Size",
-                "Number of buffers to keep in the pool",
-                16, 128, 1,
+                "Maximum number of buffers to keep in the pool (MB)",
+                16, 256, 16,
                 () -> optSettings.bufferPoolSize,
                 (value) -> optSettings.bufferPoolSize = value
-            ));
-
-            // Entity optimization
-            options.add(createCustomRangeOption(
-                "Entity Update Limit",
-                "Maximum number of entities to update per frame (0 = unlimited)",
-                0, 200, 10,
-                () -> optSettings.entityUpdateLimit,
-                (value) -> optSettings.entityUpdateLimit = value
-            ));
-
-            // Rendering pipeline optimizations
-            options.add(createSwitchOption(
-                "Render Call Batching",
-                "Group similar draw calls to reduce overhead",
-                () -> optSettings.renderCallBatching,
-                (value) -> optSettings.renderCallBatching = value
             ));
 
             return new OptionBlock("Optimization Settings", options.toArray(new Option<?>[0]));
@@ -581,7 +534,10 @@ public class MixinVulkanModOptions {
             value -> {
                 setter.accept(value);
                 // Save configuration when options change
-                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+                // Use static reference for faster config save
+                if (com.criticalrange.VulkanModExtra.configManager != null) {
+                    com.criticalrange.VulkanModExtra.configManager.saveConfig();
+                };
             },
             getter
         ).setTooltip(Text.literal(description));
@@ -599,7 +555,10 @@ public class MixinVulkanModOptions {
             value -> {
                 setter.accept(value);
                 // Save configuration when options change
-                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+                // Use static reference for faster config save
+                if (com.criticalrange.VulkanModExtra.configManager != null) {
+                    com.criticalrange.VulkanModExtra.configManager.saveConfig();
+                };
             },
             getter
         ).setTooltip(Text.literal(description));
@@ -617,7 +576,10 @@ public class MixinVulkanModOptions {
             value -> {
                 setter.accept(value);
                 // Save configuration when options change
-                com.criticalrange.config.ConfigurationManager.getInstance().saveConfig();
+                // Use static reference for faster config save
+                if (com.criticalrange.VulkanModExtra.configManager != null) {
+                    com.criticalrange.VulkanModExtra.configManager.saveConfig();
+                };
             },
             getter
         ) {

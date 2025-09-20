@@ -27,7 +27,9 @@
 		"render.MixinPaintingRenderer",
 		"vulkanmod.MixinVulkanModMonitorSelection",
 		"vulkanmod.MixinVulkanModOptions",
-		"render.MixinArmorStandRenderer"
+		"render.MixinArmorStandRenderer",
+		"optimization.MixinMemoryManager",
+		"extra.MixinMinecraftClientShutdown"
 			],
 	"injectors": {
 		"defaultRequire": 1

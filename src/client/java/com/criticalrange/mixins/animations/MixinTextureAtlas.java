@@ -44,12 +44,12 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
             return true;
         }
         
-        // Get fresh configuration values directly from the configuration manager
-        try {
-            com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
-            com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
+        // Fast config access - no ConfigurationManager overhead
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.animationSettings != null) {
+            var config = VulkanModExtra.CONFIG;
 
-            String idString = identifier.toString().toLowerCase();
+            // Cache string conversion to avoid repeated allocations
+            String idString = identifier.getPath(); // More efficient than toString().toLowerCase()
             var settings = config.animationSettings;
             
             // Check master toggle first - if disabled, block all animations
@@ -132,10 +132,8 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
             if (idString.contains("brewing_stand_base")) return settings.brewingStandBase;
             if (idString.contains("cauldron") && idString.contains("water")) return settings.cauldronWater;
             
-        } catch (Exception e) {
-            VulkanModExtra.LOGGER.error("Failed to get animation config in mixin", e);
         }
-        
+
         // Default: allow animation for unrecognized textures
         return true;
     }

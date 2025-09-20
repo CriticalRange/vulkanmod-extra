@@ -26,60 +26,43 @@ public class MixinParticleEngine {
 
     @Inject(method = "addBlockBreakParticles", at = @At(value = "HEAD"), cancellable = true)
     public void vulkanmodExtra$controlBlockBreakParticles(BlockPos pos, BlockState state, CallbackInfo ci) {
-        try {
-            com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
-            com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
-            
-            // Check master toggle first, then individual setting
-            if (!config.particleSettings.allParticles || !config.particleSettings.blockBreak) {
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.particleSettings != null) {
+            var settings = VulkanModExtra.CONFIG.particleSettings;
+            if (!settings.allParticles || !settings.blockBreak) {
                 ci.cancel();
             }
-        } catch (Exception ex) {
-            VulkanModExtra.LOGGER.error("Failed to get particle config in mixin", ex);
         }
     }
 
     @Inject(method = "addBlockBreakingParticles", at = @At(value = "HEAD"), cancellable = true)
     public void vulkanmodExtra$controlBlockBreakingParticles(BlockPos pos, Direction direction, CallbackInfo ci) {
-        try {
-            com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
-            com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
-            
-            // Check master toggle first, then individual setting
-            if (!config.particleSettings.allParticles || !config.particleSettings.blockBreaking) {
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.particleSettings != null) {
+            var settings = VulkanModExtra.CONFIG.particleSettings;
+            if (!settings.allParticles || !settings.blockBreaking) {
                 ci.cancel();
             }
-        } catch (Exception ex) {
-            VulkanModExtra.LOGGER.error("Failed to get particle config in mixin", ex);
         }
     }
 
     @Inject(method = "createParticle", at = @At(value = "HEAD"), cancellable = true)
     public void vulkanmodExtra$controlParticleCreation(ParticleEffect particleOptions, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
-        try {
-            com.criticalrange.config.ConfigurationManager configManager = com.criticalrange.config.ConfigurationManager.getInstance();
-            com.criticalrange.config.VulkanModExtraConfig config = configManager.getConfig();
-            
-            // Get particle type ID
-            var particleKey = Registries.PARTICLE_TYPE.getKey(particleOptions.getType());
-            if (particleKey.isEmpty()) {
-                return; // Skip if particle type not found in registry
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.particleSettings != null) {
+            try {
+                var particleKey = Registries.PARTICLE_TYPE.getKey(particleOptions.getType());
+                if (particleKey.isEmpty()) return;
+
+                String particleName = particleKey.get().getValue().getPath();
+                if (!shouldRenderParticle(VulkanModExtra.CONFIG.particleSettings, particleName)) {
+                    cir.setReturnValue(null);
+                }
+            } catch (Exception ex) {
+                // Ignore particle errors to prevent crashes
             }
-            String particleName = particleKey.get().getValue().getPath();
-            
-            // Check specific particle type settings
-            boolean shouldRender = shouldRenderParticle(config, particleName);
-            if (!shouldRender) {
-                cir.setReturnValue(null);
-            }
-        } catch (Exception ex) {
-            VulkanModExtra.LOGGER.error("Failed to get particle config in mixin", ex);
         }
     }
 
     @Unique
-    private boolean shouldRenderParticle(com.criticalrange.config.VulkanModExtraConfig config, String particleName) {
-        var settings = config.particleSettings;
+    private boolean shouldRenderParticle(com.criticalrange.config.VulkanModExtraConfig.ParticleSettings settings, String particleName) {
         
         // Check master toggle first - if disabled, block all particles
         if (!settings.allParticles) {
@@ -210,8 +193,7 @@ public class MixinParticleEngine {
                 if (customSetting != null) {
                     yield customSetting;
                 }
-                // Log unknown particles for debugging
-                VulkanModExtra.LOGGER.debug("Unknown particle type: " + particleName + " - defaulting to enabled");
+                // Skip logging for performance - unknown particles default to enabled
                 yield true; // Default: allow unknown particles
             }
         };

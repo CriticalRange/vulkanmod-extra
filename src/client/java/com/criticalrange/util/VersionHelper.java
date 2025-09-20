@@ -197,14 +197,11 @@ public final class VersionHelper {
      * Log version information to console for debugging
      */
     public static void logVersionInfo() {
-        System.out.println("[VulkanMod Extra] " + getDebugInfo());
-        System.out.println("[VulkanMod Extra] Version Flags:");
-        System.out.println("  IS_1_21_1: " + IS_1_21_1);
-        System.out.println("  IS_1_21_2: " + IS_1_21_2);
-        System.out.println("  IS_1_21_3: " + IS_1_21_3);
-        System.out.println("  IS_1_21_4: " + IS_1_21_4);
-        System.out.println("  IS_1_21_5: " + IS_1_21_5);
-        System.out.println("  IS_1_21_X: " + IS_1_21_X);
+        if (com.criticalrange.VulkanModExtra.LOGGER != null) {
+            com.criticalrange.VulkanModExtra.LOGGER.info("{}", getDebugInfo());
+            com.criticalrange.VulkanModExtra.LOGGER.debug("Version Flags: 1.21.1={}, 1.21.2={}, 1.21.3={}, 1.21.4={}, 1.21.5={}, 1.21.X={}",
+                IS_1_21_1, IS_1_21_2, IS_1_21_3, IS_1_21_4, IS_1_21_5, IS_1_21_X);
+        }
     }
     
     // Override system support methods

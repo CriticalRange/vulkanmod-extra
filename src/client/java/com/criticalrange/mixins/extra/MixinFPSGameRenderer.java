@@ -15,16 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class MixinFPSGameRenderer {
 
-    @Inject(method = "render", at = @At("HEAD"))
-    private void vulkanmodExtra$onRenderStart(CallbackInfo ci) {
-        // This method can be used for FPS tracking or performance monitoring
-        // The actual FPS display is handled by FPSDisplayFeature
-        // This injection point allows for frame-level performance tracking
-    }
-
-    @Inject(method = "render", at = @At("RETURN"))
-    private void vulkanmodExtra$onRenderEnd(CallbackInfo ci) {
-        // Post-render processing for FPS calculations if needed
-        // This complements the main FPS display feature
-    }
+    // Removed empty injection points to reduce render loop overhead
+    // FPS tracking is handled directly by the HUD system
 }

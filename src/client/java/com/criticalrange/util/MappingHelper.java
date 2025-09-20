@@ -319,6 +319,22 @@ public class MappingHelper {
         fieldCache.clear();
         classCache.clear();
     }
+
+    /**
+     * Periodic cache cleanup to prevent memory leaks
+     */
+    public static void cleanupCache() {
+        // Clear cache if it gets too large (>1000 entries per cache)
+        if (methodCache.size() > 1000) {
+            methodCache.clear();
+        }
+        if (fieldCache.size() > 1000) {
+            fieldCache.clear();
+        }
+        if (classCache.size() > 1000) {
+            classCache.clear();
+        }
+    }
     
     /**
      * Get cache statistics for debugging

@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class MonitorInfoUtil {
     
-    private static final SystemInfo systemInfo = new SystemInfo();
+    private static volatile SystemInfo systemInfo = null;
     private static volatile boolean initialized = false;
-    private static volatile List<MonitorInfo> monitorInfos = new ArrayList<>();
+    private static volatile List<MonitorInfo> monitorInfos = new java.util.concurrent.CopyOnWriteArrayList<>();
     private static volatile GPUInfo gpuInfo = null;
     private static volatile SystemInfoData systemInfoData = null;
     
@@ -134,19 +134,24 @@ public class MonitorInfoUtil {
         if (initialized) {
             return;
         }
-        
+
         try {
+            // Initialize SystemInfo singleton
+            if (systemInfo == null) {
+                systemInfo = new SystemInfo();
+            }
+
             // Get monitor information
             monitorInfos = getMonitorInfo();
-            
+
             // Get GPU information from VulkanMod if available
             gpuInfo = getGPUInfo();
-            
+
             // Get system information
             systemInfoData = getSystemInfo();
-            
+
             initialized = true;
-            
+
             if (systemInfoData != null) {
                 VulkanModExtra.LOGGER.debug("System: {}", systemInfoData);
             }
@@ -168,11 +173,13 @@ public class MonitorInfoUtil {
      */
     private static List<MonitorInfo> getMonitorsFromOSHI() {
         List<MonitorInfo> infos = new ArrayList<>();
-        
+
         try {
-            // Use fresh SystemInfo instance to avoid initialization conflicts
-            SystemInfo freshSystemInfo = new SystemInfo();
-            List<oshi.hardware.Display> displays = freshSystemInfo.getHardware().getDisplays();
+            // Use shared SystemInfo instance to prevent memory leaks
+            if (systemInfo == null) {
+                systemInfo = new SystemInfo();
+            }
+            List<oshi.hardware.Display> displays = systemInfo.getHardware().getDisplays();
             
             for (int i = 0; i < displays.size(); i++) {
                 try {
@@ -194,8 +201,7 @@ public class MonitorInfoUtil {
             }
             
         } catch (Exception e) {
-            System.out.println("OSHI: Error - " + e.getMessage());
-            e.printStackTrace();
+            VulkanModExtra.LOGGER.warn("OSHI monitor detection failed: {}", e.getMessage());
         }
         
         return infos;
@@ -318,51 +324,8 @@ public class MonitorInfoUtil {
      * Get GPU information from VulkanMod if available
      */
     private static GPUInfo getGPUInfo() {
-        try {
-            // Try to get GPU info from VulkanMod's DeviceManager
-            Object device = null;
-            try {
-                Class<?> deviceManagerClass = Class.forName("net.vulkanmod.vulkan.device.DeviceManager");
-                device = deviceManagerClass.getField("device").get(null);
-            } catch (Exception e) {
-                // VulkanMod not available or device not initialized
-                return null;
-            }
-            
-            if (device != null) {
-                String vendor = (String) device.getClass().getField("vendorIdString").get(device);
-                String name = (String) device.getClass().getField("deviceName").get(device);
-                String driverVersion = (String) device.getClass().getField("driverVersion").get(device);
-                String vulkanVersion = (String) device.getClass().getField("vkVersion").get(device);
-                int vendorId = device.getClass().getField("vendorId").getInt(device);
-                
-                // Get VRAM info from OSHI
-                long vramTotal = 0;
-                long vramAvailable = 0;
-                try {
-                    GlobalMemory memory = systemInfo.getHardware().getMemory();
-                    vramTotal = memory.getVirtualMemory().getSwapTotal();
-                    vramAvailable = memory.getVirtualMemory().getSwapUsed();
-                    
-                    // Fallback to GPU VRAM if available
-                    for (oshi.hardware.GraphicsCard gpu : systemInfo.getHardware().getGraphicsCards()) {
-                        if (gpu.getName().contains(name)) {
-                            vramTotal = gpu.getVRam();
-                            vramAvailable = vramTotal; // Use total as fallback since we don't have used memory
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    VulkanModExtra.LOGGER.warn("Could not get VRAM info: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
-                }
-                
-                return new GPUInfo(vendor, name, driverVersion, vulkanVersion, 
-                                 vramTotal, vramAvailable, vendorId);
-            }
-        } catch (Exception e) {
-            VulkanModExtra.LOGGER.warn("Could not get GPU info from VulkanMod: {}", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
-        }
-        
+        // Skip VulkanMod GPU detection during initialization to prevent crashes
+        // VulkanMod may not be fully initialized when this is called
         return null;
     }
     
@@ -529,5 +492,16 @@ public class MonitorInfoUtil {
         gpuInfo = null;
         systemInfoData = null;
         initialize();
+    }
+
+    /**
+     * Cleanup resources to prevent memory leaks
+     */
+    public static synchronized void cleanup() {
+        initialized = false;
+        monitorInfos.clear();
+        gpuInfo = null;
+        systemInfoData = null;
+        systemInfo = null; // Release OSHI resources
     }
 }

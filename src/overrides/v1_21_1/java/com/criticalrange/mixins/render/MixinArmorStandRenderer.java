@@ -19,14 +19,11 @@ public class MixinArmorStandRenderer {
     @Inject(at = @At("HEAD"), method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", cancellable = true)
     public void vulkanmodExtra$onRenderArmorStand(net.minecraft.entity.LivingEntity entity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         if (entity instanceof ArmorStandEntity) {
-            try {
-                var configManager = com.criticalrange.config.ConfigurationManager.getInstance();
-                var config = configManager.getConfig();
-                if (!config.renderSettings.armorStand) {
+            // Fast config access - no ConfigurationManager overhead
+            if (com.criticalrange.VulkanModExtra.CONFIG != null && com.criticalrange.VulkanModExtra.CONFIG.renderSettings != null) {
+                if (!com.criticalrange.VulkanModExtra.CONFIG.renderSettings.armorStand) {
                     ci.cancel();
                 }
-            } catch (Exception e) {
-                // If config fails to load, default to rendering armor stands
             }
         }
     }

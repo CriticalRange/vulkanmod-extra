@@ -34,8 +34,10 @@ public class VulkanModExtraConfig {
      * Write configuration changes with force option
      */
     public void writeChanges(boolean force) {
-        // Note: Configuration save is handled by ConfigurationManager
-        ConfigurationManager.getInstance().saveConfig();
+        // Use static reference for faster access
+        if (com.criticalrange.VulkanModExtra.configManager != null) {
+            com.criticalrange.VulkanModExtra.configManager.saveConfig();
+        }
     }
 
     // ===== SETTINGS CLASSES =====
@@ -332,21 +334,9 @@ public class VulkanModExtraConfig {
     }
 
     public static class OptimizationSettings {
-        // Chunk rendering optimizations
-        public boolean chunkUpdateBatching = true;
-        public int chunkUpdateBatchSize = 5;
-
-        // Memory & buffer optimizations
-        public boolean vertexBufferOptimization = true;
-        public boolean textureAtlasOptimization = true;
+        // Buffer pool optimization
         public boolean bufferPooling = true;
         public int bufferPoolSize = 64;
-
-        // Entity optimization
-        public int entityUpdateLimit = 50;
-
-        // Rendering pipeline optimizations
-        public boolean renderCallBatching = true;
     }
 
     // ===== ENUMS =====

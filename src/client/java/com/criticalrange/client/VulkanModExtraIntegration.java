@@ -122,7 +122,6 @@ public class VulkanModExtraIntegration {
             // Optimization options are now directly integrated into VulkanMod's Optimizations page
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Could not inject pages into current screen: {}", e.getMessage());
-            e.printStackTrace();
         }
     }
     /**
@@ -307,7 +306,6 @@ public class VulkanModExtraIntegration {
             }
         } catch (Exception e) {
             VulkanModExtra.LOGGER.error("Could not add optimization options to screen: {}", e.getMessage());
-            e.printStackTrace();
         }
     }
     

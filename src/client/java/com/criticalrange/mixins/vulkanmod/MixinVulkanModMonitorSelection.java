@@ -25,9 +25,9 @@ import java.util.List;
 public class MixinVulkanModMonitorSelection {
 
     @Unique
-    private static volatile List<String> availableMonitors; // Just store monitor names
+    private static volatile java.util.concurrent.CopyOnWriteArrayList<String> availableMonitors; // Thread-safe monitor names
     @Unique
-    private static volatile List<Long> monitorHandles; // Store GLFW handles separately
+    private static volatile java.util.concurrent.CopyOnWriteArrayList<Long> monitorHandles; // Thread-safe GLFW handles
     @Unique
     private static volatile int selectedMonitorIndex = 0;
 
@@ -37,8 +37,8 @@ public class MixinVulkanModMonitorSelection {
     @Unique
     private static void initializeMonitors() {
         if (availableMonitors == null) {
-            availableMonitors = new ArrayList<>();
-            monitorHandles = new ArrayList<>();
+            availableMonitors = new java.util.concurrent.CopyOnWriteArrayList<>();
+            monitorHandles = new java.util.concurrent.CopyOnWriteArrayList<>();
             try {
                 // Use OSHI to get real monitor information
                 List<MonitorInfoUtil.MonitorInfo> monitors = MonitorInfoUtil.getMonitors();
@@ -462,6 +462,23 @@ public class MixinVulkanModMonitorSelection {
         selectedMonitorIndex = 0;
         // Also reset OSHI cache to get fresh monitor information
         MonitorInfoUtil.reset();
+    }
+
+    /**
+     * Cleanup monitor selection resources to prevent memory leaks
+     */
+    @Unique
+    private static void cleanupMonitorSelection() {
+        if (availableMonitors != null) {
+            availableMonitors.clear();
+            availableMonitors = null;
+        }
+        if (monitorHandles != null) {
+            monitorHandles.clear();
+            monitorHandles = null;
+        }
+        selectedMonitorIndex = 0;
+        MonitorInfoUtil.cleanup();
     }
 
     /**

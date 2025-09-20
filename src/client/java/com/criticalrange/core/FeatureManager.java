@@ -369,6 +369,49 @@ public class FeatureManager {
     }
 
     /**
+     * Shutdown all features during mod cleanup
+     */
+    public void shutdownFeatures() {
+        LOGGER.info("Shutting down {} features...", features.size());
+
+        try {
+            // Disable all features in reverse order to respect dependencies
+            List<String> shutdownOrder = new ArrayList<>(loadingOrder);
+            Collections.reverse(shutdownOrder);
+
+            int shutdownCount = 0;
+            for (String featureId : shutdownOrder) {
+                Feature feature = features.get(featureId);
+                if (feature != null && feature.isEnabled()) {
+                    try {
+                        feature.onDisable();
+                        feature.setEnabled(false);
+                        shutdownCount++;
+                        LOGGER.debug("Shut down feature: {}", feature.getName());
+                    } catch (Exception e) {
+                        LOGGER.warn("Error shutting down feature '{}': {}", feature.getName(), e.getMessage());
+                    }
+                }
+            }
+
+            // Clear all collections
+            features.clear();
+            featuresByCategory.clear();
+            loadingOrder.clear();
+            initialized = false;
+
+            LOGGER.info("Feature shutdown complete - {} features shut down", shutdownCount);
+
+            // Post shutdown event
+            eventBus.postFeatureEvent(FeatureEventType.FEATURE_DISABLED.getEventName(), "system",
+                                     Map.of("action", "shutdown_all", "count", String.valueOf(shutdownCount)));
+
+        } catch (Exception e) {
+            LOGGER.error("Error during feature shutdown", e);
+        }
+    }
+
+    /**
      * Get system diagnostic information
      */
     public String getSystemDiagnostics() {
