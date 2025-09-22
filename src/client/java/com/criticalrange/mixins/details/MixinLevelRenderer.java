@@ -9,21 +9,32 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Weather effect control mixin based on Sodium Extra pattern
+ * Weather effect control mixin with multi-version support
  * Controls weather rendering (rain and snow) for better performance
- * Simplified to use only @Inject for compatibility
+ * Uses optional injections for maximum compatibility
  */
 @Mixin(WorldRenderer.class)
 public class MixinLevelRenderer {
 
     /**
-     * Weather rendering injection for Minecraft 1.21.1
-     * Method signature: renderWeather(LightmapTextureManager, float, double, double, double)
+     * Primary weather rendering injection
+     * Attempts to target renderWeather with full signature (works on 1.21.1)
      */
-    @Inject(method = "renderWeather(Lnet/minecraft/client/render/LightmapTextureManager;FDDD)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderWeather(Lnet/minecraft/client/render/LightmapTextureManager;FDDD)V", at = @At("HEAD"), cancellable = true, require = 0)
     private void vulkanmodExtra$renderSnowAndRain(LightmapTextureManager manager, float tickDelta,
                                                    double cameraX, double cameraY, double cameraZ,
                                                    CallbackInfo ci) {
+        if (!VulkanModExtra.CONFIG.detailSettings.rainSnow) {
+            ci.cancel();
+        }
+    }
+
+    /**
+     * Alternative weather rendering injection for newer versions
+     * Uses broader method targeting without specific parameters
+     */
+    @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true, require = 0)
+    private void vulkanmodExtra$renderWeatherGeneric(CallbackInfo ci) {
         if (!VulkanModExtra.CONFIG.detailSettings.rainSnow) {
             ci.cancel();
         }

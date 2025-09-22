@@ -8,19 +8,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Controls sky element rendering (sky, sun, moon, stars)
- * 
+ * Controls sky element rendering with multi-version support
+ * Uses optional injections for maximum compatibility across Minecraft versions
+ *
  * CURRENT LIMITATION: This mixin currently disables the entire sky (gradient, sun, moon, stars)
- * when the sky option is turned off. This is a temporary approach until more granular 
+ * when the sky option is turned off. This is a temporary approach until more granular
  * injection points can be identified for targeting only the sky gradient.
- * 
- * The ideal behavior would be to disable only the sky gradient/background color
- * while preserving celestial objects (sun, moon, stars).
  */
 @Mixin(WorldRenderer.class)
 public class MixinSkyElements {
 
-    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
+    /**
+     * Primary sky rendering injection
+     * Uses generic method targeting for maximum compatibility
+     */
+    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true, require = 0)
     private void vulkanmodExtra$controlSkyRendering(CallbackInfo ci) {
         // Disable entire sky when option is off
         if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
@@ -28,10 +30,17 @@ public class MixinSkyElements {
             return;
         }
     }
-    
-    // Future improvement ideas:
-    // 1. Target specific GL calls or buffer operations for sky gradient only
-    // 2. Use @ModifyArg to change sky colors to transparent instead of canceling
-    // 3. Find injection points after sky gradient but before celestial object rendering
-    // 4. Use @Slice to target specific portions of the renderSky method
+
+    /**
+     * Alternative sky rendering injection for different method signatures
+     * Targets any renderSky method regardless of parameters
+     */
+    @Inject(method = "renderSky*", at = @At("HEAD"), cancellable = true, require = 0)
+    private void vulkanmodExtra$controlSkyRenderingWildcard(CallbackInfo ci) {
+        // Disable entire sky when option is off
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
+            ci.cancel();
+            return;
+        }
+    }
 }

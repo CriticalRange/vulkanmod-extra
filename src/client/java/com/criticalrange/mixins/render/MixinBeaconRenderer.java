@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BeaconBlockEntityRenderer.class)
 public class MixinBeaconRenderer {
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
     private void vulkanmodExtra$checkBeaconRendering(BeaconBlockEntity beaconBlockEntity, float partialTick,
             MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
             int packedLight, int packedOverlay, CallbackInfo ci) {

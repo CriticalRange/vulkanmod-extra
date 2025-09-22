@@ -269,7 +269,7 @@ public class MixinVulkanModMonitorSelection {
 
             // Create monitor selection option
             Option<?> monitorOption = createCyclingOption(
-                Text.translatable("vulkanmod-extra.option.video.monitor_selection"),
+                Text.translatable("vulkanmod-extra.option.video.monitorSelection"),
                 monitorNames,
                 (value) -> {
                     selectedMonitorIndex = value;
@@ -277,11 +277,11 @@ public class MixinVulkanModMonitorSelection {
                 },
                 () -> selectedMonitorIndex
             );
-            
+
             // Set the tooltip for the monitor selection option
             if (monitorOption != null) {
                 try {
-                    Text tooltip = Text.translatable("vulkanmod.options.video.monitor_selection.tooltip");
+                    Text tooltip = Text.translatable("vulkanmod-extra.option.video.monitorSelection.tooltip");
                     monitorOption.setTooltip(tooltip);
                 } catch (Exception e) {
                     // Silently continue if tooltip fails

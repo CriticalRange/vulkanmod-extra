@@ -20,6 +20,33 @@ import java.util.function.Supplier;
 public class VulkanModPageFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger("VulkanMod Page Factory");
 
+    /**
+     * Get boolean field value using reflection
+     */
+    private static boolean getBooleanField(Object target, String fieldName) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getBoolean(target);
+        } catch (Exception e) {
+            return true; // Default value
+        }
+    }
+
+    /**
+     * Set boolean field value using reflection
+     */
+    private static void setBooleanField(Object target, String fieldName, boolean value) {
+        try {
+            var field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.setBoolean(target, value);
+            saveConfig();
+        } catch (Exception e) {
+            LOGGER.warn("Failed to set field: " + fieldName, e);
+        }
+    }
+
     // Cache VulkanMod classes
     private static Class<?> cachedOptionPageClass;
     private static Class<?> cachedOptionBlockClass;
@@ -47,6 +74,15 @@ public class VulkanModPageFactory {
                 pages.add(createDetailsPage());
                 pages.add(createRenderPage());
                 pages.add(createExtraPage());
+
+                // Only add optimization page if memory pooling is supported
+                if (com.criticalrange.util.VulkanModVersionHelper.isMemoryPoolingSupported()) {
+                    pages.add(createOptimizationPage());
+                    LOGGER.info("Added Optimization page with memory pooling support");
+                } else {
+                    LOGGER.info("Skipped Optimization page - memory pooling not supported in VulkanMod {}",
+                        com.criticalrange.util.VulkanModVersionHelper.getVulkanModVersion());
+                }
 
                 LOGGER.info("Created {} VulkanMod Extra option pages with settings", pages.size());
             }
@@ -83,7 +119,7 @@ public class VulkanModPageFactory {
         List<Object> masterOptions = new ArrayList<>();
         masterOptions.add(createSwitchOption(
             "All Animations",
-            "Toggle all texture animations on/off",
+            "vulkanmod-extra.option.animation.allAnimations.tooltip",
             () -> VulkanModExtra.CONFIG.animationSettings.allAnimations,
             (value) -> {
                 VulkanModExtra.CONFIG.animationSettings.allAnimations = value;
@@ -166,33 +202,14 @@ public class VulkanModPageFactory {
     }
 
     private static Object createAnimationOption(String fieldName) throws Exception {
-        String displayName = fieldName.replaceAll("([A-Z])", " $1").trim();
-        displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
-
         return createSwitchOption(
-            displayName,
-            "Enable/disable " + displayName.toLowerCase(),
-            () -> {
-                try {
-                    var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    return field.getBoolean(VulkanModExtra.CONFIG.animationSettings);
-                } catch (Exception e) {
-                    return true;
-                }
-            },
-            (value) -> {
-                try {
-                    var field = VulkanModExtra.CONFIG.animationSettings.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    field.setBoolean(VulkanModExtra.CONFIG.animationSettings, value);
-                    saveConfig();
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to set animation option: " + fieldName, e);
-                }
-            }
+            Text.translatable("vulkanmod-extra.option.animation." + fieldName),
+            "vulkanmod-extra.option.animation." + fieldName + ".tooltip",
+            () -> getBooleanField(VulkanModExtra.CONFIG.animationSettings, fieldName),
+            (value) -> setBooleanField(VulkanModExtra.CONFIG.animationSettings, fieldName, value)
         );
     }
+
 
     private static Object createParticlesPage() throws Exception {
         return createPageWithBlocks("Particles", createParticleOptionBlocks());
@@ -203,7 +220,7 @@ public class VulkanModPageFactory {
         List<Object> masterOptions = new ArrayList<>();
         masterOptions.add(createSwitchOption(
             "All Particles",
-            "Toggle all particle effects on/off",
+            "vulkanmod-extra.option.particle.allParticles.tooltip",
             () -> VulkanModExtra.CONFIG.particleSettings.allParticles,
             (value) -> {
                 VulkanModExtra.CONFIG.particleSettings.allParticles = value;
@@ -243,33 +260,14 @@ public class VulkanModPageFactory {
     }
 
     private static Object createParticleOption(String fieldName) throws Exception {
-        String displayName = fieldName.replaceAll("([A-Z])", " $1").trim();
-        displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
-
         return createSwitchOption(
-            displayName,
-            "Enable/disable " + displayName.toLowerCase() + " particles",
-            () -> {
-                try {
-                    var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    return field.getBoolean(VulkanModExtra.CONFIG.particleSettings);
-                } catch (Exception e) {
-                    return true;
-                }
-            },
-            (value) -> {
-                try {
-                    var field = VulkanModExtra.CONFIG.particleSettings.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true);
-                    field.setBoolean(VulkanModExtra.CONFIG.particleSettings, value);
-                    saveConfig();
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to set particle option: " + fieldName, e);
-                }
-            }
+            Text.translatable("vulkanmod-extra.option.particle." + fieldName),
+            "vulkanmod-extra.option.particle." + fieldName + ".tooltip",
+            () -> getBooleanField(VulkanModExtra.CONFIG.particleSettings, fieldName),
+            (value) -> setBooleanField(VulkanModExtra.CONFIG.particleSettings, fieldName, value)
         );
     }
+
 
     private static Object createDetailsPage() throws Exception {
         List<Object> options = new ArrayList<>();
@@ -277,7 +275,7 @@ public class VulkanModPageFactory {
         // Sky and celestial elements
         options.add(createSwitchOption(
             "Sky Rendering",
-            "Enable/disable sky rendering",
+            "vulkanmod-extra.option.details.sky.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.sky,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.sky = value;
@@ -287,7 +285,7 @@ public class VulkanModPageFactory {
 
         options.add(createSwitchOption(
             "Sun Rendering",
-            "Enable/disable sun rendering",
+            "vulkanmod-extra.option.details.sun.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.sun,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.sun = value;
@@ -297,7 +295,7 @@ public class VulkanModPageFactory {
 
         options.add(createSwitchOption(
             "Moon Rendering",
-            "Enable/disable moon rendering",
+            "vulkanmod-extra.option.details.moon.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.moon,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.moon = value;
@@ -307,7 +305,7 @@ public class VulkanModPageFactory {
 
         options.add(createSwitchOption(
             "Stars Rendering",
-            "Enable/disable stars rendering",
+            "vulkanmod-extra.option.details.stars.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.stars,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.stars = value;
@@ -318,7 +316,7 @@ public class VulkanModPageFactory {
         // Weather and environmental effects
         options.add(createSwitchOption(
             "Weather Effects (Rain/Snow)",
-            "Enable/disable weather rendering (rain, snow)",
+            "vulkanmod-extra.option.details.rainSnow.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.rainSnow,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.rainSnow = value;
@@ -329,7 +327,7 @@ public class VulkanModPageFactory {
         // Color effects
         options.add(createSwitchOption(
             "Biome Colors",
-            "Enable/disable biome-specific colors",
+            "vulkanmod-extra.option.details.biomeColors.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.biomeColors,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.biomeColors = value;
@@ -339,7 +337,7 @@ public class VulkanModPageFactory {
 
         options.add(createSwitchOption(
             "Sky Colors",
-            "Enable/disable sky color variations",
+            "vulkanmod-extra.option.details.skyColors.tooltip",
             () -> VulkanModExtra.CONFIG.detailSettings.skyColors,
             (value) -> {
                 VulkanModExtra.CONFIG.detailSettings.skyColors = value;
@@ -361,7 +359,7 @@ public class VulkanModPageFactory {
         List<Object> renderOptions = new ArrayList<>();
         renderOptions.add(createSwitchOption(
             "Light Updates",
-            "vulkanmod-extra.option.lightUpdates.tooltip",
+            "vulkanmod-extra.option.render.lightUpdates.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.lightUpdates,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.lightUpdates = value;
@@ -371,7 +369,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Item Frame Rendering",
-            "vulkanmod-extra.option.itemFrame.tooltip",
+            "vulkanmod-extra.option.render.itemFrame.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.itemFrame,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.itemFrame = value;
@@ -381,7 +379,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Armor Stand Rendering",
-            "vulkanmod-extra.option.armorStand.tooltip",
+            "vulkanmod-extra.option.render.armorStand.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.armorStand,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.armorStand = value;
@@ -391,7 +389,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Painting Rendering",
-            "vulkanmod-extra.option.painting.tooltip",
+            "vulkanmod-extra.option.render.painting.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.painting,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.painting = value;
@@ -401,7 +399,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Piston Rendering",
-            "Enable/disable piston rendering optimizations",
+            "vulkanmod-extra.option.render.piston.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.piston,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.piston = value;
@@ -411,7 +409,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Beacon Beam",
-            "Enable/disable beacon beam rendering",
+            "vulkanmod-extra.option.render.beaconBeam.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.beaconBeam,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.beaconBeam = value;
@@ -421,7 +419,7 @@ public class VulkanModPageFactory {
 
         renderOptions.add(createSwitchOption(
             "Limit Beacon Beam Height",
-            "Limit beacon beam height for performance",
+            "vulkanmod-extra.option.render.limitBeaconBeamHeight.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.limitBeaconBeamHeight,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.limitBeaconBeamHeight = value;
@@ -436,7 +434,7 @@ public class VulkanModPageFactory {
         List<Object> fogOptions = new ArrayList<>();
         fogOptions.add(createSwitchOption(
             "Global Fog",
-            "Enable/disable fog rendering",
+            "vulkanmod-extra.option.render.globalFog.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.globalFog,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.globalFog = value;
@@ -446,7 +444,7 @@ public class VulkanModPageFactory {
 
         fogOptions.add(createSwitchOption(
             "Multi-Dimension Fog",
-            "Enable/disable multi-dimension fog effects",
+            "vulkanmod-extra.option.render.multiDimensionFog.tooltip",
             () -> VulkanModExtra.CONFIG.renderSettings.multiDimensionFog,
             (value) -> {
                 VulkanModExtra.CONFIG.renderSettings.multiDimensionFog = value;
@@ -472,7 +470,7 @@ public class VulkanModPageFactory {
 
         displayOptions.add(createSwitchOption(
             "FPS Display",
-            "Show FPS counter in game",
+            "vulkanmod-extra.option.extra.showFps.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.showFps,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.showFps = value;
@@ -484,7 +482,7 @@ public class VulkanModPageFactory {
         try {
             Object fpsModeOption = createCyclingOption(
                 "FPS Display Mode",
-                "vulkanmod-extra.option.extra.fps_display_mode.tooltip",
+                "vulkanmod-extra.option.extra.fpsDisplayMode.tooltip",
                 VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode.getClass().getEnumConstants(),
                 () -> VulkanModExtra.CONFIG.extraSettings.fpsDisplayMode,
                 (value) -> {
@@ -501,7 +499,7 @@ public class VulkanModPageFactory {
         try {
             Object overlayCornerOption = createCyclingOption(
                 "Overlay Corner",
-                "vulkanmod-extra.option.extra.overlay_corner.tooltip",
+                "vulkanmod-extra.option.extra.overlayCorner.tooltip",
                 VulkanModExtra.CONFIG.extraSettings.overlayCorner.getClass().getEnumConstants(),
                 () -> VulkanModExtra.CONFIG.extraSettings.overlayCorner,
                 (value) -> {
@@ -518,7 +516,7 @@ public class VulkanModPageFactory {
         try {
             Object textContrastOption = createCyclingOption(
                 "Text Contrast",
-                "vulkanmod-extra.option.extra.text_contrast.tooltip",
+                "vulkanmod-extra.option.extra.textContrast.tooltip",
                 VulkanModExtra.CONFIG.extraSettings.textContrast.getClass().getEnumConstants(),
                 () -> VulkanModExtra.CONFIG.extraSettings.textContrast,
                 (value) -> {
@@ -538,7 +536,7 @@ public class VulkanModPageFactory {
         List<Object> coordinateOptions = new ArrayList<>();
         coordinateOptions.add(createSwitchOption(
             "Coordinates Display",
-            "Show coordinate information",
+            "vulkanmod-extra.option.extra.showCoords.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.showCoords,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.showCoords = value;
@@ -553,7 +551,7 @@ public class VulkanModPageFactory {
         List<Object> toastOptions = new ArrayList<>();
         toastOptions.add(createSwitchOption(
             "Toast Notifications",
-            "Enable/disable all toast notifications",
+            "vulkanmod-extra.option.extra.toasts.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.toasts,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.toasts = value;
@@ -563,7 +561,7 @@ public class VulkanModPageFactory {
 
         toastOptions.add(createSwitchOption(
             "Advancement Toasts",
-            "Enable/disable advancement toast notifications",
+            "vulkanmod-extra.option.extra.advancementToast.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.advancementToast,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.advancementToast = value;
@@ -573,7 +571,7 @@ public class VulkanModPageFactory {
 
         toastOptions.add(createSwitchOption(
             "Recipe Toasts",
-            "Enable/disable recipe unlock toast notifications",
+            "vulkanmod-extra.option.extra.recipeToast.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.recipeToast,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.recipeToast = value;
@@ -583,7 +581,7 @@ public class VulkanModPageFactory {
 
         toastOptions.add(createSwitchOption(
             "System Toasts",
-            "Enable/disable system toast notifications",
+            "vulkanmod-extra.option.extra.systemToast.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.systemToast,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.systemToast = value;
@@ -593,7 +591,7 @@ public class VulkanModPageFactory {
 
         toastOptions.add(createSwitchOption(
             "Tutorial Toasts",
-            "Enable/disable tutorial toast notifications",
+            "vulkanmod-extra.option.extra.tutorialToast.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.tutorialToast,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.tutorialToast = value;
@@ -608,7 +606,7 @@ public class VulkanModPageFactory {
         List<Object> otherOptions = new ArrayList<>();
         otherOptions.add(createSwitchOption(
             "Instant Sneak",
-            "Enable instant sneaking without animation",
+            "vulkanmod-extra.option.extra.instantSneak.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.instantSneak,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.instantSneak = value;
@@ -618,7 +616,7 @@ public class VulkanModPageFactory {
 
         otherOptions.add(createSwitchOption(
             "Prevent Shaders",
-            "Prevent shader loading for better VulkanMod compatibility",
+            "vulkanmod-extra.option.render.preventShaders.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.preventShaders,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.preventShaders = value;
@@ -628,7 +626,7 @@ public class VulkanModPageFactory {
 
         otherOptions.add(createSwitchOption(
             "Steady Debug HUD",
-            "Enable stable debug HUD with reduced flicker",
+            "vulkanmod-extra.option.extra.steadyDebugHud.tooltip",
             () -> VulkanModExtra.CONFIG.extraSettings.steadyDebugHud,
             (value) -> {
                 VulkanModExtra.CONFIG.extraSettings.steadyDebugHud = value;
@@ -642,10 +640,62 @@ public class VulkanModPageFactory {
         return blockList.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, blockList.size()));
     }
 
+    private static Object createOptimizationPage() throws Exception {
+        return createPageWithBlocks("Optimization", createOptimizationOptionBlocks());
+    }
+
+    private static Object[] createOptimizationOptionBlocks() throws Exception {
+        List<Object> blocks = new ArrayList<>();
+
+        // Memory Optimization Block (only shown if memory pooling is supported)
+        if (com.criticalrange.util.VulkanModVersionHelper.isMemoryPoolingSupported()) {
+            List<Object> memoryOptions = new ArrayList<>();
+
+            memoryOptions.add(createSwitchOption(
+                "Buffer Pooling",
+                "vulkanmod-extra.option.optimization.bufferPooling.tooltip",
+                () -> VulkanModExtra.CONFIG.optimizationSettings.bufferPooling,
+                (value) -> {
+                    VulkanModExtra.CONFIG.optimizationSettings.bufferPooling = value;
+                    saveConfig();
+                }
+            ));
+
+            // Create a range option for buffer pool size
+            try {
+                // For now, create a switch option - can be upgraded to range slider later
+                memoryOptions.add(createSwitchOption(
+                    "Large Buffer Pool",
+                    "vulkanmod-extra.option.optimization.bufferPoolSize.tooltip",
+                    () -> VulkanModExtra.CONFIG.optimizationSettings.bufferPoolSize > 32,
+                    (value) -> {
+                        VulkanModExtra.CONFIG.optimizationSettings.bufferPoolSize = value ? 128 : 32;
+                        saveConfig();
+                    }
+                ));
+            } catch (Exception e) {
+                LOGGER.warn("Failed to create buffer pool size option", e);
+            }
+
+            Object memoryBlock = createBlock("Memory Optimization", memoryOptions);
+            blocks.add(memoryBlock);
+        }
+
+        // Add other optimization blocks here as needed
+        // (chunk optimization, entity optimization, etc.)
+
+        return blocks.toArray((Object[]) java.lang.reflect.Array.newInstance(cachedOptionBlockClass, blocks.size()));
+    }
+
+    // Overloaded method for backward compatibility with String names
     private static Object createSwitchOption(String name, String description, Supplier<Boolean> getter, Consumer<Boolean> setter) throws Exception {
+        return createSwitchOption(Text.literal(name), description, getter, setter);
+    }
+
+    private static Object createSwitchOption(Text name, String description, Supplier<Boolean> getter, Consumer<Boolean> setter) throws Exception {
         Object switchOption = cachedSwitchOptionClass.getConstructor(Text.class, Consumer.class, Supplier.class)
             .newInstance(
-                Text.literal(name),
+                name,
                 setter,
                 getter
             );

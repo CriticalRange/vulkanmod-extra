@@ -34,7 +34,7 @@ public abstract class MixinDebugScreenOverlay {
     @Unique
     private boolean rebuild = true;
 
-    @Inject(method = "render", at = @At(value = "HEAD"))
+    @Inject(method = "render", at = @At(value = "HEAD"), require = 0)
     public void vulkanmodExtra$preRender(DrawContext guiGraphics, CallbackInfo ci) {
         if (VulkanModExtra.CONFIG.extraSettings.steadyDebugHud) {
             final long currentTime = Util.getEpochTimeMs();

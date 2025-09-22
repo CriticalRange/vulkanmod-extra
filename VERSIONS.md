@@ -212,7 +212,7 @@ minecraft_version=1.21.3
 yarn_mappings=1.21.3+build.1
 fabric_version=0.116.5+1.21.3
 fabric_api_version=0.116.5+1.21.3
-vulkanmod_version=0.5.5
+vulkanmod_version=0.5.3
 ```
 
 ### Build Configuration

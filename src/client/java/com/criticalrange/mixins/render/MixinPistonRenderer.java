@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PistonBlockEntityRenderer.class)
 public class MixinPistonRenderer {
 
-    @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "render*", at = @At("HEAD"), cancellable = true, require = 0)
     private void onRender(CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.piston) {
             ci.cancel();

@@ -19,7 +19,7 @@ public class MixinFogRenderer {
      * Simple fog control using standard @Inject
      * Cancels fog application when global fog is disabled
      */
-    @Inject(method = "applyFog", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "applyFog", at = @At("HEAD"), cancellable = true, require = 0)
     private static void vulkanmodExtra$controlFog(CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.renderSettings != null) {
             if (!VulkanModExtra.CONFIG.renderSettings.globalFog) {

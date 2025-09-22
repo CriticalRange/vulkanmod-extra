@@ -21,7 +21,7 @@ public class MixinGui {
      * Render our HUD elements at the end of GUI rendering
      * Uses traditional parameter access for maximum compatibility
      */
-    @Inject(method = "render", at = @At("TAIL"))
+    @Inject(method = "render", at = @At("TAIL"), require = 0)
     private void vulkanmodExtra$onRender(DrawContext drawContext, RenderTickCounter tickCounter, CallbackInfo ci) {
         float tickDelta = tickCounter.getTickDelta(true);
         VulkanModExtraClient.onHudRender(drawContext, tickDelta);

@@ -30,7 +30,13 @@ public class VulkanModExtraMixinPlugin implements IMixinConfigPlugin {
 
         // Handle VulkanMod-specific mixins
         if (mixinClassName.contains("optimization.MixinMemoryManager")) {
-            return isClassAvailable("net.vulkanmod.vulkan.memory.buffer.Buffer");
+            boolean bufferAvailable = isClassAvailable("net.vulkanmod.vulkan.memory.buffer.Buffer");
+            boolean memoryManagerHasCleanup = hasMethod("net.vulkanmod.vulkan.memory.MemoryManager", "cleanup");
+            boolean shouldLoad = bufferAvailable && memoryManagerHasCleanup;
+
+            System.out.println("[VulkanMod-Extra] MixinMemoryManager check: Buffer=" + bufferAvailable +
+                ", cleanup=" + memoryManagerHasCleanup + ", loading=" + shouldLoad);
+            return shouldLoad;
         }
 
         // Skip problematic mixins that might cause issues
@@ -69,6 +75,25 @@ public class VulkanModExtraMixinPlugin implements IMixinConfigPlugin {
         try {
             Class.forName(className, false, this.getClass().getClassLoader());
             return true;
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if a class has a specific method
+     */
+    private boolean hasMethod(String className, String methodName) {
+        try {
+            Class<?> clazz = Class.forName(className, false, this.getClass().getClassLoader());
+            // Check for method with any parameter list
+            java.lang.reflect.Method[] methods = clazz.getDeclaredMethods();
+            for (java.lang.reflect.Method method : methods) {
+                if (method.getName().equals(methodName)) {
+                    return true;
+                }
+            }
+            return false;
         } catch (ClassNotFoundException | NoClassDefFoundError e) {
             return false;
         }

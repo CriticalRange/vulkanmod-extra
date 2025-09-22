@@ -3,6 +3,8 @@ package com.criticalrange.mixins.render;
 import com.criticalrange.VulkanModExtra;
 import net.minecraft.client.render.entity.ItemFrameEntityRenderer;
 import net.minecraft.entity.decoration.ItemFrameEntity;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.VertexConsumerProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -10,32 +12,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Controls item frame rendering based on configuration
- * Simplified to use only @Inject methods for compatibility
- * Works across all Minecraft versions without version-specific signatures
+ * Controls item frame rendering with multi-version support
+ * Handles both 1.21.1 entity-based and 1.21.2+ render state-based rendering
  */
 @Mixin(ItemFrameEntityRenderer.class)
 public class MixinItemFrameRenderer {
 
-    @Inject(method = "render*", at = @At("HEAD"), cancellable = true)
-    public void vulkanmodExtra$onRender(CallbackInfo ci) {
-        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.renderSettings != null) {
-            if (!VulkanModExtra.CONFIG.renderSettings.itemFrame) {
-                ci.cancel();
-            }
+    /**
+     * Universal item frame rendering injection - targets any render method
+     * Works across all Minecraft versions by targeting method name only
+     */
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
+    private void vulkanmodExtra$controlItemFrameRendering(CallbackInfo ci) {
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.itemFrame) {
+            ci.cancel();
         }
     }
 
     /**
-     * Disable item frame name tags based on configuration
-     * Works with both hasLabel method signatures across versions
+     * Controls item frame name tag display for both versions
+     * Works with entity-based hasLabel method
      */
-    @Inject(method = "hasLabel*", at = @At(value = "HEAD"), cancellable = true)
-    private void vulkanmodExtra$shouldShowName(CallbackInfoReturnable<Boolean> cir) {
-        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.renderSettings != null) {
-            if (!VulkanModExtra.CONFIG.renderSettings.itemFrameNameTag) {
-                cir.setReturnValue(false);
-            }
+    @Inject(method = "hasLabel(Lnet/minecraft/entity/decoration/ItemFrameEntity;)Z", at = @At("HEAD"), cancellable = true, require = 0)
+    private void vulkanmodExtra$controlItemFrameNameTag(ItemFrameEntity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.itemFrameNameTag) {
+            cir.setReturnValue(false);
         }
     }
 }
