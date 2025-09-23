@@ -1,138 +1,77 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
-	id 'maven-publish'
-	id 'java'
-	id 'idea'
-	id 'eclipse'
+    id 'dev.architectury.loom' version '1.11-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.4-SNAPSHOT'
+    id 'com.gradleup.shadow' version '8.3.6' apply false
 }
 
-group = project.maven_group
-version = project.mod_version
-
-base {
-	archivesName = project.archives_base_name
+architectury {
+    minecraft = project.minecraft_version
 }
 
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-
-	// Modrinth Maven (for VulkanMod and other mods)
-	maven {
-		name = "Modrinth"
-		url = "https://api.modrinth.com/maven"
-		content {
-			includeGroup "maven.modrinth"
-		}
-	}
-
-	// Maven Central for additional dependencies
-	mavenCentral()
+allprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
 }
 
-loom {
-	splitEnvironmentSourceSets()
+subprojects {
+    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'architectury-plugin'
+    apply plugin: 'maven-publish'
 
-	mods {
-		"vulkanmod-extra" {
-			sourceSet sourceSets.client
-		}
-	}
+    base {
+        // Set up a suffixed format for the mod jar names, e.g. `vulkanmod-extra-fabric-1.21.1`.
+        archivesName = "$rootProject.archives_name-$project.name"
+    }
 
+    repositories {
+        // OSHI library for monitor detection
+        maven {
+            name = 'Maven Central'
+            url = 'https://repo1.maven.org/maven2/'
+        }
+        // Modrinth Maven for VulkanMod dependency
+        maven {
+            name = 'Modrinth'
+            url = 'https://api.modrinth.com/maven'
+        }
+    }
+
+    // Note: minecraft and mappings dependencies are defined in individual subprojects
+    // to allow for version-specific configurations
+
+    java {
+        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+        // if it is present.
+        // If you remove this line, sources will not be generated.
+        withSourcesJar()
+
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = 21
+    }
+
+    processResources {
+        inputs.property 'version', project.version
+
+        filesMatching('fabric.mod.json') {
+            expand 'version': project.version
+        }
+    }
+
+    // Configure Maven publishing.
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = base.archivesName.get()
+                from components.java
+            }
+        }
+
+        repositories {
+            // Add repositories to publish to here.
+        }
+    }
 }
-
-// No more override system - using runtime conditional logic
-
-dependencies {
-	// Multi-version support - target latest stable version (1.21.5)
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API for multi-version compatibility
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	// VulkanMod dependency - use version compatible with all supported MC versions
-	modImplementation "maven.modrinth:vulkanmod:${project.vulkanmod_version}"
-
-	// Suppress ErrorProne annotation warnings from GSON
-	compileOnly 'com.google.errorprone:error_prone_annotations:2.23.0'
-
-	// OSHI library for enhanced monitor information detection
-	implementation 'com.github.oshi:oshi-core:6.8.3'
-
-	// MixinExtras for conditional mixins and runtime version handling
-	include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0")))
-
-	// Note: VulkanMod requires Vulkan drivers and may not work in dev environment
-	// For testing without graphics, consider using production builds
-
-}
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": inputs.properties.version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
-	it.options.encoding = 'UTF-8'
-	it.options.compilerArgs.addAll([
-		'-Xlint:all',
-		'-Xlint:-processing',
-		'-parameters'
-	])
-}
-
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
-}
-
-jar {
-	inputs.property "archivesName", project.base.archivesName
-
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}"}
-	}
-}
-
-// Configure sourcesJar to exclude override directories to prevent duplicates
-tasks.withType(Jar) {
-	// Exclude override directories from source jars to prevent duplicates
-	exclude "src/overrides/**"
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-// configure the maven publication
-publishing {
-	publications {
-		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
-		}
-	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-	}
-}
-
-// Single universal build for all Minecraft 1.21.x versions
-// No more version-specific tasks needed!

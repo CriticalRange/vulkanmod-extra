@@ -1,0 +1,25 @@
+architectury {
+    common(rootProject.enabled_platforms.split(','))
+}
+
+loom {
+    silentMojangMappingsLicense()
+}
+
+dependencies {
+    minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
+    mappings "net.fabricmc:yarn:$rootProject.yarn_mappings:v2"
+
+    // Fabric Loader provides Mixin framework
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    // Fabric API for mixins and client-side features
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+
+    // MixinExtras for advanced mixin capabilities
+    implementation "io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"
+
+    // Platform-agnostic dependencies
+    // OSHI library for cross-platform monitor detection
+    api "com.github.oshi:oshi-core:$rootProject.oshi_version"
+}

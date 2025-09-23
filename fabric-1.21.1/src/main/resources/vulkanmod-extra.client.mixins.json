@@ -1,0 +1,19 @@
+{
+	"required": false,
+	"package": "com.criticalrange.mixins",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"render.MixinItemFrameRenderer",
+		"extra.MixinVOptionScreen",
+		"vulkanmod.MixinVulkanModEventTrigger",
+		"vulkanmod.MixinVulkanModMonitorSelection",
+		"vulkanmod.MixinVulkanModOptions"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	},
+	"minVersion": "0.8",
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
