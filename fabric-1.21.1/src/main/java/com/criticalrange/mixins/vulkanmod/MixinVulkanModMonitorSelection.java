@@ -494,12 +494,12 @@ public class MixinVulkanModMonitorSelection {
         }
 
         try {
-            
+
             // Find the actual video option blocks (skip monitor info if present)
             int startIndex = 0;
-            
+
             // Skip monitor info block if it exists (it would be the first block we added)
-            if (blocks.length > 0 && blocks[0] != null && 
+            if (blocks.length > 0 && blocks[0] != null &&
                 blocks[0].title().contains("Monitor")) {
                 startIndex = 1;
             }
@@ -507,12 +507,12 @@ public class MixinVulkanModMonitorSelection {
             // Video options are usually in blocks[startIndex], blocks[startIndex+1], blocks[startIndex+2]
             if (blocks.length > startIndex) {
                 injectTooltipsIntoBlock(blocks[startIndex], new String[]{
-                    "vulkanmod.options.video.resolution.tooltip",        // Resolution
-                    "vulkanmod.options.video.refreshRate.tooltip",       // Refresh Rate  
-                    "vulkanmod.options.video.fullscreen.tooltip",        // Fullscreen
-                    "vulkanmod.options.video.windowedFullscreen.tooltip", // Windowed Fullscreen
-                    "vulkanmod.options.video.framerateLimit.tooltip",    // Framerate Limit
-                    "vulkanmod.options.video.vsync.tooltip"              // VSync
+                    null, // Skip position 0 (Fullscreen Monitor - already has correct tooltip)
+                    "vulkanmod.options.video.resolution.tooltip",        // Position 1: Fullscreen Resolution
+                    "vulkanmod.options.video.refreshRate.tooltip",       // Position 2: Refresh Rate
+                    "vulkanmod.options.video.fullscreen.tooltip",        // Position 3: Window Mode
+                    "vulkanmod.options.video.framerateLimit.tooltip",    // Position 4: Max Framerate
+                    "vulkanmod.options.video.vsync.tooltip"              // Position 5: VSync
                 });
             }
 
@@ -533,7 +533,9 @@ public class MixinVulkanModMonitorSelection {
 
 
         } catch (Exception e) {
-            // Silently continue on failure
+            if (com.criticalrange.VulkanModExtra.LOGGER != null) {
+                com.criticalrange.VulkanModExtra.LOGGER.error("Failed to inject video tooltips", e);
+            }
         }
     }
 
@@ -557,14 +559,12 @@ public class MixinVulkanModMonitorSelection {
                 String tooltipKey = tooltipKeys[i];
 
                 if (option != null && tooltipKey != null) {
-                    // Only add tooltip if the option doesn't already have one
-                    if (option.getTooltip() == null) {
-                        try {
-                            Text tooltip = Text.translatable(tooltipKey);
-                            option.setTooltip(tooltip);
-                        } catch (Exception e) {
-                            // Silently continue on failure
-                        }
+                    // Set tooltip (replace any existing ones)
+                    try {
+                        Text tooltip = Text.translatable(tooltipKey);
+                        option.setTooltip(tooltip);
+                    } catch (Exception e) {
+                        // Silently continue on failure
                     }
                 }
             }

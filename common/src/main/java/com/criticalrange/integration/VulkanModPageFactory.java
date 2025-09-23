@@ -365,7 +365,7 @@ public class VulkanModPageFactory {
             // Save config immediately when field is changed
             saveConfig();
 
-            // Trigger resource reload for animation and particle changes
+            // Trigger resource reload only for animation changes (particles don't need it)
             if (needsResourceReload(target, fieldName)) {
                 triggerResourceReload(fieldName);
             }
@@ -410,9 +410,8 @@ public class VulkanModPageFactory {
      * Check if a field change requires resource reload
      */
     private static boolean needsResourceReload(Object target, String fieldName) {
-        // Check if target is animation or particle settings
-        return target instanceof com.criticalrange.config.VulkanModExtraConfig.AnimationSettings ||
-               target instanceof com.criticalrange.config.VulkanModExtraConfig.ParticleSettings;
+        // Only animation settings require resource reload (particles don't need it)
+        return target instanceof com.criticalrange.config.VulkanModExtraConfig.AnimationSettings;
     }
 
     /**

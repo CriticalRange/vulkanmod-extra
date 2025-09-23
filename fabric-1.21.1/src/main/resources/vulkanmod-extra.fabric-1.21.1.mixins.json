@@ -15,7 +15,9 @@
 		"details.MixinWorldRendererCelestial",
 		"vulkanmod.MixinVulkanModEventTrigger",
 		"vulkanmod.MixinVulkanModMonitorSelection",
-		"vulkanmod.MixinVulkanModOptions"
+		"vulkanmod.MixinVulkanModOptions",
+		"vulkanmod.MixinVulkanModGraphicsOptions",
+		"vulkanmod.MixinVulkanModTransparencyShader"
 	],
 	"injectors": {
 		"defaultRequire": 0

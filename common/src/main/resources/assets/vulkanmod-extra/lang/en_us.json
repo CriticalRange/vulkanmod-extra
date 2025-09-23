@@ -532,21 +532,27 @@
 
   "vulkanmod.options.graphics.renderDistance.tooltip": "Maximum distance for rendering chunks. Higher values allow you to see further but reduce performance.\n\n§7Performance Impact: §cHigh",
   "vulkanmod.options.graphics.simulationDistance.tooltip": "Distance at which game mechanics (mob spawning, redstone, etc.) are simulated. Lower values improve performance.\n\n§7Performance Impact: §6Medium",
-  "vulkanmod.options.graphics.prioritizeChunkUpdates.tooltip": "Controls how chunk updates are prioritized. 'Nearby' focuses on chunks around the player first.\n\n§7Performance Impact: §eLow",
+  "vulkanmod.options.graphics.prioritizeChunkUpdates.tooltip": "Controls chunk update priority. 'Nearby' prioritizes chunks closer to the player for faster loading of visible terrain.\n\n§7Performance Impact: §eLow",
   "vulkanmod.options.graphics.graphics.tooltip": "Overall graphics quality. Fancy enables additional visual effects like better grass and leaves.\n\n§7Performance Impact: §6Medium",
-  "vulkanmod.options.graphics.particles.tooltip": "Controls particle density. Lower settings improve performance by reducing particle effects.\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.graphics.ambientOcclusion.tooltip": "Smooth lighting quality. Off: flat lighting. On: standard smooth lighting. Sub-block: enhanced AO for stairs/slabs (experimental).\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.graphics.particles.tooltip": "Controls particle density. All: full particles. Decreased: reduced density. Minimal: critical only.\n\n§7Performance Impact: §6Medium",
   "vulkanmod.options.graphics.renderClouds.tooltip": "Controls cloud rendering. Off disables clouds entirely, Fast renders simple clouds, Fancy renders detailed clouds.\n\n§7Performance Impact: §eLow",
   "vulkanmod.options.graphics.biomeBlendRadius.tooltip": "Controls how smoothly biome colors blend at borders. Higher values create smoother transitions but reduce performance.\n\n§7Performance Impact: §cHigh",
   "vulkanmod.options.graphics.entityShadows.tooltip": "Enables shadows under entities (players, mobs, items). Disable to improve performance.\n\n§7Performance Impact: §eLow",
   "vulkanmod.options.graphics.entityDistanceScaling.tooltip": "Controls how far away entities are rendered. Lower values improve performance by culling distant entities.\n\n§7Performance Impact: §6Medium",
   "vulkanmod.options.graphics.mipmapLevels.tooltip": "Controls texture detail at distance. Higher levels reduce texture flickering but use more GPU memory.\n\n§7Performance Impact: §eLow",
 
-  "vulkanmod.options.other.frameQueue.tooltip": "Higher values might help stabilize frametime but will increase input lag.\n\n§7Performance Impact: §eLow",
-  "vulkanmod.options.other.deviceSelector.tooltip": "Current device: %s",
-  "vulkanmod.options.other.chunkBuilderThreads.tooltip": "Number of threads used for chunk building. More threads improve chunk loading speed on multi-core CPUs.\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.other.frameQueue.tooltip": "Number of frames buffered for GPU processing. Higher values reduce stuttering but increase input delay. 2-3 recommended for most systems.\n\n§7Performance Impact: §eLow",
+  "vulkanmod.options.other.deviceSelector.tooltip": "Selects which GPU to use for rendering. Auto chooses the best available device. Manual selection useful for multi-GPU systems.",
+  "vulkanmod.options.other.chunkBuilderThreads.tooltip": "Background threads for chunk geometry building. Auto uses optimal count. More threads speed up chunk updates but may impact main thread performance.\n\n§7Performance Impact: §6Medium",
 
   "__comment": "Optimization Settings",
   "vulkanmod-extra.pages.optimization": "Optimization",
+  "vulkanmod.options.optimization.advCulling.tooltip": "Controls chunk section culling aggressiveness. Aggressive: maximum culling but may cause pop-in. Normal: balanced. Conservative: minimal culling. Off: no culling.\n§7Performance Impact: §aHigh",
+  "vulkanmod.options.optimization.entityCulling.tooltip": "Culls entities in non-visible chunk sections. Improves performance with many entities.\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.optimization.uniqueOpaqueLayer.tooltip": "Uses optimized render layer for solid blocks. Improves terrain rendering performance.\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.optimization.backfaceCulling.tooltip": "Removes hidden block faces on CPU. Improves GPU performance but increases CPU usage. Use with Indirect Draw for best results.\n\n§7Performance Impact: §6Medium",
+  "vulkanmod.options.optimization.indirectDraw.tooltip": "Reduces CPU overhead from backface culling by moving work to GPU. Enable when using backface culling.\n\n§7Performance Impact: §eLow",
 
   "__comment": "Chunk Rendering Optimizations",
   "vulkanmod-extra.option.optimization.chunkUpdateBatching": "Chunk Update Batching",
@@ -566,5 +572,6 @@
 
   "__comment": "Rendering Pipeline Optimizations",
   "vulkanmod-extra.option.optimization.renderCallBatching": "Render Call Batching",
-  "vulkanmod-extra.option.optimization.renderCallBatching.tooltip": "Groups similar draw calls together to reduce CPU-GPU communication overhead and improve overall rendering performance.\n\n§7Performance Impact: §aMedium (Positive)"
+  "vulkanmod-extra.option.optimization.renderCallBatching.tooltip": "Groups similar draw calls together to reduce CPU-GPU communication overhead and improve overall rendering performance.\n\n§7Performance Impact: §aMedium (Positive)",
+  "vulkanmod.options.graphics.graphics.tooltip": "Control graphics quality. Fast improves performance, Fancy enhances visuals, Fabulous provides experimental advanced transparency.\n\n§7Performance Impact: §cHigh"
 }

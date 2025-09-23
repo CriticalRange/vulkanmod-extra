@@ -40,10 +40,12 @@ public class MixinVulkanModOptions {
             net.vulkanmod.config.gui.OptionBlock[] originalBlocks = cir.getReturnValue();
             List<net.vulkanmod.config.gui.OptionBlock> newBlocks = new ArrayList<>();
 
-            // Add original blocks
+            // Add original blocks with tooltip injection
             for (net.vulkanmod.config.gui.OptionBlock block : originalBlocks) {
                 newBlocks.add(block);
             }
+
+            // Video tooltip injection is now handled by MixinVulkanModMonitorSelection
 
             // Add VulkanMod Extra block
             net.vulkanmod.config.gui.OptionBlock extraBlock = createVulkanModExtraBlock();
@@ -82,43 +84,8 @@ public class MixinVulkanModOptions {
             }
 
 
-            // Monitor selection - always show
-            try {
-                // Initialize monitors and get monitor list
-                MonitorInfoUtil.initialize();
-                List<MonitorInfoUtil.MonitorInfo> monitors = MonitorInfoUtil.getMonitors();
-
-                String[] monitorNames;
-                if (monitors.isEmpty()) {
-                    // Fallback if no monitors detected
-                    monitorNames = new String[]{"Primary"};
-                } else {
-                    monitorNames = monitors.stream()
-                        .map(monitor -> monitor.name)
-                        .toArray(String[]::new);
-                }
-
-                options.add(new CyclingOption<>(
-                    Text.literal("Fullscreen Monitor"),
-                    monitorNames,
-                    value -> {
-                        // Find monitor index by name
-                        for (int i = 0; i < monitorNames.length; i++) {
-                            if (monitorNames[i].equals(value)) {
-                                com.criticalrange.VulkanModExtra.CONFIG.extraSettings.fullscreenMonitor = i;
-                                saveConfig();
-                                break;
-                            }
-                        }
-                    },
-                    () -> {
-                        int index = com.criticalrange.VulkanModExtra.CONFIG.extraSettings.fullscreenMonitor;
-                        return (index >= 0 && index < monitorNames.length) ? monitorNames[index] : monitorNames[0];
-                    }
-                ));
-            } catch (Exception e) {
-                // Silently ignore monitor selection creation failures
-            }
+            // Monitor selection is now handled by MixinVulkanModMonitorSelection
+            // Remove duplicate implementation to prevent double-shifting of tooltips
 
             return new net.vulkanmod.config.gui.OptionBlock(
                 "VulkanMod Extra",
@@ -244,14 +211,16 @@ public class MixinVulkanModOptions {
             if (blocks.length > 0) {
                 injectTooltipsIntoBlock(blocks[0], new String[]{
                     "vulkanmod.options.other.chunkBuilderThreads.tooltip", // Builder Threads (called builderThreads in VulkanMod)
-                    null, // Frame Queue already has tooltip
-                    null  // Device Selector already has tooltip
+                    "vulkanmod.options.other.frameQueue.tooltip",          // Frame Queue
+                    "vulkanmod.options.other.deviceSelector.tooltip"       // Device Selector
                 });
             }
         } catch (Exception e) {
             // Silently continue on failure
         }
     }
+
+    // Video tooltip injection removed - now handled by MixinVulkanModMonitorSelection
 
     /**
      * Helper method to inject tooltips into an OptionBlock
@@ -273,14 +242,12 @@ public class MixinVulkanModOptions {
                 String tooltipKey = tooltipKeys[i];
 
                 if (option != null && tooltipKey != null) {
-                    // Only add tooltip if the option doesn't already have one
-                    if (option.getTooltip() == null) {
-                        try {
-                            net.minecraft.text.Text tooltip = net.minecraft.text.Text.translatable(tooltipKey);
-                            option.setTooltip(tooltip);
-                        } catch (Exception e) {
-                            // Silently continue on failure
-                        }
+                    // Add or replace tooltip - this fixes misaligned tooltips in VulkanMod's video options
+                    try {
+                        net.minecraft.text.Text tooltip = net.minecraft.text.Text.translatable(tooltipKey);
+                        option.setTooltip(tooltip);
+                    } catch (Exception e) {
+                        // Silently continue on failure
                     }
                 }
             }
