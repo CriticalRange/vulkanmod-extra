@@ -63,7 +63,7 @@ public class MixinParticleEngine {
 
     @Unique
     private boolean shouldRenderParticle(com.criticalrange.config.VulkanModExtraConfig.ParticleSettings settings, String particleName) {
-        
+
         // Check master toggle first - if disabled, block all particles
         if (!settings.allParticles) {
             return false;

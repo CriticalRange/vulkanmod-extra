@@ -28,7 +28,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version_1_21_1"
 
     // VulkanMod dependency from Modrinth Maven
-    modImplementation "maven.modrinth:vulkanmod:0.5.4"
+    modImplementation "maven.modrinth:vulkanmod:$rootProject.vulkanmod_version"
 
     // MixinExtras for advanced mixin capabilities
     implementation "io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"

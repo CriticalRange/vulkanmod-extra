@@ -2,7 +2,6 @@ package com.criticalrange.client;
 
 import com.criticalrange.core.FeatureManager;
 import com.criticalrange.features.animation.AnimationFeature;
-import com.criticalrange.features.fps.FPSDisplayFeature;
 import com.criticalrange.features.particle.ParticleFeature;
 import com.criticalrange.features.monitor.MonitorInfoFeature;
 import com.criticalrange.config.ConfigurationManager;
@@ -22,7 +21,6 @@ public class VulkanModExtraClient implements ClientModInitializer {
     private static volatile boolean isShuttingDown = false;
 
     private FeatureManager featureManager;
-    private FPSDisplayFeature fpsDisplayFeature;
     private VulkanModExtraHud hud;
     private long frameCount = 0;
 
@@ -89,9 +87,6 @@ public class VulkanModExtraClient implements ClientModInitializer {
      */
     private void registerFeatures() {
         // Core features
-        fpsDisplayFeature = new FPSDisplayFeature();
-        featureManager.registerFeature(fpsDisplayFeature);
-
         featureManager.registerFeature(new AnimationFeature());
         featureManager.registerFeature(new ParticleFeature());
         featureManager.registerFeature(new MonitorInfoFeature());
@@ -137,12 +132,6 @@ public class VulkanModExtraClient implements ClientModInitializer {
         return instance != null ? instance.featureManager : null;
     }
 
-    /**
-     * Get the FPS display feature
-     */
-    public static FPSDisplayFeature getFpsDisplayFeature() {
-        return instance != null ? instance.fpsDisplayFeature : null;
-    }
 
 
     /**

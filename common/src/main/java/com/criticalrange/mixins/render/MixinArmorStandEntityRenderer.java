@@ -18,11 +18,11 @@ public class MixinArmorStandEntityRenderer {
 
 
     /**
-     * Universal: hasLabel method (works across all versions)
+     * 1.21.1: hasLabel method with ArmorStandEntity parameter
      */
-    @Inject(method = "hasLabel", at = @At("HEAD"), cancellable = true, require = 0)
-    private void controlNameTag(CallbackInfoReturnable<Boolean> cir) {
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.renderSettings.armorStandNameTag) {
+    @Inject(method = "hasLabel(Lnet/minecraft/entity/decoration/ArmorStandEntity;)Z", at = @At("HEAD"), cancellable = true)
+    private void controlNameTag(net.minecraft.entity.decoration.ArmorStandEntity armorStandEntity, CallbackInfoReturnable<Boolean> cir) {
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.renderSettings != null && !VulkanModExtra.CONFIG.renderSettings.armorStandNameTag) {
             cir.setReturnValue(false);
         }
     }

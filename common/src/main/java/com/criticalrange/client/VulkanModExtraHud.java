@@ -30,6 +30,7 @@ public class VulkanModExtraHud {
     private long lastVramCheck = 0;
     private String cachedVramInfo = "";
     private static final long VRAM_UPDATE_INTERVAL = 1000; // Update VRAM info every 1 second
+    private int frameCounter = 0;
 
     public VulkanModExtraHud() {
         this.minecraft = MinecraftClient.getInstance();
@@ -37,6 +38,8 @@ public class VulkanModExtraHud {
 
     public void onHudRender(DrawContext drawContext, float partialTicks) {
         if (minecraft.player == null) return;
+
+        frameCounter++;
         
         // Show our HUD when F3 debug screen is NOT open, or show alongside it
         // For now, let's always show it to test if it works
@@ -60,15 +63,21 @@ public class VulkanModExtraHud {
             lastUpdateTime = currentTime;
             
             // Debug log to see if HUD is being called and what the config values are (only once per second)
-            var config = VulkanModExtra.CONFIG.extraSettings;
-            var fpsMode = config.fpsDisplayMode;
-            VulkanModExtra.LOGGER.debug("FPS updated - showFps: {}, fpsDisplayMode: {}, FPS: {}", config.showFps, fpsMode, fps);
+            if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.extraSettings != null) {
+                var config = VulkanModExtra.CONFIG.extraSettings;
+                var fpsMode = config.fpsDisplayMode;
+                VulkanModExtra.LOGGER.debug("FPS updated - showFps: {}, fpsDisplayMode: {}, FPS: {}", config.showFps, fpsMode, fps);
+            }
         }
 
         renderOverlay(drawContext);
     }
 
     private void renderOverlay(DrawContext drawContext) {
+        if (VulkanModExtra.CONFIG == null || VulkanModExtra.CONFIG.extraSettings == null) {
+            return;
+        }
+
         var config = VulkanModExtra.CONFIG.extraSettings;
 
         // if none is true: nothing to render

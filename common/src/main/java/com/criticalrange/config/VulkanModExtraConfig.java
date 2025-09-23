@@ -1,9 +1,7 @@
 package com.criticalrange.config;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import com.criticalrange.config.FogType;
 
 /**
  * Refactored configuration system for VulkanMod Extra
@@ -275,34 +273,35 @@ public class VulkanModExtraConfig {
         public boolean painting = true;
         public boolean piston = true;
         public boolean beaconBeam = true;
-        public boolean limitBeaconBeamHeight = false;
+        public int beaconBeamHeight = 256; // Range: 32-512, default: 256
         public boolean itemFrameNameTag = true;
         public boolean armorStandNameTag = true;
         public boolean playerNameTag = true;
-        public boolean globalFog = true;
-        public final EnumMap<FogType, FogTypeConfig> fogTypeConfig = new EnumMap<>(FogType.class);
-        public boolean multiDimensionFog = false;
+        public boolean fog = true; // Master fog toggle (renamed from globalFog)
+        // Dimension-specific fog toggles
+        public boolean overworldFog = true;
+        public boolean netherFog = true;
+        public boolean endFog = true;
+        // Individual fog type enable toggles
+        public boolean waterFog = true;
+        public boolean lavaFog = true;
+        public boolean powderSnowFog = true;
 
         public RenderSettings() {
-            // Initialize fog configs
-            for (FogType type : FogType.values()) {
-                if (type != FogType.NONE) {
-                    fogTypeConfig.put(type, new FogTypeConfig());
-                }
-            }
+            // No complex fog config initialization needed anymore
         }
     }
 
 
 
     public static class DetailSettings {
-        public boolean sky = true;
+        public boolean sky = true;         // Master toggle for all sky elements
+        public boolean skyGradient = true; // Sky background gradient
         public boolean sun = true;
         public boolean moon = true;
         public boolean stars = true;
         public boolean rainSnow = true;
         public boolean biomeColors = true;
-        public boolean skyColors = true;
         public int cloudHeight = 192;
         public int cloudDistance = 100;
     }
@@ -360,13 +359,4 @@ public class VulkanModExtraConfig {
         }
     }
 
-    public static class FogTypeConfig {
-        public boolean enable = true;
-        public int environmentStartMultiplier = 100;
-        public int environmentEndMultiplier = 100;
-        public int renderDistanceStartMultiplier = 100;
-        public int renderDistanceEndMultiplier = 100;
-        public int skyEndMultiplier = 100;
-        public int cloudEndMultiplier = 100;
-    }
 }

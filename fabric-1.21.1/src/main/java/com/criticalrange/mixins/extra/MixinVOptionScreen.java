@@ -38,7 +38,7 @@ public abstract class MixinVOptionScreen {
                         this.optionPages.add((OptionPage) page);
                     }
                 }
-                LOGGER.info("Successfully added {} VulkanMod Extra pages to GUI", extraPages.size());
+                LOGGER.debug("Successfully added {} VulkanMod Extra pages to GUI", extraPages.size());
             } else {
                 LOGGER.warn("No VulkanMod Extra pages were created");
             }

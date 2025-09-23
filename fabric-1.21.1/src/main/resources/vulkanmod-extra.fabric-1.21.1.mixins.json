@@ -5,6 +5,14 @@
 	"client": [
 		"render.MixinItemFrameRenderer",
 		"extra.MixinVOptionScreen",
+		"extra.MixinGui",
+		"extra.MixinFPSGameRenderer",
+		"extra.MixinDebugScreenOverlay",
+		"extra.MixinMinecraftClient",
+		"details.MixinLevelRenderer",
+		"render.MixinFogRenderer",
+		"render.MixinBeaconRenderer",
+		"details.MixinWorldRendererCelestial",
 		"vulkanmod.MixinVulkanModEventTrigger",
 		"vulkanmod.MixinVulkanModMonitorSelection",
 		"vulkanmod.MixinVulkanModOptions"

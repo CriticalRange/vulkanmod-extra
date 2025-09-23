@@ -89,7 +89,7 @@ public class VulkanModPageFactory {
                 // Create cycling option for enum fields
                 Object[] enumValues = fieldType.getEnumConstants();
                 return createCyclingOption(
-                    fieldName,
+                    Text.translatable(keyPrefix + "." + fieldName),
                     keyPrefix + "." + fieldName + ".tooltip",
                     enumValues,
                     () -> getEnumField(configObject, fieldName),
@@ -158,19 +158,84 @@ public class VulkanModPageFactory {
 
         // Create individual option blocks
         if (config.optionGroups != null && config.optionGroups.length > 0) {
-            List<Object> individualOptions = new ArrayList<>();
+            for (int i = 0; i < config.optionGroups.length; i++) {
+                String[] group = config.optionGroups[i];
+                List<Object> groupOptions = new ArrayList<>();
 
-            for (String[] group : config.optionGroups) {
                 for (String fieldName : group) {
-                    individualOptions.add(createVulkanModOption(config.pageType, fieldName));
+                    groupOptions.add(createVulkanModOption(config.pageType, fieldName));
                 }
-            }
 
-            Object individualBlock = createBlock("Individual Controls", individualOptions);
-            blocks.add(individualBlock);
+                // Create a separate block for each group with descriptive names
+                String blockName = getBlockName(config.pageType, i);
+                Object groupBlock = createBlock(blockName, groupOptions);
+                blocks.add(groupBlock);
+            }
         }
 
         return createPage(config.pageTitle, blocks.toArray());
+    }
+
+    /**
+     * Get descriptive block names for each page type and group
+     */
+    private static String getBlockName(PageType pageType, int groupIndex) {
+        switch (pageType) {
+            case RENDER:
+                switch (groupIndex) {
+                    case 0: return "Entity Rendering";
+                    case 1: return "Name Tags";
+                    case 2: return "Block Rendering";
+                    case 3: return "Light & Effects";
+                    case 4: return "Fog Controls";
+                    default: return "Additional Controls " + (groupIndex + 1);
+                }
+            case ANIMATION:
+                switch (groupIndex) {
+                    case 0: return "Fluid Animations";
+                    case 1: return "Fire & Light";
+                    case 2: return "Portal Animations";
+                    case 3: return "Block Animations";
+                    case 4: return "Machine Animations";
+                    case 5: return "Plant Animations";
+                    case 6: return "Stem Animations";
+                    case 7: return "Sculk Animations";
+                    case 8: return "Command Blocks";
+                    case 9: return "Additional";
+                    default: return "Additional Controls " + (groupIndex + 1);
+                }
+            case PARTICLE:
+                switch (groupIndex) {
+                    case 0: return "Common Particles";
+                    case 1: return "Bubble Effects";
+                    case 2: return "Environmental";
+                    case 3: return "Combat Effects";
+                    case 4: return "Status Effects";
+                    case 5: return "Fire & Flame";
+                    case 6: return "Liquid Effects";
+                    case 7: return "Dust Effects";
+                    case 8: return "Explosion Effects";
+                    case 9: return "Nature Effects";
+                    case 10: return "Sculk Effects";
+                    case 11: return "Other Effects";
+                    default: return "Additional Controls " + (groupIndex + 1);
+                }
+            case DETAIL:
+                switch (groupIndex) {
+                    case 0: return "Sky Elements";
+                    case 1: return "Color Effects";
+                    default: return "Additional Controls " + (groupIndex + 1);
+                }
+            case EXTRA:
+                switch (groupIndex) {
+                    case 0: return "HUD Display";
+                    case 1: return "Coordinates";
+                    case 2: return "Toast Notifications";
+                    default: return "Additional Controls " + (groupIndex + 1);
+                }
+            default:
+                return "Additional Controls " + (groupIndex + 1);
+        }
     }
 
     /**
@@ -206,7 +271,7 @@ public class VulkanModPageFactory {
             case PARTICLE:
                 String[][] particleGroups = {
                     // Common particles
-                    {"ambientEntityEffect", "barrier", "block", "blockdust", "blockBreaking", "blockCrumble", "blockMarker"},
+                    {"ambientEntityEffect", "barrier", "block", "blockdust", "blockBreaking", "blockMarker"},
                     // Bubble particles
                     {"bubble", "bubbleColumnUp", "bubblePop", "currentDown"},
                     // Environmental particles
@@ -234,19 +299,31 @@ public class VulkanModPageFactory {
 
             case DETAIL:
                 String[][] detailGroups = {
-                    {"sky", "sun", "moon", "stars", "rainSnow", "biomeColors", "skyColors"}
+                    {"skyGradient", "sun", "moon", "stars", "rainSnow"},
+                    {"biomeColors"}
                 };
-                return new PageConfig(PageType.DETAIL, "Details", null, detailGroups);
+                return new PageConfig(PageType.DETAIL, "Details", "sky", detailGroups);
 
             case RENDER:
                 String[][] renderGroups = {
-                    {"lightUpdates", "itemFrame", "armorStand", "painting", "piston", "beaconBeam", "limitBeaconBeamHeight", "itemFrameNameTag", "playerNameTag", "globalFog", "multiDimensionFog"}
+                    // Entity Rendering
+                    {"itemFrame", "armorStand", "painting"},
+                    // Name Tags
+                    {"itemFrameNameTag", "playerNameTag"},
+                    // Block Rendering
+                    {"piston"},
+                    // Light & Effects
+                    {"lightUpdates", "beaconBeam", "beaconBeamHeight"},
+                    // Fog Controls
+                    {"fog", "overworldFog", "netherFog", "endFog", "waterFog", "lavaFog", "powderSnowFog"}
                 };
                 return new PageConfig(PageType.RENDER, "Render", null, renderGroups);
 
             case EXTRA:
                 String[][] extraGroups = {
-                    {"showFps", "fpsDisplayMode", "overlayCorner", "textContrast", "showCoords", "toasts", "advancementToast", "recipeToast", "systemToast", "tutorialToast"}
+                    {"showFps", "fpsDisplayMode", "overlayCorner", "textContrast"},
+                    {"showCoords"},
+                    {"toasts", "advancementToast", "recipeToast", "systemToast", "tutorialToast"}
                 };
                 return new PageConfig(PageType.EXTRA, "Extra", null, extraGroups);
 
@@ -283,11 +360,20 @@ public class VulkanModPageFactory {
             var field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.setBoolean(target, value);
+
+
+            // Save config immediately when field is changed
             saveConfig();
+
+            // Trigger resource reload for animation and particle changes
+            if (needsResourceReload(target, fieldName)) {
+                triggerResourceReload(fieldName);
+            }
         } catch (Exception e) {
             LOGGER.warn("Failed to set field: " + fieldName, e);
         }
     }
+
 
     /**
      * Get enum field value using reflection
@@ -311,9 +397,43 @@ public class VulkanModPageFactory {
             var field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
+            // Save config immediately when field is changed
             saveConfig();
         } catch (Exception e) {
             LOGGER.warn("Failed to set enum field: " + fieldName, e);
+        }
+    }
+
+
+
+    /**
+     * Check if a field change requires resource reload
+     */
+    private static boolean needsResourceReload(Object target, String fieldName) {
+        // Check if target is animation or particle settings
+        return target instanceof com.criticalrange.config.VulkanModExtraConfig.AnimationSettings ||
+               target instanceof com.criticalrange.config.VulkanModExtraConfig.ParticleSettings;
+    }
+
+    /**
+     * Trigger Minecraft resource reload
+     */
+    private static void triggerResourceReload(String reason) {
+        try {
+            net.minecraft.client.MinecraftClient minecraft = net.minecraft.client.MinecraftClient.getInstance();
+            if (minecraft != null) {
+                // Schedule reload on main thread to avoid threading issues
+                minecraft.execute(() -> {
+                    try {
+                        LOGGER.info("Triggering resource reload due to {} change", reason);
+                        minecraft.reloadResources();
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to reload resources: " + e.getMessage());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to trigger resource reload: " + e.getMessage());
         }
     }
 
@@ -339,6 +459,7 @@ public class VulkanModPageFactory {
             var field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             field.setInt(target, value);
+            // Save config immediately when field is changed
             saveConfig();
         } catch (Exception e) {
             LOGGER.warn("Failed to set integer field: " + fieldName, e);
@@ -363,6 +484,9 @@ public class VulkanModPageFactory {
                 break;
             case "fullscreenMonitor":
                 min = 0; max = 5; step = 1;
+                break;
+            case "beaconBeamHeight":
+                min = 32; max = 512; step = 16;
                 break;
             default:
                 // Generic integer range
@@ -420,7 +544,7 @@ public class VulkanModPageFactory {
 
                 // Optimization page removed - no optimization features currently available
 
-                LOGGER.info("Created {} VulkanMod Extra option pages with settings", pages.size());
+                LOGGER.debug("Created {} VulkanMod Extra option pages with settings", pages.size());
             }
 
         } catch (Exception e) {
@@ -489,37 +613,30 @@ public class VulkanModPageFactory {
         return switchOption;
     }
 
+    // Overloaded method for backward compatibility with String names
     private static Object createCyclingOption(String name, String description, Object[] values, Supplier<Object> getter, Consumer<Object> setter) throws Exception {
+        return createCyclingOption(Text.literal(name), description, values, getter, setter);
+    }
+
+    private static Object createCyclingOption(Text name, String description, Object[] values, Supplier<Object> getter, Consumer<Object> setter) throws Exception {
         Object cyclingOption = cachedCyclingOptionClass.getConstructor(Text.class, Object[].class, Consumer.class, Supplier.class)
             .newInstance(
-                Text.literal(name),
+                name,
                 values,
                 setter,
                 getter
             );
 
-        // Add translator function for enum display names
+        // Add translator function for enum display names using translation keys
         try {
             Method setTranslatorMethod = cachedCyclingOptionClass.getMethod("setTranslator", Function.class);
             Function<Object, Text> translator = (value) -> {
                 if (value instanceof Enum<?>) {
                     Enum<?> enumValue = (Enum<?>) value;
-                    // Convert enum name to display format (e.g., BASIC -> Basic, TOP_LEFT -> Top Left)
-                    String enumName = enumValue.name().toLowerCase().replace('_', ' ');
-                    StringBuilder displayName = new StringBuilder();
-                    boolean capitalize = true;
-                    for (char c : enumName.toCharArray()) {
-                        if (capitalize && Character.isLetter(c)) {
-                            displayName.append(Character.toUpperCase(c));
-                            capitalize = false;
-                        } else if (c == ' ') {
-                            displayName.append(c);
-                            capitalize = true;
-                        } else {
-                            displayName.append(c);
-                        }
-                    }
-                    return Text.literal(displayName.toString());
+                    // Convert UPPER_CASE to camelCase for translation keys
+                    String enumKey = convertToCamelCase(enumValue.name());
+                    String translationKey = description.replace(".tooltip", "." + enumKey);
+                    return Text.translatable(translationKey);
                 }
                 return Text.literal(value.toString());
             };
@@ -591,6 +708,32 @@ public class VulkanModPageFactory {
         } catch (Exception e) {
             LOGGER.warn("Failed to save config", e);
         }
+    }
+
+    /**
+     * Convert UPPER_CASE enum names to camelCase for translation keys
+     * Examples: TOP_LEFT -> topLeft, BOTTOM_RIGHT -> bottomRight, BASIC -> basic
+     */
+    private static String convertToCamelCase(String upperCase) {
+        if (upperCase == null || upperCase.isEmpty()) {
+            return upperCase;
+        }
+
+        String[] parts = upperCase.toLowerCase().split("_");
+        if (parts.length == 1) {
+            return parts[0]; // Single word like "BASIC" -> "basic"
+        }
+
+        StringBuilder camelCase = new StringBuilder(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            if (!parts[i].isEmpty()) {
+                camelCase.append(Character.toUpperCase(parts[i].charAt(0)));
+                if (parts[i].length() > 1) {
+                    camelCase.append(parts[i].substring(1));
+                }
+            }
+        }
+        return camelCase.toString();
     }
 
     /**

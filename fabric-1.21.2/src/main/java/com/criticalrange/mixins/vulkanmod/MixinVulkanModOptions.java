@@ -134,6 +134,7 @@ public class MixinVulkanModOptions {
     private static void saveConfig() {
         try {
             if (com.criticalrange.VulkanModExtra.configManager != null) {
+                // Save the current in-memory config (with all user changes)
                 com.criticalrange.VulkanModExtra.configManager.saveConfig();
             }
         } catch (Exception e) {

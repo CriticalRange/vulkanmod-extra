@@ -3,6 +3,7 @@ package com.criticalrange.mixins.animations;
 import com.criticalrange.VulkanModExtra;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.SpriteLoader;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,22 +20,31 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  */
 @Mixin(SpriteAtlasTexture.class)
 public abstract class MixinTextureAtlas extends AbstractTexture {
-    
 
-    @Redirect(method = "upload", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/Sprite;createAnimation()Lnet/minecraft/client/texture/Sprite$TickableAnimation;"))
+
+
+    @Redirect(method = "upload(Lnet/minecraft/client/texture/SpriteLoader$StitchResult;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/Sprite;createAnimation()Lnet/minecraft/client/texture/Sprite$TickableAnimation;"))
     public Sprite.TickableAnimation vulkanmodExtra$tickAnimatedSprites(Sprite instance) {
         Sprite.TickableAnimation tickableAnimation = instance.createAnimation();
-        
+
         if (tickableAnimation != null) {
             String textureName = instance.getContents().getId().toString();
             boolean shouldAnimate = this.shouldAnimate(instance.getContents().getId());
-            
-            
+
+            // Log specific textures that we know should be controlled
+            if (textureName.contains("lava") || textureName.contains("fire") || textureName.contains("water")) {
+                VulkanModExtra.LOGGER.info("VulkanMod Extra: Animation control for {} -> shouldAnimate: {}", textureName, shouldAnimate);
+            }
+
             if (shouldAnimate) {
                 return tickableAnimation;
+            } else {
+                if (textureName.contains("lava") || textureName.contains("fire") || textureName.contains("water")) {
+                    VulkanModExtra.LOGGER.info("VulkanMod Extra: BLOCKING animation for {}", textureName);
+                }
             }
         }
-        
+
         return null;
     }
 
@@ -43,15 +53,16 @@ public abstract class MixinTextureAtlas extends AbstractTexture {
         if (identifier == null) {
             return true;
         }
-        
+
         // Fast config access - no ConfigurationManager overhead
         if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.animationSettings != null) {
             var config = VulkanModExtra.CONFIG;
 
             // Cache string conversion to avoid repeated allocations
             String idString = identifier.getPath(); // More efficient than toString().toLowerCase()
+
             var settings = config.animationSettings;
-            
+
             // Check master toggle first - if disabled, block all animations
             if (!settings.allAnimations) {
                 return false;

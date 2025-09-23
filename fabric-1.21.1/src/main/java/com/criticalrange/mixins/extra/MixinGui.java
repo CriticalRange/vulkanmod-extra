@@ -23,7 +23,12 @@ public class MixinGui {
      */
     @Inject(method = "render", at = @At("TAIL"), require = 0)
     private void vulkanmodExtra$onRender(DrawContext drawContext, RenderTickCounter tickCounter, CallbackInfo ci) {
-        float tickDelta = tickCounter.getTickDelta(true);
-        VulkanModExtraClient.onHudRender(drawContext, tickDelta);
+        try {
+            float tickDelta = tickCounter.getTickDelta(true);
+            VulkanModExtraClient.onHudRender(drawContext, tickDelta);
+        } catch (Exception e) {
+            System.out.println("VulkanMod Extra: Error in MixinGui: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

@@ -93,24 +93,45 @@ public class ConfigurationManager {
      * Save the current configuration
      */
     public void saveConfig() {
-        if (config == null) {
-            LOGGER.warn("No config to save - config is null");
-            return;
-        }
-
         try {
+            // Always get the current static CONFIG reference before saving
+            // This ensures we save any changes made by the GUI
+            VulkanModExtraConfig currentConfig = getCurrentStaticConfig();
+            if (currentConfig != null) {
+                this.config = currentConfig;
+            }
+
+            if (config == null) {
+                LOGGER.warn("No config to save - config is null");
+                return;
+            }
+
             // Save to the single config file location
             Path configFile = configDirectory.getParent().resolve("vulkanmod-extra-options.json");
             String json = GSON.toJson(config);
             Files.writeString(configFile, json);
 
-            // Update the static CONFIG reference to ensure all code sees the latest values
-            updateStaticConfigReference();
+            LOGGER.info("Successfully saved config to: {}", configFile);
 
         } catch (IOException e) {
             LOGGER.error("Failed to save configuration: {}", e.getMessage());
             LOGGER.error("Config directory: {}", configDirectory);
             LOGGER.error("Config directory exists: {}", Files.exists(configDirectory));
+        }
+    }
+
+    /**
+     * Get the current static CONFIG reference from VulkanModExtra
+     */
+    private VulkanModExtraConfig getCurrentStaticConfig() {
+        try {
+            Class<?> vulkanModExtraClass = Class.forName("com.criticalrange.VulkanModExtra");
+            java.lang.reflect.Field configField = vulkanModExtraClass.getDeclaredField("CONFIG");
+            configField.setAccessible(true);
+            return (VulkanModExtraConfig) configField.get(null);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to get current static CONFIG reference: {}", e.getMessage());
+            return null;
         }
     }
 

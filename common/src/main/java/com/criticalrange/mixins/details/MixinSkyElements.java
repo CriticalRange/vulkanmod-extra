@@ -8,37 +8,37 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Controls sky element rendering with multi-version support
+ * Controls complete sky rendering when master toggle is disabled
  * Uses optional injections for maximum compatibility across Minecraft versions
  *
- * CURRENT LIMITATION: This mixin currently disables the entire sky (gradient, sun, moon, stars)
- * when the sky option is turned off. This is a temporary approach until more granular
- * injection points can be identified for targeting only the sky gradient.
+ * Note: Individual sky elements (gradient, sun, moon, stars) are controlled by MixinWorldRendererCelestial
  */
 @Mixin(WorldRenderer.class)
 public class MixinSkyElements {
 
     /**
-     * Primary sky rendering injection
-     * Uses generic method targeting for maximum compatibility
+     * Master sky rendering control - cancels entire renderSky when master toggle is off
      */
     @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true, require = 0)
-    private void vulkanmodExtra$controlSkyRendering(CallbackInfo ci) {
-        // Disable entire sky when option is off
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
+    private void vulkanmodExtra$controlMasterSkyToggle(CallbackInfo ci) {
+        // Only cancel when master toggle is completely off
+        if (VulkanModExtra.CONFIG != null &&
+            VulkanModExtra.CONFIG.detailSettings != null &&
+            !VulkanModExtra.CONFIG.detailSettings.sky) {
             ci.cancel();
             return;
         }
     }
 
     /**
-     * Alternative sky rendering injection for different method signatures
-     * Targets any renderSky method regardless of parameters
+     * Alternative master sky control for different method signatures
      */
     @Inject(method = "renderSky*", at = @At("HEAD"), cancellable = true, require = 0)
-    private void vulkanmodExtra$controlSkyRenderingWildcard(CallbackInfo ci) {
-        // Disable entire sky when option is off
-        if (VulkanModExtra.CONFIG != null && !VulkanModExtra.CONFIG.detailSettings.sky) {
+    private void vulkanmodExtra$controlMasterSkyToggleWildcard(CallbackInfo ci) {
+        // Only cancel when master toggle is completely off
+        if (VulkanModExtra.CONFIG != null &&
+            VulkanModExtra.CONFIG.detailSettings != null &&
+            !VulkanModExtra.CONFIG.detailSettings.sky) {
             ci.cancel();
             return;
         }

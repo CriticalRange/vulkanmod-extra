@@ -25,7 +25,10 @@ public class VulkanModExtra implements ModInitializer {
 		// Initialize configuration system
 		configManager = ConfigurationManager.getInstance();
 		CONFIG = configManager.loadConfig();
-		
+
+		LOGGER.info("VulkanMod Extra initialized with config: allAnimations={}, allParticles={}",
+			CONFIG != null && CONFIG.animationSettings != null ? CONFIG.animationSettings.allAnimations : "null",
+			CONFIG != null && CONFIG.particleSettings != null ? CONFIG.particleSettings.allParticles : "null");
 	}
 	
 	private int countSettings(VulkanModExtraConfig config) {

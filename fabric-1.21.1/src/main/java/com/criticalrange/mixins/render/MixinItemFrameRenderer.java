@@ -19,11 +19,11 @@ public class MixinItemFrameRenderer {
 
     /**
      * 1.21.1: Entity-based render method
-     * Method signature: render(ItemFrameEntity, float, float, MatrixStack, VertexConsumerProvider, int)
+     * Method signature: render(T, float, float, MatrixStack, VertexConsumerProvider, int)
      */
     @Inject(method = "render(Lnet/minecraft/entity/decoration/ItemFrameEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
             at = @At("HEAD"), cancellable = true)
-    private void controlRendering1_21_1(CallbackInfo ci) {
+    private void controlRendering1_21_1(ItemFrameEntity itemFrameEntity, float f, float g, net.minecraft.client.util.math.MatrixStack matrixStack, net.minecraft.client.render.VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.renderSettings != null &&
             !VulkanModExtra.CONFIG.renderSettings.itemFrame) {
@@ -34,8 +34,8 @@ public class MixinItemFrameRenderer {
     /**
      * 1.21.1: hasLabel method with ItemFrameEntity parameter
      */
-    @Inject(method = "hasLabel", at = @At("HEAD"), cancellable = true)
-    private void controlNameTag(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hasLabel(Lnet/minecraft/entity/decoration/ItemFrameEntity;)Z", at = @At("HEAD"), cancellable = true)
+    private void controlNameTag(ItemFrameEntity itemFrameEntity, CallbackInfoReturnable<Boolean> cir) {
         if (VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.renderSettings != null &&
             !VulkanModExtra.CONFIG.renderSettings.itemFrameNameTag) {

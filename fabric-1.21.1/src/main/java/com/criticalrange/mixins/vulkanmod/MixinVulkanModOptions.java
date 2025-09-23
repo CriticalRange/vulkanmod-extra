@@ -137,7 +137,7 @@ public class MixinVulkanModOptions {
                 com.criticalrange.VulkanModExtra.configManager.saveConfig();
             }
         } catch (Exception e) {
-            // Silently ignore config save failures
+            System.out.println("VulkanMod Extra: Config save failed: " + e.getMessage());
         }
     }
 
