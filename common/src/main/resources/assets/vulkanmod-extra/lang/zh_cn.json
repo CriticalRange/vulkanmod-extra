@@ -1,0 +1,25 @@
+{
+  "__comment": "Simplified Chinese translations for VulkanMod Extra",
+  "__comment_contributors": "Please contribute translations at https://github.com/CriticalRange/vulkanmod-extra",
+
+  "vulkanmod-extra.pages.animations": "动画",
+  "vulkanmod-extra.pages.particles": "粒子",
+  "vulkanmod-extra.pages.details": "细节",
+  "vulkanmod-extra.pages.render": "渲染",
+  "vulkanmod-extra.pages.extra": "额外",
+
+  "__comment": "Block/Section Titles",
+  "vulkanmod-extra.block.masterControls": "主控制",
+  "vulkanmod-extra.block.render.entityRendering": "实体渲染",
+  "vulkanmod-extra.block.render.nameTags": "名称标签",
+  "vulkanmod-extra.block.render.blockRendering": "方块渲染",
+  "vulkanmod-extra.block.render.lightEffects": "光照与效果",
+  "vulkanmod-extra.block.render.fogControls": "雾气控制",
+
+  "__comment": "Master Toggles",
+  "vulkanmod-extra.option.animation.allAnimations": "所有动画",
+  "vulkanmod-extra.option.particle.allParticles": "所有粒子",
+
+  "__comment_note": "Additional translations needed - this is a starter template",
+  "__comment_note2": "Please help translate the remaining strings at: https://github.com/CriticalRange/vulkanmod-extra"
+}

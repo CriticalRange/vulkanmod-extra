@@ -1,0 +1,25 @@
+{
+  "__comment": "Brazilian Portuguese translations for VulkanMod Extra",
+  "__comment_contributors": "Please contribute translations at https://github.com/CriticalRange/vulkanmod-extra",
+
+  "vulkanmod-extra.pages.animations": "Animações",
+  "vulkanmod-extra.pages.particles": "Partículas",
+  "vulkanmod-extra.pages.details": "Detalhes",
+  "vulkanmod-extra.pages.render": "Renderização",
+  "vulkanmod-extra.pages.extra": "Extra",
+
+  "__comment": "Block/Section Titles",
+  "vulkanmod-extra.block.masterControls": "Controles Principais",
+  "vulkanmod-extra.block.render.entityRendering": "Renderização de Entidades",
+  "vulkanmod-extra.block.render.nameTags": "Placas de Nome",
+  "vulkanmod-extra.block.render.blockRendering": "Renderização de Blocos",
+  "vulkanmod-extra.block.render.lightEffects": "Luz e Efeitos",
+  "vulkanmod-extra.block.render.fogControls": "Controles de Névoa",
+
+  "__comment": "Master Toggles",
+  "vulkanmod-extra.option.animation.allAnimations": "Todas as Animações",
+  "vulkanmod-extra.option.particle.allParticles": "Todas as Partículas",
+
+  "__comment_note": "Additional translations needed - this is a starter template",
+  "__comment_note2": "Please help translate the remaining strings at: https://github.com/CriticalRange/vulkanmod-extra"
+}

@@ -1,0 +1,25 @@
+{
+  "__comment": "French (France) translations for VulkanMod Extra",
+  "__comment_contributors": "Please contribute translations at https://github.com/CriticalRange/vulkanmod-extra",
+
+  "vulkanmod-extra.pages.animations": "Animations",
+  "vulkanmod-extra.pages.particles": "Particules",
+  "vulkanmod-extra.pages.details": "Détails",
+  "vulkanmod-extra.pages.render": "Rendu",
+  "vulkanmod-extra.pages.extra": "Extra",
+
+  "__comment": "Block/Section Titles",
+  "vulkanmod-extra.block.masterControls": "Contrôles Principaux",
+  "vulkanmod-extra.block.render.entityRendering": "Rendu des Entités",
+  "vulkanmod-extra.block.render.nameTags": "Étiquettes de Nom",
+  "vulkanmod-extra.block.render.blockRendering": "Rendu des Blocs",
+  "vulkanmod-extra.block.render.lightEffects": "Lumière et Effets",
+  "vulkanmod-extra.block.render.fogControls": "Contrôles du Brouillard",
+
+  "__comment": "Master Toggles",
+  "vulkanmod-extra.option.animation.allAnimations": "Toutes les Animations",
+  "vulkanmod-extra.option.particle.allParticles": "Toutes les Particules",
+
+  "__comment_note": "Additional translations needed - this is a starter template",
+  "__comment_note2": "Please help translate the remaining strings at: https://github.com/CriticalRange/vulkanmod-extra"
+}

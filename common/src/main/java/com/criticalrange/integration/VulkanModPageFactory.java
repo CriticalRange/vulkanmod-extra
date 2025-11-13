@@ -152,7 +152,7 @@ public class VulkanModPageFactory {
                 (value) -> setBooleanField(configObject, config.masterToggleField, value)
             ));
 
-            Object masterBlock = createBlock("Master Controls", masterOptions);
+            Object masterBlock = createBlock(Text.translatable("vulkanmod-extra.block.masterControls").getString(), masterOptions);
             blocks.add(masterBlock);
         }
 
@@ -177,65 +177,74 @@ public class VulkanModPageFactory {
     }
 
     /**
-     * Get descriptive block names for each page type and group
+     * Get descriptive block names for each page type and group (localized)
      */
     private static String getBlockName(PageType pageType, int groupIndex) {
+        String translationKey;
+
         switch (pageType) {
             case RENDER:
                 switch (groupIndex) {
-                    case 0: return "Entity Rendering";
-                    case 1: return "Name Tags";
-                    case 2: return "Block Rendering";
-                    case 3: return "Light & Effects";
-                    case 4: return "Fog Controls";
-                    default: return "Additional Controls " + (groupIndex + 1);
+                    case 0: translationKey = "vulkanmod-extra.block.render.entityRendering"; break;
+                    case 1: translationKey = "vulkanmod-extra.block.render.nameTags"; break;
+                    case 2: translationKey = "vulkanmod-extra.block.render.blockRendering"; break;
+                    case 3: translationKey = "vulkanmod-extra.block.render.lightEffects"; break;
+                    case 4: translationKey = "vulkanmod-extra.block.render.fogControls"; break;
+                    default: return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
                 }
+                break;
             case ANIMATION:
                 switch (groupIndex) {
-                    case 0: return "Fluid Animations";
-                    case 1: return "Fire & Light";
-                    case 2: return "Portal Animations";
-                    case 3: return "Block Animations";
-                    case 4: return "Machine Animations";
-                    case 5: return "Plant Animations";
-                    case 6: return "Stem Animations";
-                    case 7: return "Sculk Animations";
-                    case 8: return "Command Blocks";
-                    case 9: return "Additional";
-                    default: return "Additional Controls " + (groupIndex + 1);
+                    case 0: translationKey = "vulkanmod-extra.block.animation.fluidAnimations"; break;
+                    case 1: translationKey = "vulkanmod-extra.block.animation.fireLight"; break;
+                    case 2: translationKey = "vulkanmod-extra.block.animation.portalAnimations"; break;
+                    case 3: translationKey = "vulkanmod-extra.block.animation.blockAnimations"; break;
+                    case 4: translationKey = "vulkanmod-extra.block.animation.machineAnimations"; break;
+                    case 5: translationKey = "vulkanmod-extra.block.animation.plantAnimations"; break;
+                    case 6: translationKey = "vulkanmod-extra.block.animation.stemAnimations"; break;
+                    case 7: translationKey = "vulkanmod-extra.block.animation.sculkAnimations"; break;
+                    case 8: translationKey = "vulkanmod-extra.block.animation.commandBlocks"; break;
+                    case 9: translationKey = "vulkanmod-extra.block.animation.additional"; break;
+                    default: return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
                 }
+                break;
             case PARTICLE:
                 switch (groupIndex) {
-                    case 0: return "Common Particles";
-                    case 1: return "Bubble Effects";
-                    case 2: return "Environmental";
-                    case 3: return "Combat Effects";
-                    case 4: return "Status Effects";
-                    case 5: return "Fire & Flame";
-                    case 6: return "Liquid Effects";
-                    case 7: return "Dust Effects";
-                    case 8: return "Explosion Effects";
-                    case 9: return "Nature Effects";
-                    case 10: return "Sculk Effects";
-                    case 11: return "Other Effects";
-                    default: return "Additional Controls " + (groupIndex + 1);
+                    case 0: translationKey = "vulkanmod-extra.block.particle.commonParticles"; break;
+                    case 1: translationKey = "vulkanmod-extra.block.particle.bubbleEffects"; break;
+                    case 2: translationKey = "vulkanmod-extra.block.particle.environmental"; break;
+                    case 3: translationKey = "vulkanmod-extra.block.particle.combatEffects"; break;
+                    case 4: translationKey = "vulkanmod-extra.block.particle.statusEffects"; break;
+                    case 5: translationKey = "vulkanmod-extra.block.particle.fireFlame"; break;
+                    case 6: translationKey = "vulkanmod-extra.block.particle.liquidEffects"; break;
+                    case 7: translationKey = "vulkanmod-extra.block.particle.dustEffects"; break;
+                    case 8: translationKey = "vulkanmod-extra.block.particle.explosionEffects"; break;
+                    case 9: translationKey = "vulkanmod-extra.block.particle.natureEffects"; break;
+                    case 10: translationKey = "vulkanmod-extra.block.particle.sculkEffects"; break;
+                    case 11: translationKey = "vulkanmod-extra.block.particle.otherEffects"; break;
+                    default: return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
                 }
+                break;
             case DETAIL:
                 switch (groupIndex) {
-                    case 0: return "Sky Elements";
-                    case 1: return "Color Effects";
-                    default: return "Additional Controls " + (groupIndex + 1);
+                    case 0: translationKey = "vulkanmod-extra.block.details.skyElements"; break;
+                    case 1: translationKey = "vulkanmod-extra.block.details.colorEffects"; break;
+                    default: return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
                 }
+                break;
             case EXTRA:
                 switch (groupIndex) {
-                    case 0: return "HUD Display";
-                    case 1: return "Coordinates";
-                    case 2: return "Toast Notifications";
-                    default: return "Additional Controls " + (groupIndex + 1);
+                    case 0: translationKey = "vulkanmod-extra.block.extra.hudDisplay"; break;
+                    case 1: translationKey = "vulkanmod-extra.block.extra.coordinates"; break;
+                    case 2: translationKey = "vulkanmod-extra.block.extra.toastNotifications"; break;
+                    default: return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
                 }
+                break;
             default:
-                return "Additional Controls " + (groupIndex + 1);
+                return Text.translatable("vulkanmod-extra.block.additionalControls", groupIndex + 1).getString();
         }
+
+        return Text.translatable(translationKey).getString();
     }
 
     /**
