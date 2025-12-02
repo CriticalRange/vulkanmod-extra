@@ -295,7 +295,6 @@ public class VulkanModExtraConfig {
 
 
     public static class DetailSettings {
-        public boolean sky = true;         // Master toggle for all sky elements
         public boolean skyGradient = true; // Sky background gradient
         public boolean sun = true;
         public boolean moon = true;

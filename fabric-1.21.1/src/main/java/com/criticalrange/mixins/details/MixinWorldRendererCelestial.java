@@ -76,7 +76,7 @@ public class MixinWorldRendererCelestial {
         if (isInSunContext &&
             VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.detailSettings != null &&
-            (!VulkanModExtra.CONFIG.detailSettings.sky || !VulkanModExtra.CONFIG.detailSettings.sun)) {
+            (!VulkanModExtra.CONFIG.detailSettings.sun)) {
             return getDummyVertexConsumer();
         }
 
@@ -84,7 +84,7 @@ public class MixinWorldRendererCelestial {
         if (isInMoonContext &&
             VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.detailSettings != null &&
-            (!VulkanModExtra.CONFIG.detailSettings.sky || !VulkanModExtra.CONFIG.detailSettings.moon)) {
+            (!VulkanModExtra.CONFIG.detailSettings.moon)) {
             return getDummyVertexConsumer();
         }
 
@@ -112,7 +112,7 @@ public class MixinWorldRendererCelestial {
         if (instance == this.starsBuffer &&
             VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.detailSettings != null &&
-            (!VulkanModExtra.CONFIG.detailSettings.sky || !VulkanModExtra.CONFIG.detailSettings.stars)) {
+            (!VulkanModExtra.CONFIG.detailSettings.stars)) {
             return; // Skip the draw call
         }
 
@@ -120,7 +120,7 @@ public class MixinWorldRendererCelestial {
         if (instance == this.lightSkyBuffer &&
             VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.detailSettings != null &&
-            (!VulkanModExtra.CONFIG.detailSettings.sky || !VulkanModExtra.CONFIG.detailSettings.skyGradient)) {
+            (!VulkanModExtra.CONFIG.detailSettings.skyGradient)) {
             return; // Skip the draw call
         }
 

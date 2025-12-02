@@ -26,8 +26,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version_1_21_2"
 
-    // VulkanMod dependency - comment out if maven.vulkanmod.net is not accessible
-    // modImplementation "net.vulkanmod:vulkanmod:$rootProject.vulkanmod_version"
+    // VulkanMod dependency - needed for compilation of VulkanMod integration mixins
+    modCompileOnly "maven.modrinth:vulkanmod:$rootProject.vulkanmod_version"
 
     // MixinExtras for advanced mixin capabilities
     implementation "io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"

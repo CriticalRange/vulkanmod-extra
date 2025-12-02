@@ -8,39 +8,27 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Controls complete sky rendering when master toggle is disabled
- * Uses optional injections for maximum compatibility across Minecraft versions
- *
- * Note: Individual sky elements (gradient, sun, moon, stars) are controlled by MixinWorldRendererCelestial
+ * Cloud rendering control mixin
+ * Controls cloud rendering based on user preferences and performance settings
+ * Basic version for compatibility across Minecraft versions
  */
 @Mixin(WorldRenderer.class)
 public class MixinSkyElements {
 
     /**
-     * Master sky rendering control - cancels entire renderSky when master toggle is off
+     * Basic cloud control using wildcard patterns
+     * Platform-specific versions can override this with more precise targeting
      */
-    @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true, require = 0)
-    private void vulkanmodExtra$controlMasterSkyToggle(CallbackInfo ci) {
-        // Only cancel when master toggle is completely off
-        if (VulkanModExtra.CONFIG != null &&
-            VulkanModExtra.CONFIG.detailSettings != null &&
-            !VulkanModExtra.CONFIG.detailSettings.sky) {
-            ci.cancel();
-            return;
-        }
-    }
+    @Inject(method = "render*", at = @At("HEAD"), cancellable = true, require = 0)
+    private void vulkanmodExtra$controlCloudRendering(CallbackInfo ci) {
+        if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.detailSettings != null) {
+            var settings = VulkanModExtra.CONFIG.detailSettings;
 
-    /**
-     * Alternative master sky control for different method signatures
-     */
-    @Inject(method = "renderSky*", at = @At("HEAD"), cancellable = true, require = 0)
-    private void vulkanmodExtra$controlMasterSkyToggleWildcard(CallbackInfo ci) {
-        // Only cancel when master toggle is completely off
-        if (VulkanModExtra.CONFIG != null &&
-            VulkanModExtra.CONFIG.detailSettings != null &&
-            !VulkanModExtra.CONFIG.detailSettings.sky) {
-            ci.cancel();
-            return;
+            // Disable clouds completely if distance is set to 0 or below
+            if (settings.cloudDistance <= 0) {
+                ci.cancel();
+                return;
+            }
         }
     }
 }

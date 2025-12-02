@@ -638,7 +638,6 @@ Outstanding contributions may be recognized:
 
 ### Resources
 
-- **Documentation**: [ARCHITECTURE.md](ARCHITECTURE.md), [CLAUDE.md](CLAUDE.md)
 - **Discussions**: [GitHub Discussions](https://github.com/CriticalRange/vulkanmod-extra/discussions)
 - **Issues**: [GitHub Issues](https://github.com/CriticalRange/vulkanmod-extra/issues)
 - **Discord**: [Join VulkanMod Community]
@@ -646,7 +645,7 @@ Outstanding contributions may be recognized:
 ### Common Questions
 
 **Q: I'm new to modding. Where do I start?**
-A: Check out [Fabric's documentation](https://fabricmc.net/wiki/tutorial:introduction) and our [ARCHITECTURE.md](ARCHITECTURE.md) to understand the basics.
+A: Check out [Fabric's documentation](https://fabricmc.net/wiki/tutorial:introduction) to understand the basics.
 
 **Q: How do I test my changes?**
 A: Run `./gradlew :fabric-1.21.1:runClient` to launch Minecraft with your modified mod.

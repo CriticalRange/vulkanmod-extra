@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "vulkanmod-extra",
+  "version": "${version}",
+  "name": "VulkanMod Extra",
+  "description": "Performance optimizations, visual tweaks, and quality-of-life improvements for VulkanMod",
+  "authors": [
+    "CriticalRange"
+  ],
+  "contact": {
+    "homepage": "https://github.com/CriticalRange/vulkanmod-extra",
+    "sources": "https://github.com/CriticalRange/vulkanmod-extra",
+    "issues": "https://github.com/CriticalRange/vulkanmod-extra/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/vulkanmod-extra/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.criticalrange.VulkanModExtra"
+    ],
+    "client": [
+      "com.criticalrange.client.VulkanModExtraClient"
+    ]
+  },
+  "mixins": [
+    "vulkanmod-extra.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.17.2",
+    "fabric-api": "*",
+    "minecraft": "~1.21.4",
+    "vulkanmod": ">=0.5.3"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

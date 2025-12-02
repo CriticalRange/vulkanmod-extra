@@ -1,0 +1,38 @@
+{
+	"required": false,
+	"package": "com.criticalrange.mixins",
+	"compatibilityLevel": "JAVA_17",
+	"plugin": "com.criticalrange.mixins.VulkanModExtraMixinPlugin",
+	"client": [
+		"animations.MixinTextureAtlas",
+		"particles.MixinParticleEngine",
+		"details.MixinBiomeColors",
+		"render.MixinLevelLightEngine",
+		"extra.MixinCamera",
+		"details.MixinDimensionType",
+		"extra.MixinPreventShadersGameRenderer",
+		"extra.MixinWindow",
+		"extra.MixinToastManager",
+		"details.MixinSkyRenderer",
+		"details.MixinSkyElements",
+		"render.MixinFogRenderer",
+		"render.MixinItemFrameRenderer",
+		"render.MixinArmorStandRenderer",
+		"render.MixinArmorStandEntityRenderer",
+		"render.MixinPaintingRenderer",
+		"render.MixinPistonRenderer",
+		"render.MixinBeaconRenderer",
+		"extra.MixinVOptionScreen",
+		"extra.MixinMinecraftClientShutdown",
+		"vulkanmod.MixinVulkanModEventTrigger",
+		"vulkanmod.MixinVulkanModMonitorSelection",
+		"vulkanmod.MixinVulkanModOptions"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	},
+	"minVersion": "0.8",
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
