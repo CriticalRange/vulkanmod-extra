@@ -50,6 +50,11 @@ This is a **Release Candidate** - please test thoroughly before upgrading to sta
   • Minor warning in `MixinInGameHud` (non-critical, does not affect functionality)
   • Crowdin PR #6 has incorrect file naming (will be fixed in next sync)
 
+### 🙏 CONTRIBUTORS:
+
+Special thanks to our first community contributor:
+  • **[@Alvaro842DEV](https://github.com/Alvaro842DEV)** - Fixed FPS overlay rendering issues and performance improvements ([#3](https://github.com/CriticalRange/vulkanmod-extra/pull/3))
+
 ---
 
 # v0.2.0-beta7:

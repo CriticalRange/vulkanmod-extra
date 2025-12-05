@@ -75,3 +75,27 @@ subprojects {
         }
     }
 }
+
+// Task to build all versions and collect JARs for release
+tasks.register('buildAllVersions') {
+    description = 'Builds all Minecraft version modules and collects JARs for release'
+    group = 'build'
+    
+    dependsOn subprojects.collect { it.tasks.named('build') }
+    
+    doLast {
+        def releasesDir = file("${rootProject.buildDir}/releases")
+        releasesDir.mkdirs()
+        
+        // Copy all built JARs to releases directory
+        subprojects.each { subproject ->
+            copy {
+                from subproject.tasks.remapJar.archiveFile
+                into releasesDir
+            }
+        }
+        
+        println "✅ All versions built successfully!"
+        println "📦 Release JARs copied to: ${releasesDir.absolutePath}"
+    }
+}
