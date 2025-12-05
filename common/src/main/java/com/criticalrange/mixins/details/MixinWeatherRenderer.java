@@ -20,7 +20,7 @@ public class MixinWeatherRenderer {
      * Control weather particles and sound effects
      * This method will be overridden by platform-specific mixins
      */
-    @Inject(method = "*", at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "*", at = @At("HEAD"), require = 0)
     private void vulkanmodExtra$controlWeatherParticles(Camera camera, CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.detailSettings != null) {
             // Cancel weather effects when rain/snow toggle is disabled

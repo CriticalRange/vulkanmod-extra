@@ -19,7 +19,7 @@ public class MixinSkyGradient {
      * Control sky gradient rendering
      * This method will be overridden by platform-specific mixins
      */
-    @Inject(method = "*", at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "*", at = @At("HEAD"), require = 0)
     private void vulkanmodExtra$controlSkyGradient(CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.detailSettings != null) {
             // Cancel sky gradient rendering when disabled

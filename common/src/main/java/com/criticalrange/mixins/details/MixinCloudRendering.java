@@ -19,7 +19,7 @@ public class MixinCloudRendering {
      * Control cloud rendering
      * This method will be overridden by platform-specific mixins
      */
-    @Inject(method = "*", at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "*", at = @At("HEAD"), require = 0)
     private void vulkanmodExtra$controlCloudRendering(CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null &&
             VulkanModExtra.CONFIG.detailSettings != null) {

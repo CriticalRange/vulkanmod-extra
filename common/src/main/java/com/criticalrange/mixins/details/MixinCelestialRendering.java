@@ -19,7 +19,7 @@ public class MixinCelestialRendering {
      * Control celestial bodies rendering using wildcard patterns
      * This method will be overridden by platform-specific mixins
      */
-    @Inject(method = "*", at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "*", at = @At("HEAD"), require = 0)
     private void vulkanmodExtra$controlCelestialBodies(CallbackInfo ci) {
         if (VulkanModExtra.CONFIG != null && VulkanModExtra.CONFIG.detailSettings != null) {
             var settings = VulkanModExtra.CONFIG.detailSettings;
