@@ -1,0 +1,40 @@
+# Crowdin Configuration for VulkanMod Extra
+# Documentation: https://support.crowdin.com/configuration-file/
+
+# Project identifier (get this from Crowdin project settings)
+project_id: "852664"
+
+# API token from environment variable (recommended for security)
+# Set this in your CI/CD: export CROWDIN_PERSONAL_TOKEN="your-token"
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+# Preserve directory hierarchy in Crowdin
+preserve_hierarchy: true
+
+# File configuration
+files:
+  # VulkanMod Extra language files
+  - source: /common/src/main/resources/assets/vulkanmod-extra/lang/en_us.json
+    translation: /common/src/main/resources/assets/vulkanmod-extra/lang/%locale%.json
+    
+    # Update strategy: import new strings as unapproved
+    update_option: update_as_unapproved
+    
+    # Locale mapping (Minecraft format -> Crowdin format)
+    languages_mapping:
+      locale:
+        cs_cz: cs
+        de_de: de
+        es_es: es
+        fr_fr: fr
+        it_it: it
+        ja_jp: ja
+        ko_kr: ko
+        nl_nl: nl
+        pl_pl: pl
+        pt_br: pt-BR
+        ru_ru: ru
+        sv_se: sv-SE
+        tr_tr: tr
+        zh_cn: zh-CN
+        zh_tw: zh-TW
