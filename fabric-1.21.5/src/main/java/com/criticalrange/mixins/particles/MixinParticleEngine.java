@@ -199,4 +199,16 @@ public class MixinParticleEngine {
             }
         };
     }
+
+    /**
+     * Null-safe particle addition to prevent crashes from disabled particles
+     * This prevents NullPointerException when particles (especially firework sub-particles) are disabled
+     */
+    @Inject(method = "addParticle(Lnet/minecraft/client/particle/Particle;)V", at = @At("HEAD"), cancellable = true)
+    private void vulkanmodExtra$preventNullParticleAddition(Particle particle, CallbackInfo ci) {
+        // If particle is null (disabled by our filter), cancel the addition to prevent crashes
+        if (particle == null) {
+            ci.cancel();
+        }
+    }
 }

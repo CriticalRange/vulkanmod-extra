@@ -9,6 +9,7 @@
 		"details.MixinBiomeColors",
 		"render.MixinLevelLightEngine",
 		"extra.MixinCamera",
+		"extra.MixinInGameHud",
 		"details.MixinDimensionType",
 		"extra.MixinPreventShadersGameRenderer",
 		"extra.MixinWindow",

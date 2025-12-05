@@ -24,6 +24,6 @@ public class MixinInGameHud {
     @Inject(method = "render", at = @At("HEAD"))
     private void vulkanmodExtra$onHudRender(DrawContext drawContext, RenderTickCounter tickCounter, CallbackInfo ci) {
         // Call our HUD renderer
-        VulkanModExtraClient.onHudRender(drawContext, tickCounter.getLastFrameDuration());
+        VulkanModExtraClient.onHudRender(drawContext, tickCounter.getTickProgress(false));
     }
 }
