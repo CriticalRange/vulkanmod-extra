@@ -1,5 +1,58 @@
+# v0.2.0-rc1 (Release Candidate):
+**Full Changelog**: https://github.com/CriticalRange/vulkanmod-extra/compare/v0.2.0-beta7...v0.2.0-rc1
+
+## 🎯 Release Candidate for Stable 0.2.0
+
+This release candidate includes critical bug fixes and internationalization improvements, preparing for the stable 0.2.0 release.
+
+### 🐛 CRITICAL BUG FIXES:
+
+  • **Firework Particle Crash Fix (Issue #5)**: Added null-safe particle handling to prevent NullPointerException when firework particles are disabled. The crash occurred when firework sub-particles were filtered out, exposing a vanilla Minecraft bug. Our fix adds defensive null checks in `MixinParticleEngine.addParticle()` to gracefully handle disabled particles across all versions.
+  
+  • **Armor Stand Rendering (1.21.3-1.21.5)**: Fixed missing `render` method injection that prevented armor stands from being hidden. Corrected `hasLabel` method signature from `protected boolean` to `private void` to properly cancel name tag rendering.
+  
+  • **Beacon Beam Height Adjustment**: Updated beacon beam height modification logic to use `originalHeight >= 256` instead of `originalHeight == 1024` for robustness. Fixed `renderBeam` method signature for 1.21.5 (added `float scale` parameter, updated index from 5 to 6).
+  
+  • **HUD Rendering (1.21.5)**: Updated `MixinInGameHud` to use `tickCounter.getTickProgress(false)` instead of deprecated `tickCounter.realtimeDelta` due to API changes in 1.21.5.
+
+### 🌍 INTERNATIONALIZATION (i18n):
+
+  • **Complete Language Coverage**: Updated all 15 language files from 3-10% to 96% completion using EN_US template as fallback
+  • **Crowdin Integration**: Implemented automated translation workflow with GitHub Actions for community contributions
+  • **Supported Languages**: Czech, German, Spanish, French, Italian, Japanese, Korean, Dutch, Polish, Portuguese (BR), Russian, Swedish, Turkish, Chinese (Simplified & Traditional)
+  • **Translation Keys**: 596 keys covering animations, particles, details, render settings, and VulkanMod tooltips
+  • **Locale Mapping**: Fixed Crowdin locale mapping to match Minecraft format (lowercase with underscores)
+
+### 🔧 BUILD & COMPATIBILITY:
+
+  • **Multi-Version Support**: All fixes applied across Minecraft 1.21.1, 1.21.2, 1.21.3, 1.21.4, and 1.21.5
+  • **Build Success**: All versions compile successfully with minimal warnings
+  • **Particle System**: Enhanced particle filtering with proper null handling for all particle types
+  • **Mixin Improvements**: Updated mixin signatures to match version-specific API changes
+
+### 📦 INFRASTRUCTURE:
+
+  • **Crowdin Workflow**: Automated translation sync with pull request creation
+  • **GitHub Actions**: Enhanced CI/CD with proper permissions for bot-created PRs
+  • **Configuration**: Added `crowdin.yml` with correct project ID (852664) and locale mappings
+
+### 🧪 TESTING NOTES:
+
+This is a **Release Candidate** - please test thoroughly before upgrading to stable:
+  - Test firework explosions with particles disabled
+  - Verify armor stand hiding functionality
+  - Check beacon beam height limits
+  - Confirm HUD rendering on 1.21.5
+  - Test language switching in-game
+
+### 📋 KNOWN ISSUES:
+
+  • Minor warning in `MixinInGameHud` (non-critical, does not affect functionality)
+  • Crowdin PR #6 has incorrect file naming (will be fixed in next sync)
+
+---
+
 # v0.2.0-beta7:
-**Full Changelog**: https://github.com/CriticalRange/vulkanmod-extra/compare/v0.2.0-beta6...v0.2.0-beta7
 
 ## Enhanced VulkanMod integration with comprehensive tooltip system and monitor management
 
