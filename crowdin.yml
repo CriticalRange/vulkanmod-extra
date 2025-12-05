@@ -20,21 +20,23 @@ files:
     # Update strategy: import new strings as unapproved
     update_option: update_as_unapproved
     
-    # Locale mapping (Minecraft format -> Crowdin format)
+    # Locale mapping (Crowdin format -> Minecraft format)
+    # Crowdin uses format like "cs", "de", "pt-BR"
+    # Minecraft uses format like "cs_cz", "de_de", "pt_br"
     languages_mapping:
       locale:
-        cs_cz: cs
-        de_de: de
-        es_es: es
-        fr_fr: fr
-        it_it: it
-        ja_jp: ja
-        ko_kr: ko
-        nl_nl: nl
-        pl_pl: pl
-        pt_br: pt-BR
-        ru_ru: ru
-        sv_se: sv-SE
-        tr_tr: tr
-        zh_cn: zh-CN
-        zh_tw: zh-TW
+        cs: cs_cz
+        de: de_de
+        es: es_es
+        fr: fr_fr
+        it: it_it
+        ja: ja_jp
+        ko: ko_kr
+        nl: nl_nl
+        pl: pl_pl
+        pt-BR: pt_br
+        ru: ru_ru
+        sv-SE: sv_se
+        tr: tr_tr
+        zh-CN: zh_cn
+        zh-TW: zh_tw
