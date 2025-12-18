@@ -1,3 +1,10 @@
+# VulkanMod Extra Android Fix
+This Fork of VulkanMod Extra intends to increase function of VulkanMod Extra on Android devices
+
+Current state:
+- opening video options no longer crashes the game
+- video options do not display -> mod still outputs to console, shows signs of function
+
 # VulkanMod Extra
 
 [![Modrinth Version](https://img.shields.io/modrinth/v/vulkanmod-extra?logo=modrinth&label=modrinth&color=00AF5C)](https://modrinth.com/mod/vulkanmod-extra)
