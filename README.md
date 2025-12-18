@@ -2,8 +2,8 @@
 This Fork of VulkanMod Extra intends to increase function of VulkanMod Extra on Android devices
 
 Current state:
-- opening video options no longer crashes the game
-- video options do not display -> mod still outputs to console, shows signs of function
+- opening video options no longer crashes the game 
+- appears fixed
 
 # VulkanMod Extra
 
