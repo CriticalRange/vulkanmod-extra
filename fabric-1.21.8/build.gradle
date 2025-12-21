@@ -1,0 +1,74 @@
+plugins {
+    id 'com.gradleup.shadow'
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+configurations {
+    common {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+
+    shadowBundle {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version_1_21_8"
+
+    // VulkanMod dependency - needed for compilation of VulkanMod integration mixins
+    modCompileOnly "maven.modrinth:vulkanmod:$rootProject.vulkanmod_version"
+
+    // MixinExtras for advanced mixin capabilities
+    implementation "io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"
+
+    // Architectury API (optional but recommended)
+    modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
+
+    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+}
+
+// Version-specific properties for this subproject
+project.ext.minecraft_version = rootProject.minecraft_version_1_21_8
+project.ext.yarn_mappings = rootProject.yarn_mappings_1_21_8
+
+// Override loom configuration to use version-specific minecraft and mappings
+loom {
+    silentMojangMappingsLicense()
+}
+
+// Override dependencies with version-specific ones
+dependencies {
+    minecraft "net.minecraft:minecraft:$project.minecraft_version"
+    mappings "net.fabricmc:yarn:$project.yarn_mappings:v2"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft_version', project.minecraft_version
+
+    filesMatching('fabric.mod.json') {
+        expand version: inputs.properties.version,
+               minecraft_version: inputs.properties.minecraft_version
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+}
