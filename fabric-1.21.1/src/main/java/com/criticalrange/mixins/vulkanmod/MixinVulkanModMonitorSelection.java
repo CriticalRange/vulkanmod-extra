@@ -71,7 +71,7 @@ public class MixinVulkanModMonitorSelection {
                             } else {
                                 monitorHandles.add(0L); // Fallback to primary
                             }
-                        } catch (Exception e) {
+                        } catch (Exception | LinkageError e) {
                             monitorHandles.add(0L); // Fallback to primary
                         }
                     }
@@ -90,7 +90,7 @@ public class MixinVulkanModMonitorSelection {
                     selectedMonitorIndex = 0;
                 }
                 
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
                 // Fallback to GLFW if OSHI fails
                 initializeMonitorsWithGLFW();
             }
@@ -119,7 +119,7 @@ public class MixinVulkanModMonitorSelection {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             // Final fallback
             availableMonitors.add("Primary");
             monitorHandles.add(0L);
@@ -179,7 +179,7 @@ public class MixinVulkanModMonitorSelection {
             
             // Also inject video tooltips into the final blocks
             injectVideoTooltips(finalBlocks);
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             // Log error but continue with original blocks
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to inject monitor selection into video options: {}", e.getMessage());
@@ -209,7 +209,7 @@ public class MixinVulkanModMonitorSelection {
             }
             
             return false;
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to check block for resolution options: {}", e.getMessage());
             }
@@ -244,7 +244,7 @@ public class MixinVulkanModMonitorSelection {
                 newOptions.toArray(new Option<?>[0])
             );
             
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to add monitor selection to existing block: {}", e.getMessage());
             }
@@ -283,14 +283,14 @@ public class MixinVulkanModMonitorSelection {
                 try {
                     Text tooltip = Text.translatable("vulkanmod-extra.option.video.monitorSelection.tooltip");
                     monitorOption.setTooltip(tooltip);
-                } catch (Exception e) {
+                } catch (Exception | LinkageError e) {
                     // Silently continue if tooltip fails
                 }
             }
             
             return monitorOption;
 
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to create monitor selection option: {}", e.getMessage());
             }
@@ -331,7 +331,7 @@ public class MixinVulkanModMonitorSelection {
                 try {
                     Text tooltip = Text.translatable("vulkanmod.options.video.monitor_selection.tooltip");
                     monitorOption.setTooltip(tooltip);
-                } catch (Exception e) {
+                } catch (Exception | LinkageError e) {
                     // Silently continue if tooltip fails
                 }
             }
@@ -343,7 +343,7 @@ public class MixinVulkanModMonitorSelection {
                 options.toArray(new Option<?>[0])
             );
 
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to create monitor selection block: {}", e.getMessage());
             }
@@ -390,7 +390,7 @@ public class MixinVulkanModMonitorSelection {
             
             return option;
             
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to create cycling option: {}", e.getMessage());
             }
@@ -431,21 +431,21 @@ public class MixinVulkanModMonitorSelection {
                             java.lang.reflect.Field selectedVideoModeField = VideoModeManager.class.getDeclaredField("selectedVideoMode");
                             selectedVideoModeField.setAccessible(true);
                             selectedVideoModeField.set(null, currentMode);
-                        } catch (Exception e) {
+                        } catch (Exception | LinkageError e) {
                             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to update selected video mode: {}", e.getMessage());
                             }
                         }
                         
                         
-                    } catch (Exception e) {
+                    } catch (Exception | LinkageError e) {
                         if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                             com.criticalrange.VulkanModExtra.LOGGER.error("Failed to update video mode sets: {}", e.getMessage());
                         }
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to update video modes for selected monitor: {}", e.getMessage());
             }
@@ -532,7 +532,7 @@ public class MixinVulkanModMonitorSelection {
             }
 
 
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.error("Failed to inject video tooltips", e);
             }
@@ -563,13 +563,13 @@ public class MixinVulkanModMonitorSelection {
                     try {
                         Text tooltip = Text.translatable(tooltipKey);
                         option.setTooltip(tooltip);
-                    } catch (Exception e) {
+                    } catch (Exception | LinkageError e) {
                         // Silently continue on failure
                     }
                 }
             }
 
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             if (com.criticalrange.VulkanModExtra.LOGGER != null) {
                 com.criticalrange.VulkanModExtra.LOGGER.warn("Failed to inject tooltips into option block", e);
             }
