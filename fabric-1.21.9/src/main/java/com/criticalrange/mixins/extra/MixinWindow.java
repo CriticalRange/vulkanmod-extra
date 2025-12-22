@@ -21,7 +21,7 @@ public class MixinWindow {
     private int height;
 
     @Inject(method = "setScaleFactor", at = @At("HEAD"))
-    private void vulkanmodExtra$optimizeMacResolution(double d, CallbackInfo ci) {
+    private void vulkanmodExtra$optimizeMacResolution(int d, CallbackInfo ci) {
         // Check if macOS resolution reduction is enabled
         if (VulkanModExtra.CONFIG.extraSettings.reduceResolutionOnMac) {
             // Check if we're running on macOS

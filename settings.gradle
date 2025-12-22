@@ -10,6 +10,7 @@ pluginManagement {
 rootProject.name = 'vulkanmod-extra'
 
 include 'common'
+include 'fabric-1.21'
 include 'fabric-1.21.1'
 include 'fabric-1.21.2'
 include 'fabric-1.21.3'

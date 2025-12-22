@@ -61,6 +61,9 @@ public class MappingHelper {
             METHOD_ALIASES.put("tickWorld", "tickWorld");
             CLASS_ALIASES.put("net.minecraft.world.level.Level", "net.minecraft.server.level.WorldServer");
         }
+
+        // Common mappings
+        METHOD_ALIASES.put("method_51439", "drawText");
     }
     
     /**

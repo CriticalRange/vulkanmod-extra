@@ -5,6 +5,7 @@ import com.criticalrange.core.FeatureCategory;
 import com.criticalrange.config.VulkanModExtraConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.Text;
 
 /**
  * FPS Display feature - shows FPS information on screen
@@ -64,7 +65,6 @@ public class FPSDisplayFeature extends BaseFeature {
         }
 
         String fpsText = buildFPSText(config);
-        int color = getTextColor();
 
         // Position based on overlay corner setting
         int screenWidth = minecraft.getWindow().getScaledWidth();
@@ -72,17 +72,38 @@ public class FPSDisplayFeature extends BaseFeature {
         int x = calculateXPosition(screenWidth);
         int y = calculateYPosition(screenHeight);
 
-        drawContext.drawText(minecraft.textRenderer, fpsText, x, y, color, false);
+        // Handle contrast modes
+        var contrast = config.extraSettings.textContrast;
+        
+        switch (contrast) {
+            case NONE -> {
+                // Plain white text (ARGB format for 1.21.6+)
+                drawContext.drawText(minecraft.textRenderer, fpsText, x, y, 0xFFFFFFFF, false);
+            }
+            case BACKGROUND -> {
+                // Draw background like Minecraft's debug screen (F3)
+                // Background color: 0x90505050 (from DebugHud.class constant pool)
+                int textWidth = minecraft.textRenderer.getWidth(fpsText);
+                int fontHeight = minecraft.textRenderer.fontHeight;
+                drawContext.fill(x - 1, y - 1, x + textWidth + 1, y + fontHeight + 1, 0x90505050);
+                // White text on top
+                drawContext.drawText(minecraft.textRenderer, fpsText, x, y, 0xFFFFFFFF, false);
+            }
+            case SHADOW -> {
+                // White text with drop shadow
+                drawContext.drawText(minecraft.textRenderer, fpsText, x, y, 0xFFFFFFFF, true);
+            }
+        }
     }
 
     private String buildFPSText(VulkanModExtraConfig config) {
         StringBuilder text = new StringBuilder();
         text.append("FPS: ").append(fpsCounter.getCurrentFPS());
 
-        // Only show extended stats in full or detailed modes
+        // Only show extended stats in EXTENDED or DETAILED modes
         var mode = config.extraSettings.fpsDisplayMode;
         boolean showExtended = (mode == VulkanModExtraConfig.FPSDisplayMode.EXTENDED || mode == VulkanModExtraConfig.FPSDisplayMode.DETAILED);
-        if (showExtended && config.extraSettings.showFPSDetails && showDetails) {
+        if (showExtended) {
             text.append(" (")
                 .append("avg: ").append(fpsCounter.getAverageFPS())
                 .append(", min: ").append(fpsCounter.getMinFPS())
@@ -96,13 +117,14 @@ public class FPSDisplayFeature extends BaseFeature {
     private int getTextColor() {
         VulkanModExtraConfig config = getConfig();
         if (config == null) {
-            return 0xFFFFFF;
+            return 0xFFFFFFFF; // ARGB: Full alpha + white
         }
 
+        // Minecraft 1.21.6+ uses ARGB format - need alpha channel (0xFF prefix for full opacity)
         return switch (config.extraSettings.textContrast) {
-            case NONE -> 0xFFFFFF;
-            case BACKGROUND -> 0x000000;
-            case SHADOW -> 0xFFFFFF;
+            case NONE -> 0xFFFFFFFF;      // ARGB: Full alpha + white
+            case BACKGROUND -> 0xFF000000; // ARGB: Full alpha + black
+            case SHADOW -> 0xFFFFFFFF;     // ARGB: Full alpha + white
         };
     }
 

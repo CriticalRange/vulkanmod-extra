@@ -710,8 +710,8 @@ public class VulkanModPageFactory {
             var configManager = com.criticalrange.config.ConfigurationManager.getInstance();
             if (configManager != null) {
                 configManager.saveConfig();
-                // Reload the in-memory config to reflect changes immediately
-                VulkanModExtra.CONFIG = configManager.loadConfig();
+                // Note: Do NOT reload config here - the in-memory config is already up-to-date
+                // Reloading would discard any pending changes made by the GUI
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to save config", e);

@@ -1,0 +1,31 @@
+{
+	"required": false,
+	"package": "com.criticalrange.mixins",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"animations.MixinTextureAtlas",
+		"particles.MixinParticleEngine",
+		"render.MixinItemFrameRenderer",
+		"extra.MixinVOptionScreen",
+		"extra.MixinGui",
+		"extra.MixinFPSGameRenderer",
+		"extra.MixinDebugScreenOverlay",
+		"extra.MixinMinecraftClient",
+		"details.MixinLevelRenderer",
+		"render.MixinFogRenderer",
+		"render.MixinBeaconRenderer",
+		"details.MixinWorldRendererCelestial",
+		"vulkanmod.MixinVulkanModEventTrigger",
+		"vulkanmod.MixinVulkanModMonitorSelection",
+		"vulkanmod.MixinVulkanModOptions",
+		"vulkanmod.MixinVulkanModGraphicsOptions",
+		"vulkanmod.MixinVulkanModTransparencyShader"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	},
+	"minVersion": "0.8",
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
